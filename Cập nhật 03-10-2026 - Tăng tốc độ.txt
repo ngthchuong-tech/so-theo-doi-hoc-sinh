@@ -1,0 +1,33 @@
+CẬP NHẬT 03/10/2026 – TĂNG TỐC ĐỘ APP
+
+Vì sao app chậm
+- Mỗi lần app hỏi máy chủ Google (Apps Script) mất khoảng 1–2 giây – đây là giới hạn của công nghệ, không bỏ được.
+- Nhưng mã của app còn làm chậm thêm: đọc đi đọc lại cùng 1 bảng trong 1 lần hỏi; đọc cả thư viện 3 500 câu mỗi lần chọn tiết;
+  lưu 1 ô cũng ghi lại cả bảng (cuối năm bảng điểm danh ~6 000 dòng → càng dùng càng chậm). Phần này đã sửa.
+
+Đã sửa
+1. Mỗi bảng chỉ đọc 1 lần trong mỗi lần hỏi máy chủ.
+2. Các bảng lớn, ít thay đổi (thư viện, lịch báo giảng, tuần học, môn học, học kì, cài đặt, nhận xét chung) được Google nhớ đệm
+   6 giờ (CacheService). App tự làm mới khi chính app ghi vào các bảng đó.
+   Nếu cô sửa TRỰC TIẾP trên Trang tính: menu "📒 Sổ theo dõi → Làm mới dữ liệu".
+3. Lưu tại chỗ: lưu điểm danh 1 ngày, sửa 1 ô đánh giá, hoàn tác nhận xét… chỉ ghi đúng các dòng đó, không ghi lại cả bảng.
+4. Sổ theo dõi khi chọn tiết: chỉ dò 2 cột Môn/Bài rồi đọc đoạn của bài đó, không đọc cả năm.
+5. Trang chủ hiện ngay bản lần trước (lưu trên máy, không có tên học sinh) rồi mới cập nhật.
+6. "Lưu nhận xét" và "Lưu điểm danh" chạy ngầm: không còn màn "Đang xử lý…"; cô chọn tiếp nhóm khác ngay.
+   Nếu lưu lỗi (mất mạng…), app báo và chọn lại các em để bấm Lưu lần nữa.
+
+Đo trên máy (dữ liệu ~1,5 tháng: 782 ghi nhận; số lần đọc Trang tính trong 1 thao tác)
+   Thao tác                 Trước                      Sau
+   Mở app                   10 lần                     1 lần (lần đầu sau 6 giờ: 7) + hiện ngay bản cũ
+   Mở Sổ theo dõi           11 lần                     0
+   Chọn tiết                6 lần / 4 300 dòng         2 lần / 817 dòng (2 cột)
+   Lưu nhận xét             3 lần, phải chờ            0, không phải chờ
+   Lưu điểm danh            3 lần + ghi cả bảng        1 lần + ghi 35 dòng
+   Tổng hợp nhận xét tháng  8 lần / 7 883 dòng         4 lần / 924 dòng
+   Tổng hợp GK1             12 lần / 5 298 dòng        4 lần / 1 101 dòng
+   (Trên Google, mỗi lần đọc/ghi Trang tính tốn khoảng 0,1–0,5 giây; dữ liệu càng nhiều về cuối năm thì khác biệt càng lớn.)
+Đã thử lại: hoàn tác, xoá nhận xét giữa bảng, xoá nhiều dòng, lưu lại điểm danh, sửa ô đánh giá – dữ liệu đúng.
+
+Cách cập nhật
+- Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+- Mở lại file Trang tính một lần để thấy mục menu mới "Làm mới dữ liệu".

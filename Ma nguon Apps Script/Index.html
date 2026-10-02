@@ -520,7 +520,8 @@
             <li><b>Tiết hiện "thư viện tạm"?</b> Môn đó chưa có thư viện theo bài của học kì này – tải thư viện ở Cài đặt → Kho thư viện.</li>
             <li><b>Bài của tiết bị sai?</b> Cài đặt → Ghép tiết với bài → chọn môn → sửa bài ở dòng đó → Lưu thay đổi.</li>
             <li><b>Dữ liệu nằm ở đâu?</b> Trong file Google Trang tính "Sổ theo dõi …" trên Google Drive của cô. Có thể mở xem, nhưng nên nhập liệu qua app và không sửa tên cột.</li>
-            <li><b>App chạy chậm?</b> Mỗi thao tác cần 1–3 giây do Google xử lí; chờ dòng "Đang xử lý…" biến mất rồi thao tác tiếp.</li>
+            <li><b>App chạy chậm?</b> Mỗi lần app hỏi máy chủ Google cần khoảng 1–2 giây. Lưu nhận xét và lưu điểm danh chạy ngầm – cô cứ chọn tiếp, khi xong app báo "Đã lưu" (lỗi thì app chọn lại để cô bấm Lưu lần nữa). Lần mở đầu tiên trong ngày thường chậm hơn các lần sau.</li>
+            <li><b>Đã sửa trực tiếp trên Trang tính</b> (thư viện, lịch báo giảng, môn học, cài đặt) mà app chưa thấy? Mở file Trang tính → menu <b>📒 Sổ theo dõi → Làm mới dữ liệu</b> (app nhớ tạm các bảng này tới 6 giờ để chạy nhanh).</li>
             <li><b>Thấy chữ lạ / mất màu sắc?</b> Mã nguồn bị dán thiếu – nhờ người hỗ trợ dán lại 2 file Code.gs và Index.html.</li>
           </ul>
         </details>
@@ -1132,7 +1133,18 @@ function roiDiDuoc() {
 
 // ============================================================================ TRANG CHỦ
 function taiTrangChu() {
-  chay('layTrangChu').then(function (d) {
+  var khoa = 'trangChu_' + homNayIso(), cu = null;
+  try { cu = JSON.parse(localStorage.getItem(khoa) || 'null'); } catch (e) {}
+  if (cu) veTrangChu(cu);          // hiện ngay bản lần trước (không có tên học sinh), máy chủ trả về thì vẽ lại
+  (cu ? goi : chay)('layTrangChu').then(function (d) {
+    try { Object.keys(localStorage).forEach(function (k) { if (/^trangChu_/.test(k) && k !== khoa) localStorage.removeItem(k); });
+          localStorage.setItem(khoa, JSON.stringify(d)); } catch (e) {}
+    veTrangChu(d);
+  }, function () {});
+}
+function veTrangChu(d) {
+  d = JSON.parse(JSON.stringify(d));
+  {
     $('phuDe').textContent = [d.truong, d.lop ? 'Lớp ' + d.lop : '', d.namHoc ? 'Năm học ' + d.namHoc : ''].filter(Boolean).join(' · ') || 'Chưa có thông tin lớp';
     $('tcNgay').textContent = d.thu + ', ' + d.homNay;
     $('tcTuan').textContent = ['Tháng ' + d.thang, d.tuan ? 'Tuần ' + d.tuan : '', d.hocKy ? 'Học kì ' + d.hocKy : '', d.chuDe, d.siSo ? 'Sĩ số ' + d.siSo : ''].filter(Boolean).join(' · ');
@@ -1144,7 +1156,7 @@ function taiTrangChu() {
         (r.bai ? ' · <span class="nho">' + esc(r.bai) + '</span>' : '') + '</div><div class="ten">' + esc(r.ten) + '</div></div></div>';
     }).join('') : '<div class="nho">Hôm nay không có tiết dạy trong Sổ báo giảng.</div>';
     window._lichHomNay = d.lich;
-  });
+  }
 }
 function moTietTuTrangChu(tiet) {
   var r = (window._lichHomNay || []).filter(function (x) { return +x.tiet === +tiet; })[0]; if (!r) return;
@@ -1177,8 +1189,12 @@ function datDD(i, tt) { if (dd.hocSinh[i].trangThai !== tt) { dd.hocSinh[i].tran
 function datLaiDiemDanh() { if (!dd || !dd.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại điểm danh?')) taiDiemDanh(); }
 function luuDiemDanhUI() {
   if (!dd || !dd.hocSinh.length) return bao('Chưa có danh sách học sinh – vào Học sinh → Tải danh sách trước.');
-  chay('luuDiemDanh', dd.ngay, dd.hocSinh.map(function (h) { return { ma: h.ma, trangThai: h.trangThai, buoi: h.trangThai === 'Có mặt' ? '' : h.buoi, ghiChu: h.ghiChu }; }))
-    .then(function (m) { bao(m + ' (Muốn sửa: chạm lại rồi Lưu lần nữa.)', 5000); dd.daLuu = true; dd.sua = false; veDiemDanh(); });
+  // Lưu chạy ngầm: màn hình báo "đã lưu" ngay; nếu lỗi thì trả lại trạng thái "chưa lưu" để cô bấm lại
+  var ngay = dd.ngay, cu = dd;
+  dd.daLuu = true; dd.sua = false; veDiemDanh(); bao('Đang lưu điểm danh…', 20000);
+  goi('luuDiemDanh', ngay, dd.hocSinh.map(function (h) { return { ma: h.ma, trangThai: h.trangThai, buoi: h.trangThai === 'Có mặt' ? '' : h.buoi, ghiChu: h.ghiChu }; }))
+    .then(function (m) { bao(m + ' (Muốn sửa: chạm lại rồi Lưu lần nữa.)', 5000); },
+          function (e) { if (dd === cu) { dd.sua = true; veDiemDanh(); } bao('Chưa lưu được điểm danh ' + ngay + ': ' + ((e && e.message) || e) + ' – bấm Lưu lần nữa.', 9000); });
 }
 
 // ============================================================================ SỔ THEO DÕI
@@ -1216,8 +1232,8 @@ function doiNgaySTD() {
 var _monHoc = null;
 function monList() {
   if (_monHoc) return Promise.resolve(_monHoc);
-  return goi('layCaiDat').then(function (c) {
-    _monHoc = c.monHoc.filter(function (m) { return m.DangDay === 'Có'; });
+  return goi('layMonDangDay').then(function (ds) {
+    _monHoc = ds;
     $('stMon').innerHTML = '<option value="">– chọn môn –</option>' + _monHoc.map(function (m) { return '<option>' + esc(m.TenMon) + '</option>'; }).join('');
     return _monHoc;
   });
@@ -1308,13 +1324,20 @@ function luuNhanXetUI() {
   if (!x.hocSinh.length) return bao('Chạm chọn học sinh trước.');
   if (!x.mucDo) return bao('Chọn mức trước.');
   if (!nd && !x.ghiChu) return bao('Chọn ít nhất 1 câu nhận xét hoặc ghi thêm.');
-  chay('luuNhanXet', x).then(function (kq) {
+  // Lưu chạy ngầm: bỏ chọn ngay để cô chọn tiếp nhóm khác; nếu lỗi thì chọn lại các em để bấm Lưu lần nữa
+  var hsLuc = st.hs;
+  st.chon = {}; $('stGhiChu').value = ''; veHocSinhST();
+  bao('Đang lưu nhận xét cho ' + x.hocSinh.length + ' học sinh…', 20000);
+  goi('luuNhanXet', x).then(function (kq) {
     x.hocSinh.forEach(function (ma, i) {
-      var h = st.hs.filter(function (y) { return y.ma === ma; })[0];
+      var h = hsLuc.filter(function (y) { return y.ma === ma; })[0];
       if (h) h.da.push({ id: kq.ids[i], hd: x.hoatDong, muc: x.mucDo, nd: nd, gc: x.ghiChu, ngay: x.ngay, luc: kq.luc });
     });
-    st.chon = {}; $('stGhiChu').value = ''; veHocSinhST();
+    if (st.hs === hsLuc) veHocSinhST();
     bao(kq.msg, 9000, 'Hoàn tác', function () { hoanTac(kq.ids); });
+  }, function (e) {
+    if (st.hs === hsLuc) { x.hocSinh.forEach(function (ma) { st.chon[ma] = 1; }); if (!$('stGhiChu').value) $('stGhiChu').value = x.ghiChu; veHocSinhST(); }
+    bao('Chưa lưu được: ' + ((e && e.message) || e) + '. Các em đã được chọn lại – bấm Lưu lần nữa.', 9000);
   });
 }
 function boKhoiDanhSach(ids) {

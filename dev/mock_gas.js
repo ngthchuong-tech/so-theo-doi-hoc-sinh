@@ -22,18 +22,24 @@
     getLastRow: function () { var r = this._d().rows; for (var i = r.length - 1; i >= 0; i--) if (r[i] && r[i].some(function (v) { return v !== '' && v != null; })) return i + 1; return 0; },
     getMaxRows: function () { return Math.max(this._d().max, this._d().rows.length); },
     insertRowsAfter: function (after, n) { this._d().max += n; save(); },
+    deleteRows: function (row, n) { ghiDem('ghi', this.name, n); this._d().rows.splice(row - 1, n); save(); },
     setFrozenRows: function () {},
     getRange: function (row, col, nr, nc) { return new Range(this, row, col, nr || 1, nc || 1); }
   };
   function Range(sh, row, col, nr, nc) { this.sh = sh; this.row = row; this.col = col; this.nr = nr; this.nc = nc; }
+  // Bộ đếm đọc/ghi Trang tính cho mỗi lần gọi máy chủ (ước lượng tốc độ trên Google thật): window._doTocDo
+  var dem = null;
+  function ghiDem(loai, sh, so) { if (!dem) return; dem[loai]++; dem[loai + 'Dong'] += so; dem.bang[sh] = (dem.bang[sh] || 0) + 1; }
   Range.prototype = {
     getValues: function () {
+      ghiDem('doc', this.sh.name, this.nr);
       var rows = this.sh._d().rows, out = [];
       for (var i = 0; i < this.nr; i++) { var r = rows[this.row - 1 + i] || [], o = []; for (var j = 0; j < this.nc; j++) { var v = r[this.col - 1 + j]; o.push(v == null ? '' : v); } out.push(o); }
       return out;
     },
     getDisplayValues: function () { return this.getValues().map(function (r) { return r.map(function (v) { return String(v); }); }); },
     setValues: function (vals) {
+      ghiDem('ghi', this.sh.name, vals.length);
       var rows = this.sh._d().rows;
       for (var i = 0; i < vals.length; i++) { var k = this.row - 1 + i; rows[k] = rows[k] || []; for (var j = 0; j < vals[i].length; j++) rows[k][this.col - 1 + j] = vals[i][j] == null ? '' : String(vals[i][j]); }
       save(); return this;
@@ -78,10 +84,17 @@
     getFileById: function (id) { return { setTrashed: function () { window._fileDaXoa = (window._fileDaXoa || []).concat([id]); },
       getBlob: function () { return { getBytes: function () { if (!(id in window._driveFiles)) throw new Error('[giả lập] ảnh không còn trong bộ nhớ (đã tải lại trang)'); return window._driveFiles[id]; } }; },
       makeCopy: function (ten) { window._banSao = (window._banSao || []).concat([ten]); return { getUrl: function () { return 'https://docs.google.com/spreadsheets/d/BAN-SAO-GIA-LAP'; } }; } }; } };
+  // CacheService giả lập: bộ nhớ trong trang (mất khi tải lại trang, giống bộ nhớ đệm hết hạn)
+  var _cache = {};
+  window.CacheService = { getScriptCache: function () { return {
+    get: function (k) { return k in _cache ? _cache[k] : null; },
+    getAll: function (ks) { var o = {}; ks.forEach(function (k) { if (k in _cache) o[k] = _cache[k]; }); return o; },
+    putAll: function (o) { Object.keys(o).forEach(function (k) { if (String(o[k]).length > 100000) throw new Error('Giá trị quá 100KB'); _cache[k] = o[k]; }); },
+    put: function (k, v) { _cache[k] = v; }, remove: function (k) { delete _cache[k]; } }; } };
   // Script Properties giả lập (khoá AI) – lưu riêng trong localStorage của máy
   window.PropertiesService = { getScriptProperties: function () {
     var K = 'gia_lap_script_properties', doc = function () { try { return JSON.parse(localStorage.getItem(K) || '{}'); } catch (e) { return {}; } };
-    return { getProperty: function (k) { return doc()[k] || null; },
+    return { getProperty: function (k) { return doc()[k] || null; }, getProperties: function () { return doc(); },
       setProperty: function (k, v) { var o = doc(); o[k] = v; localStorage.setItem(K, JSON.stringify(o)); },
       deleteProperty: function (k) { var o = doc(); delete o[k]; localStorage.setItem(K, JSON.stringify(o)); } };
   } };
@@ -116,8 +129,14 @@
         return function () {
           var args = JSON.parse(JSON.stringify(Array.prototype.slice.call(arguments)));
           setTimeout(function () {
-            try { var r = window[name].apply(null, args); ok && ok(r === undefined ? undefined : JSON.parse(JSON.stringify(r))); }
-            catch (e) { console.error(e); fail && fail(e); }
+            // Như Google thật: mỗi lần gọi máy chủ là 1 lần chạy mới, biến toàn cục (bộ nhớ tạm) bắt đầu trống
+            if ('_NHO' in window) { window._NHO = {}; window._SHEET = {}; window._PB = null; }
+            dem = { doc: 0, docDong: 0, ghi: 0, ghiDong: 0, bang: {} }; var t0 = performance.now();
+            try { var r = window[name].apply(null, args); }
+            catch (e) { dem = null; console.error(e); fail && fail(e); return; }
+            var d = dem; dem = null; d.ham = name; d.ms = Math.round(performance.now() - t0);
+            (window._doTocDo = window._doTocDo || []).push(d);
+            ok && ok(r === undefined ? undefined : JSON.parse(JSON.stringify(r)));
           }, 120);
         };
       }

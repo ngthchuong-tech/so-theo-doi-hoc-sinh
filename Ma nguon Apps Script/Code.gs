@@ -65,6 +65,8 @@ function onOpen() {
   SpreadsheetApp.getUi().createMenu('📒 Sổ theo dõi')
     .addItem('Mở app', 'moAppTuMenu')
     .addItem('Lấy đường link / mã QR để mở trên điện thoại', 'moAppTuMenu')
+    .addSeparator()
+    .addItem('Làm mới dữ liệu (sau khi sửa trực tiếp trên Trang tính)', 'lamMoiDuLieu')
     .addToUi();
 }
 function moAppTuMenu() {
@@ -120,30 +122,83 @@ function sh_(ten) {
   if (!sh) throw new Error('Chưa có bảng "' + ten + '". Hãy chạy hàm caiDatLanDau trước.');
   return sh;
 }
-function doc_(ten) {            // đọc bảng thành mảng đối tượng {cột: giá trị}
-  var sh = sh_(ten), n = sh.getLastRow(), cot = BANG[ten];
-  if (n < 2) return [];
-  return sh.getRange(2, 1, n - 1, cot.length).getDisplayValues().map(function (r) {
-    var o = {}; cot.forEach(function (c, i) { o[c] = r[i]; }); return o;
-  });
+// ---------------------------------------------------------------------------- Đọc / ghi bảng (có nhớ tạm để nhanh hơn)
+// 1) Trong 1 lần gọi máy chủ: mỗi bảng chỉ đọc Trang tính 1 lần (_NHO), ghi thì xoá phần nhớ của bảng đó.
+// 2) Bảng lớn, ít đổi (BANG_DEM): nhớ thêm 6 giờ trong CacheService của Google; mỗi lần app ghi bảng đó thì tăng "phiên bản"
+//    nên bản nhớ cũ không bao giờ được dùng lại. Sửa TRỰC TIẾP trên Trang tính thì dùng menu "📒 Sổ theo dõi → Làm mới dữ liệu".
+var _NHO = {}, _SHEET = {};
+var BANG_DEM = { CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1 };
+function sheetNho_(ten) { return _SHEET[ten] || (_SHEET[ten] = sh_(ten)); }
+function docTrangTinh_(ten) {     // mảng các dòng (mảng giá trị), không kể dòng tiêu đề
+  var sh = sheetNho_(ten), n = sh.getLastRow();
+  return n < 2 ? [] : sh.getRange(2, 1, n - 1, BANG[ten].length).getDisplayValues();
+}
+var _PB = null;                   // phiên bản các bảng, đọc 1 lần mỗi lần gọi máy chủ
+function phienBan_(ten) { if (!_PB) _PB = thuocTinh_().getProperties(); return _PB['pb_' + ten] || '0'; }
+function docDem_(ten) {
+  var c = CacheService.getScriptCache(), k = 'b_' + ten + '_' + phienBan_(ten);
+  try {
+    var soPhan = c.get(k + '_n');
+    if (soPhan) {
+      var khoa = []; for (var i = 0; i < +soPhan; i++) khoa.push(k + '_' + i);
+      var m = c.getAll(khoa), s = '';
+      for (i = 0; i < khoa.length; i++) { if (m[khoa[i]] == null) { s = null; break; } s += m[khoa[i]]; }
+      if (s != null) return JSON.parse(s);
+    }
+  } catch (e) {}
+  var rows = docTrangTinh_(ten);
+  try {        // mỗi phần ≤ 30 000 ký tự (giới hạn 100 KB/ô nhớ, chữ Việt tới 3 byte/ký tự)
+    var json = JSON.stringify(rows), n = Math.ceil(json.length / 30000), phan = {};
+    if (n <= 200) { for (var j = 0; j < n; j++) phan[k + '_' + j] = json.substr(j * 30000, 30000); phan[k + '_n'] = String(n); c.putAll(phan, 21600); }
+  } catch (e) {}
+  return rows;
+}
+function boNho_(ten) {            // gọi sau mỗi lần ghi bảng
+  delete _NHO[ten];
+  if (BANG_DEM[ten]) { var v = String(Date.now()); thuocTinh_().setProperty('pb_' + ten, v); if (_PB) _PB['pb_' + ten] = v; }
+}
+function lamMoiDuLieu() {         // menu: sau khi sửa trực tiếp trên Trang tính
+  _NHO = {}; _PB = null; Object.keys(BANG_DEM).forEach(function (t) { thuocTinh_().setProperty('pb_' + t, String(Date.now())); });
+  try { SpreadsheetApp.getActive().toast('App sẽ đọc lại dữ liệu mới từ Trang tính.', 'Đã làm mới', 5); } catch (e) {}
+}
+function doc_(ten) {            // đọc bảng thành mảng đối tượng {cột: giá trị} (bản sao, sửa thoải mái)
+  if (!_NHO[ten]) _NHO[ten] = BANG_DEM[ten] ? docDem_(ten) : docTrangTinh_(ten);
+  var cot = BANG[ten];
+  return _NHO[ten].map(function (r) { var o = {}; cot.forEach(function (c, i) { o[c] = r[i] == null ? '' : r[i]; }); return o; });
 }
 function hang_(ten, o) { return BANG[ten].map(function (c) { return o[c] == null ? '' : String(o[c]); }); }
+function duDong_(sh, cuoi) {      // bảo đảm Trang tính có đủ số dòng
+  if (sh.getMaxRows() < cuoi) sh.insertRowsAfter(sh.getMaxRows(), cuoi - sh.getMaxRows());
+}
 function ghiTatCa_(ten, rows) {  // ghi đè toàn bộ dữ liệu (giữ dòng tiêu đề)
-  var sh = sh_(ten), w = BANG[ten].length, n = sh.getLastRow();
+  var sh = sheetNho_(ten), w = BANG[ten].length, n = sh.getLastRow();
   if (n > 1) sh.getRange(2, 1, n - 1, w).clearContent();
-  if (rows.length) {
-    if (sh.getMaxRows() < rows.length + 1) sh.insertRowsAfter(sh.getMaxRows(), rows.length + 1 - sh.getMaxRows());
-    sh.getRange(2, 1, rows.length, w).setNumberFormat('@').setValues(rows);
-  }
+  if (rows.length) { duDong_(sh, rows.length + 1); sh.getRange(2, 1, rows.length, w).setNumberFormat('@').setValues(rows); }
+  boNho_(ten);
 }
 function themDong_(ten, rows) {
   if (!rows.length) return;
-  var sh = sh_(ten), w = BANG[ten].length;
-  sh.getRange(sh.getLastRow() + 1, 1, rows.length, w).setNumberFormat('@').setValues(rows);
+  var sh = sheetNho_(ten), w = BANG[ten].length, dau = sh.getLastRow() + 1;
+  duDong_(sh, dau + rows.length - 1);
+  sh.getRange(dau, 1, rows.length, w).setNumberFormat('@').setValues(rows);
+  boNho_(ten);
 }
-function thayTheTheo_(ten, giuLai, moi) {   // giữ các dòng thoả giuLai(o), thay phần còn lại bằng moi
-  var con = doc_(ten).filter(giuLai).map(function (o) { return hang_(ten, o); });
-  ghiTatCa_(ten, con.concat(moi));
+// Giữ các dòng thoả giuLai(o), thay phần còn lại bằng moi. Nhanh: nếu các dòng bị thay nằm liền nhau thì chỉ ghi
+// đúng đoạn đó (VD lưu điểm danh 1 ngày, sửa 1 ô đánh giá, hoàn tác nhận xét vừa lưu); còn lại mới ghi lại cả bảng.
+function thayTheTheo_(ten, giuLai, moi) {
+  var tat = doc_(ten), bo = [];
+  tat.forEach(function (o, i) { if (!giuLai(o)) bo.push(i); });
+  if (!bo.length) return themDong_(ten, moi);
+  var sh = sheetNho_(ten), w = BANG[ten].length, dau = bo[0] + 2, lienTuc = bo[bo.length - 1] - bo[0] + 1 === bo.length;
+  if (lienTuc && (moi.length === bo.length || bo[bo.length - 1] === tat.length - 1)) {
+    if (moi.length) { duDong_(sh, dau + moi.length - 1); sh.getRange(dau, 1, moi.length, w).setNumberFormat('@').setValues(moi); }
+    if (moi.length < bo.length) sh.getRange(dau + moi.length, 1, bo.length - moi.length, w).clearContent();
+    return boNho_(ten);
+  }
+  if (lienTuc && !moi.length) {     // xoá 1 đoạn giữa bảng
+    try { sh.deleteRows(dau, bo.length); return boNho_(ten); } catch (e) {}
+  }
+  ghiTatCa_(ten, tat.filter(giuLai).map(function (o) { return hang_(ten, o); }).concat(moi));
 }
 function caiDat_() { var o = {}; doc_('CaiDat').forEach(function (r) { o[r.Khoa] = r.GiaTri; }); return o; }
 function luuCaiDat_(k, v) {
@@ -154,6 +209,7 @@ function luuCaiDat_(k, v) {
 }
 function voiKhoa_(fn) {
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
+  _NHO = {};                       // trong khoá: luôn đọc dữ liệu mới nhất (lần gọi khác có thể vừa ghi)
   try { return fn(); } finally { lock.releaseLock(); }
 }
 
@@ -481,6 +537,7 @@ function luuGhepTay(mon, ds) {    // ds: [{ngay, tiet, bai}]
 }
 
 // ============================================================================ SỔ THEO DÕI
+function layMonDangDay() { return monDangDay_(); }
 function layTietTheoNgay(ngay) {
   var hk = hocKyHienTai_(); if (!hk) return [];
   var monCo = {}; monDangDay_().forEach(function (m) { monCo[m.TenMon] = 1; });
@@ -517,9 +574,20 @@ function layNhanXetChung() {
   return { nhom: thuTu.map(function (t) { return nhom[t]; }), muc: MUC_PC };
 }
 // Học sinh + nhận xét đã ghi cho (môn, bài) để hiện dấu trên từng em
+// Sổ theo dõi lớn dần cả năm: chỉ đọc 2 cột Môn, Bài để tìm đoạn dòng của bài, rồi đọc riêng đoạn đó
+function docSTDTheoBai_(mon, bai) {
+  var sh = sheetNho_('SoTheoDoi'), n = sh.getLastRow(), cot = BANG.SoTheoDoi, cMon = cot.indexOf('Mon');
+  if (n < 2) return [];
+  var mb = sh.getRange(2, cMon + 1, n - 1, 2).getDisplayValues(), dau = -1, cuoi = -1;
+  mb.forEach(function (r, i) { if (r[0] === mon && r[1] === bai) { if (dau < 0) dau = i; cuoi = i; } });
+  if (dau < 0) return [];
+  return sh.getRange(dau + 2, 1, cuoi - dau + 1, cot.length).getDisplayValues().map(function (r) {
+    var o = {}; cot.forEach(function (c, i) { o[c] = r[i]; }); return o;
+  });
+}
 function layHocSinhChoBai(ngay, mon, bai) {
   var ds = hocSinhDangHoc_(ngay || homNay_()), da = {};
-  doc_('SoTheoDoi').forEach(function (r) {
+  (_NHO.SoTheoDoi ? doc_('SoTheoDoi') : docSTDTheoBai_(mon, bai)).forEach(function (r) {
     if (r.Mon === mon && r.Bai === bai) (da[r.MaDinhDanh] = da[r.MaDinhDanh] || []).push({ id: r.ID, hd: r.HoatDong, muc: r.MucDo, nd: r.NoiDung, gc: r.GhiChu, ngay: r.Ngay, luc: r.ThoiGian });
   });
   return ds.map(function (h) { return { ma: h.MaDinhDanh, ten: h.HoTen, da: da[h.MaDinhDanh] || [] }; });
