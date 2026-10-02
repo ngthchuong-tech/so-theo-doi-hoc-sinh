@@ -1,0 +1,30 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 5: NHẬN XÉT CỦA GVCN CUỐI NĂM
+
+Có gì mới (Đánh giá → Định kỳ → chọn "Nhận xét GVCN cuối năm" → Tổng hợp)
+- App ghép sẵn bản nháp cho từng em (không dùng AI) từ kết quả cuối năm (CK2):
+    kết quả các môn (hoàn thành tốt / hoàn thành / chưa hoàn thành), 1–2 ý cụ thể từ nhận xét môn,
+    phẩm chất và năng lực đạt mức Tốt, điều cần cố gắng (mục mức C), lời động viên lên lớp sau.
+  VD: "Năm học qua, em hoàn thành tốt các môn Tiếng Việt, Hoạt động trải nghiệm và Đạo đức; hoàn thành môn Toán.
+       Em kể chuyện "Em có xinh không?" đúng trình tự. Em chăm chỉ. Em thể hiện tốt năng lực tự chủ và tự học, giao tiếp
+       và hợp tác, ngôn ngữ và tính toán. Cô mong em tiếp tục phát huy điểm mạnh và cố gắng hơn nữa ở lớp 3."
+- Dưới tên mỗi em có dòng tóm tắt kết quả (mức từng môn, điểm KTĐK, số mục năng lực – phẩm chất Tốt/Đạt/Cần cố gắng).
+- Giới hạn 200 chữ VÀ 900 ký tự (theo cột "Nhận xét của GVCN (tối đa 900 ký tự)" của file mẫu); bộ đếm hiện cả hai, đỏ khi vượt, app không cho xuất.
+- Tuỳ chọn "✨ Viết lại bằng AI" (từng em hoặc cả lớp) với xem trước, Dùng / Giữ / Viết lại lần nữa, hoàn tác, lịch sử đến khi xuất
+  – giống nhận xét cuối kì. AI nhận dòng tóm tắt kết quả và bản nháp (đã bỏ tên), không nhận họ tên, ngày sinh, mã định danh.
+- Xuất file: chọn file mẫu "nhan_xet_GVCN_lop_…" tải từ hệ thống. File tải về chỉ có tiêu đề (dòng 6–7 gộp ô):
+  app thêm 35 dòng từ dòng 8: STT, Mã định danh, Họ và tên, Ngày sinh, Giới tính (Nam/Nữ), Nhận xét. Tiêu đề giữ nguyên.
+- Chưa có đánh giá CK2 thì app tạm dùng CK1 (có ghi chú vàng) – để xem thử.
+- Hướng dẫn sử dụng: thêm mục 6c.
+
+Lưu ý nhỏ: sheet HuongDan của file mẫu ghi "không quá 200 kí tự", còn tiêu đề cột ghi "tối đa 900 ký tự".
+App theo quyết định của cô (200 CHỮ) và chặn thêm 900 ký tự. Nếu hệ thống báo lỗi độ dài khi nộp, báo lại để chỉnh.
+
+Cách cập nhật
+- Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai. Không có bảng mới.
+
+Đã kiểm tra trên máy (dữ liệu giả lập CK1, file mẫu GVCN thật)
+- 35 bản nháp, dài nhất 88 chữ / 386 ký tự. Sửa quá 200 chữ → đỏ, chặn xuất; "↺ Bản app gợi ý" lấy lại bản nháp.
+- AI cả lớp (giả lập): 35 bản, không gửi tên/mã; dùng tất cả → xuất → lịch sử được xoá.
+- File xuất: 35 em từ dòng 8, đủ 6 cột, nhận xét khớp màn hình, tiêu đề và ô gộp giữ nguyên.
+
+Bước 4 còn lại: phần 6 – ảnh minh chứng (chụp, nhiều trang), chuyển năm học mới, xoá ảnh năm cũ.

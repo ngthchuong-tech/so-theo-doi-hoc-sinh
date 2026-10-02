@@ -1,0 +1,87 @@
+    <!-- ======================= ĐÁNH GIÁ – BIỂU MẪU ======================= -->
+    <section id="v-danhgia" class="an">
+      <div class="the">
+        <span class="chip on" id="dgChonThang" onclick="dgChonLoai('thang')">Nhận xét tháng</span>
+        <span class="chip" id="dgChonKy" onclick="dgChonLoai('ky')">Định kỳ (giữa kì, cuối kì)</span>
+      </div>
+
+      <!-- ---------- NHẬN XÉT THÁNG ---------- -->
+      <div id="dgThang">
+      <div class="the">
+        <h2>Nhận xét tháng</h2>
+        <div class="nho">App ghép sẵn nhận xét từ các câu cô đã chọn trong Sổ theo dõi của tháng. Cô đọc, sửa nếu cần, rồi xuất vào file mẫu của trường.</div>
+        <div class="hang" style="margin-top:8px">
+          <label>Tháng <select id="bmThang"></select></label>
+          <button class="nut" onclick="taiBieuMauThang()">Tổng hợp</button>
+        </div>
+        <div id="bmTomTat" class="nho" style="margin-top:8px"></div>
+      </div>
+
+      <div id="bmNoiDung" class="an">
+        <div class="the">
+          <div id="bmSheet"></div>
+          <div class="hang" style="margin-top:6px">
+            <input id="bmTim" placeholder="Tìm tên…" oninput="veBieuMau()" style="flex:1">
+            <label class="nho"><input type="checkbox" id="bmChiCanXem" onchange="veBieuMau()"> Chỉ em cần xem</label>
+          </div>
+          <div class="nho" style="margin-top:6px">Sửa trực tiếp trong ô – app tự lưu khi cô chạm ra ngoài ô. Số ký tự đỏ là vượt giới hạn của biểu mẫu.</div>
+        </div>
+        <div id="bmDs"></div>
+
+        <div class="the">
+          <h2>Xuất file nộp hệ thống</h2>
+          <ol class="nho" style="padding-left:18px;line-height:1.5">
+            <li>Tải file mẫu nhận xét tháng (đánh giá thường xuyên) của lớp từ hệ thống của Bộ.</li>
+            <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô, ghép theo mã định danh, giữ nguyên định dạng.</li>
+            <li>Tải file đã điền về, nộp lên hệ thống.</li>
+          </ol>
+          <input type="file" id="bmFile" accept=".xlsx" onchange="xuatBieuMauThang(this)">
+          <div id="bmKetQua"></div>
+        </div>
+      </div>
+      </div>
+
+      <!-- ---------- ĐỊNH KỲ ---------- -->
+      <div id="dgKy" class="an">
+        <div class="the">
+          <h2>Đánh giá định kỳ</h2>
+          <div class="nho">App gợi ý mức đạt được của từng môn (T/H/C), 15 mức năng lực – phẩm chất (T/Đ/C) và nhận xét, từ Sổ theo dõi trong kì. Cô xem, chốt mức, nhập điểm KTĐK (cuối kì), rồi xuất vào 2 file mẫu của Bộ.</div>
+          <div class="hang" style="margin-top:8px">
+            <label>Kì <select id="kyChon">
+              <option value="GK1">Giữa học kì I (GK1)</option><option value="CK1">Cuối học kì I (CK1)</option>
+              <option value="GK2">Giữa học kì II (GK2)</option><option value="CK2">Cuối năm (CK2)</option>
+              <option value="GVCN">Nhận xét GVCN cuối năm</option></select></label>
+            <button class="nut" onclick="taiDanhGiaKy()">Tổng hợp</button>
+          </div>
+          <div id="kyTomTat" class="nho" style="margin-top:8px"></div>
+        </div>
+
+        <div id="kyNoiDung" class="an">
+          <div class="the">
+            <div id="kyPhan"></div>
+            <div class="hang" style="margin-top:6px">
+              <input id="kyTim" placeholder="Tìm tên…" oninput="veDanhGiaKy()" style="flex:1">
+              <label class="nho"><input type="checkbox" id="kyChiCanXem" onchange="veDanhGiaKy()"> Chỉ em cần xem</label>
+            </div>
+            <div class="nho" style="margin-top:6px" id="kyGhiChu"></div>
+          </div>
+          <div id="kyDs"></div>
+
+          <div class="the">
+            <h2>Xuất file nộp hệ thống</h2>
+            <div id="kyXuatThuong">
+            <div class="nho">Tải 2 file mẫu của kì này từ hệ thống của Bộ, rồi chọn ở đây. App điền đúng ô theo mã định danh, giữ nguyên định dạng.</div>
+            <label class="dong">1. File đánh giá định kỳ môn học <span class="nho">(tên dạng "filemau_danhgia_dinhkyc1…")</span></label>
+            <input type="file" id="kyFileMon" accept=".xlsx" onchange="xuatKy(this, 'mon')">
+            <label class="dong">2. File năng lực – phẩm chất <span class="nho">(tên dạng "danhgia_nlpc_data…")</span></label>
+            <input type="file" id="kyFileNLPC" accept=".xlsx" onchange="xuatKy(this, 'nlpc')">
+            </div>
+            <div id="kyXuatGVCN" class="an">
+            <div class="nho">Tải file mẫu "Nhận xét của GVCN" của lớp từ hệ thống của Bộ (tên dạng "nhan_xet_GVCN_lop_…"), rồi chọn ở đây. File tải về chưa có tên học sinh – app tự thêm đủ dòng (STT, mã định danh, họ tên, ngày sinh, giới tính, nhận xét).</div>
+            <input type="file" id="kyFileGVCN" accept=".xlsx" onchange="xuatKy(this, 'gvcn')" style="margin-top:6px">
+            </div>
+            <div id="kyKetQua"></div>
+          </div>
+        </div>
+      </div>
+    </section>

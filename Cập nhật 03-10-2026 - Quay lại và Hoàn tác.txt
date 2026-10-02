@@ -1,0 +1,36 @@
+CẬP NHẬT 03/10/2026 (bản 3) – CHỈ CÒN 2 FILE CẦN DÁN
+
+Lỗi cô gặp: app hiện dòng chữ "<?!= include('Styles'); ?>" và mất màu sắc, bố cục.
+Nguyên nhân: file "Styles" trong Apps Script bị dán sai nội dung (dán tay nhiều file rất dễ nhầm).
+Cách sửa: gộp toàn bộ giao diện vào MỘT file Index.html. Từ nay chỉ dán 2 file: Code.gs và Index.html.
+
+CÁCH CẬP NHẬT (làm trên máy tính)
+1. Mở Apps Script của file "Sổ theo dõi 2026-2027 - Lớp 2.5" (Tiện ích mở rộng → Apps Script).
+2. File Code.gs: bấm vào, Ctrl+A (chọn hết) → Delete → mở file Code.gs trong thư mục "Ma nguon Apps Script"
+   bằng Notepad → Ctrl+A → Ctrl+C → quay lại Apps Script → Ctrl+V.
+3. File Index.html: làm y hệt bước 2 với file Index.html.
+4. XOÁ 3 file không dùng nữa: Styles, Client, Parsers
+   (bấm dấu ⋮ cạnh tên file → Xoá). Giữ lại: Code.gs, Index.html, appsscript.json.
+5. Bấm Lưu (biểu tượng đĩa mềm).
+6. Triển khai → Quản lý các bản triển khai → bút chì (Chỉnh sửa) → Phiên bản: "Phiên bản mới" → Triển khai.
+7. Trên điện thoại: đóng hẳn app rồi mở lại.
+   Dữ liệu (học sinh, Sổ báo giảng, thư viện, nhận xét, điểm danh) giữ nguyên, không phải tải lại.
+
+Mẹo tránh dán nhầm: luôn dùng Ctrl+A rồi Ctrl+C trong Notepad để chép TOÀN BỘ file;
+sau khi dán, cuộn xuống cuối file trong Apps Script xem dòng cuối có giống dòng cuối của file gốc không.
+  - Code.gs kết thúc bằng hàm layHoSo.
+  - Index.html kết thúc bằng </html>.
+
+CÁC CHỨC NĂNG QUAY LẠI / HOÀN TÁC (đã có từ bản 2)
+- Nút ← góc trên: lùi về màn trước; bấm liên tục về Trang chủ.
+- Sổ theo dõi: tab "Theo bài học" / "Phẩm chất – năng lực" chuyển qua lại; nút "← Đổi bài".
+- Lưu nhận xét xong có nút "Hoàn tác"; mục "Đã ghi cho bài này – xem / xoá".
+- Điểm danh có "Bỏ thay đổi"; app hỏi lại trước khi rời màn hình còn thao tác chưa lưu.
+
+NHỜ THỬ LẠI TRÊN ĐIỆN THOẠI
+a) Trang chủ → chạm 1 tiết → bấm ←                     (về Trang chủ)
+b) Sổ theo dõi → "Phẩm chất – năng lực" → "Theo bài học" (về danh sách tiết)
+c) Chạm 1 tiết → "← Đổi bài"                          (về danh sách tiết)
+d) Học sinh → chạm 1 em → "← Đóng"                    (về danh sách lớp)
+e) Lưu 1 nhận xét → bấm "Hoàn tác"
+f) Nút Back của điện thoại: lùi trong app hay thoát app?

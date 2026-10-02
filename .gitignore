@@ -1,0 +1,15 @@
+# Không đưa lên GitHub
+# - Bản chạy thử trên máy: build.py tạo lại được
+xem-thu/
+# - File dữ liệu thật của lớp (danh sách học sinh, biểu mẫu đã điền, ảnh…) – đề phòng lỡ chép vào thư mục này
+*.xlsx
+*.xls
+*.jpg
+*.jpeg
+*.png
+*.pdf
+# - File tạm của Word/Excel, Python, cài đặt riêng của máy
+~$*
+*.tmp
+__pycache__/
+.claude/

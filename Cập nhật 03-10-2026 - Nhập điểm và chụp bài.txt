@@ -1,0 +1,35 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 3: NHẬP ĐIỂM KTĐK – BÀN PHÍM HOẶC CHỤP BÀI (AI ĐỌC ĐIỂM)
+
+Có gì mới
+1. Cài đặt → "Trợ lý AI (Gemini) – tuỳ chọn": dán khoá API, chọn mẫu AI (mặc định gemini-2.5-flash), "Thử kết nối", "Xoá khoá".
+   - Khoá cất trong Script Properties của Apps Script, KHÔNG nằm trong Trang tính; app chỉ hiện 4 ký tự cuối.
+   - Chỉ dùng khoá của dự án Google Cloud đã bật thanh toán (gói trả phí). Gói miễn phí: Google có thể dùng dữ liệu để cải thiện sản phẩm.
+   - Không có khoá: app vẫn chạy đủ, chỉ ẩn nút AI.
+2. Đánh giá → Định kỳ → CK1/CK2 → chọn môn có điểm → "✍ Nhập điểm lần lượt cả lớp" (hoặc nút 📷 cạnh ô điểm của từng em):
+   - Cửa sổ nhập điểm từng em: 10 nút số lớn 1–10; chạm 1 số là lưu và sang em sau. Có "Em trước / Em sau",
+     "Bỏ qua em đã có điểm". Máy tính: gõ phím 1–9, phím 0 = 10.
+   - 📷 Chụp bài (hoặc chọn ảnh có sẵn) → khung vàng đặt sẵn ở ô "Điểm" (góc trên bên trái) → cô kéo cho khớp → "Đọc điểm bằng AI".
+     Số AI đọc được có viền vàng; điểm CHỈ được lưu khi cô chạm số. App nhớ vị trí khung: các bài sau chụp xong là đọc luôn.
+   - AI chỉ nhận phần ảnh trong khung (khoảng 15–20 KB), không kèm tên, ngày sinh, mã định danh.
+   - Ảnh cả trang được lưu vào Google Drive: App Sổ theo dõi / Bài kiểm tra / <năm học> / <Kì - Môn> / "02. Họ tên - Toán CK1.jpg".
+     Chụp lại thì ảnh cũ vào Thùng rác (mỗi em 1 ảnh mỗi môn mỗi kì). Bỏ tích "Lưu ảnh" nếu không muốn lưu.
+   - Nút Quay lại của điện thoại / nút ← chỉ đóng cửa sổ nhập điểm, giữ nguyên danh sách.
+3. Thẻ từng em hiện link "ảnh bài" khi đã có ảnh. Hướng dẫn sử dụng: bổ sung mục 6b và 9.
+
+Cách cập nhật
+1. Dán lại Code.gs và Index.html (thư mục "Ma nguon Apps Script") → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+2. Lần đầu mở app, Google HỎI CẤP QUYỀN MỚI: "Kết nối với dịch vụ bên ngoài" (để gọi Gemini) → Cho phép.
+   Nếu báo lỗi quyền: trong Apps Script chọn hàm "caiDatLanDau" → Chạy một lần.
+3. Bảng "BaiKiemTra" (danh sách ảnh bài) được tự tạo.
+4. Muốn dùng AI: lấy khoá ở aistudio.google.com → Get API key (dự án đã bật thanh toán) → dán vào Cài đặt → Lưu → Thử kết nối.
+
+Đã kiểm tra trên máy (Gemini giả lập, không gọi ra Internet; ảnh giấy kiểm tra mẫu tự tạo)
+- Khung mặc định cắt đúng ô "Điểm", không lấy dòng "Họ và tên"; yêu cầu gửi AI không chứa tên hay mã học sinh nào.
+- AI đọc 9 → viền vàng số 9 → chạm 9: lưu điểm, lưu ảnh đúng tên file, sang em kế tiếp chưa có điểm.
+- AI đọc sai (giả lập 7 trong khi bài 9): cô chạm 9 → lưu 9. Phím 0 → 10. Chụp lại → ảnh cũ vào Thùng rác.
+- Không có khoá: ẩn nút AI, không gửi gì. Khoá sai dạng bị từ chối.
+- Điểm đã nhập xuất đúng vào cột "Điểm KTĐK" của file mẫu CK1 (đã thử ở phần 2).
+
+Cần thử trên app thật (sau khi có khoá)
+a) Cài đặt → Trợ lý AI → dán khoá → Thử kết nối → thấy "Kết nối được với AI".
+b) Chụp 3–5 bài kiểm tra thật đã chấm → so điểm AI đọc với điểm thật. Báo lại nếu AI hay đọc sai hoặc khung mặc định lệch nhiều.

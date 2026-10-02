@@ -1,0 +1,44 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 6: MINH CHỨNG ẢNH, NĂM HỌC MỚI, XOÁ ẢNH NĂM CŨ
+
+1. Minh chứng (Học sinh → chạm tên em → mục "📎 Minh chứng")
+- "📷 Chụp tài liệu": chụp trang 1 → "Chụp trang tiếp" … → xem lại: ◀ ▶ đổi thứ tự, ✕ bỏ trang
+  → tên tài liệu, loại (Bài kiểm tra / Bài làm, vở / Sản phẩm / Giấy khen, thành tích / Khác), ghi chú → "Lưu N trang".
+  "🖼 Chọn ảnh có sẵn": chọn nhiều ảnh một lúc.
+- Ảnh được thu nhỏ (cạnh dài 1600 px, ~200–400 KB/trang ảnh điện thoại, vẫn rõ chữ) rồi lưu vào Drive:
+  App Sổ theo dõi / Minh chứng / <năm học> / <STT. Họ tên> / "<Tên tài liệu> (ngày) - trang N.jpg".
+- Danh sách tài liệu có ảnh thu nhỏ; mỗi tài liệu: Xem (lật trang bằng ‹ › hoặc vuốt), ⬇ PDF (gộp các trang thành 1 file PDF
+  khổ A4 ngay trên máy; dự phòng "Lưu PDF vào Drive"), ＋ Trang (chụp thêm), Xoá; trong lúc xem: Mở trong Drive, Xoá trang này.
+- Mạng yếu, lưu dở chừng: các trang đã lưu được giữ, bấm Lưu lần nữa để lưu tiếp phần còn lại.
+- Rời màn hình khi còn trang vừa chụp chưa lưu: app hỏi lại.
+
+2. Cài đặt → "Năm học và lưu trữ"
+- Hiện năm học, sĩ số; số em đã chốt CK2 môn học / năng lực – phẩm chất CK2 / Nhận xét GVCN.
+- "Bắt đầu năm học mới" (hỏi lại + gõ lại năm học):
+    sao lưu NGUYÊN file dữ liệu thành "Lưu trữ <năm cũ> - Lớp … - Sổ theo dõi" (App Sổ theo dõi / Lưu trữ);
+    làm trống: học sinh, điểm danh, sổ theo dõi, nhận xét tháng, đánh giá định kỳ, lịch sử AI, Sổ báo giảng;
+    giữ: môn học, kho thư viện, nhận xét chung, thông tin trường, khoá AI, ảnh minh chứng.
+- Mục "Năm học cũ (chỉ xem)": link mở các file lưu trữ.
+- Trang chủ: sau ngày dạy cuối HK II nhắc xuất đủ CK2, NLPC CK2, Nhận xét GVCN rồi sang năm học mới.
+
+3. Cài đặt → "Dung lượng ảnh"
+- Bảng theo năm học: số tài liệu, số trang ảnh, số ảnh bài kiểm tra, dung lượng ước tính.
+- Năm cũ có nút "Xoá ảnh năm này" (hỏi lại + gõ lại năm học): cả thư mục ảnh của năm đó vào Thùng rác Drive
+  (khôi phục được 30 ngày; không thấy thư mục thì bỏ từng ảnh theo mã file). Tên tài liệu, nhận xét, kết quả vẫn giữ.
+  Không xoá được ảnh của năm đang dùng.
+
+Cách cập nhật
+- Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+- Bảng mới "MinhChung", "MinhChung_Trang" được tự tạo. Không cần cấp quyền mới (đã có quyền Drive).
+
+Đã kiểm tra trên máy (Drive giả lập)
+- Tài liệu 3 trang chọn từ máy, đổi thứ tự trang 2–3 → lưu đúng thứ tự; xem, lật trang; PDF 3 trang (đúng thứ tự, trang ngang/dọc theo ảnh);
+  lưu PDF vào Drive; thêm trang (4 trang); xoá trang 1 → đánh số lại 1–3.
+- Xoá ảnh năm 2025-2026: gõ sai năm bị từ chối; năm đang dùng không xoá được; xoá xong ghi chú "(đã xoá ảnh …)", dữ liệu chữ còn.
+- Năm học mới 2027-2028: tạo bản lưu trữ, làm trống đúng các bảng, giữ môn học / kho thư viện (3 472 câu) / nhận xét chung / minh chứng;
+  bấm lại lần nữa bị chặn. (Dữ liệu giả lập đã được khôi phục lại sau khi thử.)
+
+Cần thử trên app thật
+a) Hồ sơ 1 em → Chụp tài liệu 2 trang bằng điện thoại → Lưu → Xem → ⬇ PDF (thử tải về trên điện thoại; không được thì "Lưu PDF vào Drive").
+b) Cài đặt → Dung lượng ảnh: xem số liệu. (Không bấm "Bắt đầu năm học mới" cho đến cuối năm!)
+
+Với phần này, Bước 4 (bản đầy đủ) đã làm xong các mục đã thống nhất.

@@ -1,0 +1,36 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 4: "VIẾT LẠI BẰNG AI" CHO NHẬN XÉT CUỐI KÌ (CK1, CK2)
+
+Có gì mới (Đánh giá → Định kỳ → CK1 hoặc CK2; cần khoá AI ở Cài đặt → Trợ lý AI)
+- Mỗi ô nhận xét (môn học; năng lực chung, đặc thù, phẩm chất) có nút "✨ Viết lại bằng AI".
+- Đầu danh sách có "✨ Viết lại bằng AI cả lớp" cho phần đang xem (1 môn, hoặc Năng lực – phẩm chất).
+- Bản AI hiện trong KHUNG TÍM dưới ô – CHƯA thay gì. Cô chọn:
+    Dùng bản AI  /  Giữ bản cũ  /  Viết lại lần nữa (mỗi lần viết khác đi một chút)
+  hoặc cả lớp:  Dùng tất cả  /  Giữ bản cũ tất cả.
+- Hoàn tác:
+    "↶ Hoàn tác" ở từng ô (trả về bản trước khi dùng AI);
+    "↶ Hoàn tác lần dùng AI gần nhất (N ô)" – trả lại cả lớp một lần; thông báo ngay sau khi dùng cũng có nút Hoàn tác.
+    Nếu cô đã sửa tay sau khi dùng AI, app hỏi lại trước khi hoàn tác ô đó.
+- Lịch sử phiên bản được giữ đến khi XUẤT FILE (app nhắc trước khi xuất); xuất xong thì xoá lịch sử của phần đó.
+- Còn bản AI chưa chọn mà rời màn hình, tổng hợp lại hoặc xuất file: app hỏi lại.
+- Giữa kì (GK1, GK2) không có nút AI (đúng như đã thống nhất: giữa kì ghép theo quy tắc).
+
+AI nhận gì / không nhận gì
+- Nhận: mã tạm (1, 2, 3…), tên môn hoặc nhóm năng lực, mức (T/H/C hoặc T/Đ/C), điểm KTĐK, nội dung nhận xét hiện có.
+- Không nhận: họ tên, ngày sinh, mã định danh. Nếu cô có gõ tên em trong nhận xét, app tự bỏ tên trước khi gửi
+  (đã thử: gõ "Em An rất chăm. Nguyễn Văn An tiến bộ." → gửi đi không còn tên).
+- Yêu cầu với AI: giữ đúng ý bản gốc, không bịa thêm; hợp với mức; nêu điều tốt trước, điều cần cố gắng sau;
+  ≤ 500 ký tự, 1 đoạn; không nêu tên, không xưng "con". Bản AI vượt 500 ký tự được app cắt ở cuối câu.
+- Cả lớp gửi theo lô 8 nhận xét/lần (35 em ≈ 5 lần, khoảng 30 giây). AI lỗi giữa chừng: giữ các bản đã có, bấm lại để viết tiếp phần còn thiếu.
+
+Cách cập nhật
+1. Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+2. Bảng "PhienBanNX" (lịch sử phiên bản) được tự tạo.
+
+Đã kiểm tra trên máy (Gemini giả lập)
+- 1 ô: xem trước → viết lại lần nữa → dùng → hoàn tác: trả đúng bản cũ.
+- Cả lớp Tiếng Việt: 35 bản; giữ bản cũ 1 em, dùng tất cả 34; sửa tay 1 em; hoàn tác cả lớp → hỏi về ô đã sửa → 34 ô về đúng như cũ (đã tải lại từ Trang tính để đối chiếu).
+- Năng lực – phẩm chất: 96 ô (bỏ qua ô trống); AI lỗi ở lô 3 → giữ 16 bản, bấm lại viết tiếp phần còn thiếu.
+- Xuất file NLPC CK1 → lịch sử NLPC được xoá. GK1: máy chủ từ chối gọi AI.
+
+Cần thử trên app thật (khi có khoá)
+- CK1 (khi đến cuối kì) hoặc thử ngay với vài em: bấm ✨ ở 2–3 ô, đọc bản AI xem văn phong có hợp không; báo lại để chỉnh lời dặn cho AI.

@@ -1,0 +1,34 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 2: ĐÁNH GIÁ ĐỊNH KỲ (GK1, CK1, GK2, CK2)
+
+Có gì mới
+- Tab "📊 Đánh giá" có 2 nút: "Nhận xét tháng" (như cũ) và "Định kỳ (giữa kì, cuối kì)".
+- Chọn kì → "Tổng hợp": app gợi ý từ Sổ theo dõi trong kì (không dùng AI):
+  + Từng môn: mức đạt được T/H/C + nhận xét (≤ 500 ký tự). Cuối kì có ô Điểm KTĐK (số nguyên 1–10) cho môn có bài kiểm tra
+    (môn nào có điểm: Cài đặt → Môn học → cột "Có điểm KTĐK").
+  + Năng lực – phẩm chất: đủ 15 mục T/Đ/C (3 NL chung, 7 NL đặc thù, 5 phẩm chất) + 3 ô nhận xét.
+    Mục chưa có dữ liệu trong sổ (VD Tin học, Thể chất) để trống, viền đỏ – cô chọn; có nút "Điền Đ cho mọi mục còn trống".
+- Cô chạm để chốt mức, sửa nhận xét (tự lưu); "↺ Bản app gợi ý" để bỏ phần đã sửa; lọc "Chỉ em cần xem".
+- Phạm vi: giữa kì = đầu học kì → hết tuần ôn tập giữa kì (theo Sổ báo giảng); cuối kì = cả học kì.
+- Xuất file: chọn 2 file mẫu tải từ hệ thống của Bộ (file môn học "filemau_danhgia_dinhkyc1…" và file năng lực – phẩm chất
+  "danhgia_nlpc_data…") → app điền đúng ô theo mã định danh, giữ nguyên định dạng và kiểu ô của file mẫu.
+  App không cho xuất khi còn thiếu mức (liệt kê em/môn còn thiếu); thiếu điểm KTĐK thì hỏi lại.
+  File năng lực – phẩm chất GK2/CK2 tải về chưa có dòng học sinh → app tự thêm đủ dòng (STT, mã, họ tên, ngày sinh).
+- Hướng dẫn sử dụng có thêm mục 6b.
+
+Cách cập nhật
+1. Apps Script: dán lại 2 file Code.gs và Index.html (thư mục "Ma nguon Apps Script") → Lưu.
+2. Triển khai → Quản lý các bản triển khai → bút chì → Phiên bản mới → Triển khai.
+3. Bảng dữ liệu mới "DanhGiaKy" (lưu phần cô chốt/sửa) được app tự tạo, không cần làm gì.
+
+Đã kiểm tra trên máy (dữ liệu giả lập, 4 file mẫu thật GK1/CK1 môn học, GK1/GK2 năng lực – phẩm chất)
+- GK1: 35/35 em ở 4 sheet Tiếng việt, Toán, HĐTN, Đạo đức; mức, nhận xét, cột "Thời điểm đánh giá" = GK1; ô cô sửa đúng như màn hình.
+- Năng lực – phẩm chất: 15 mức đúng thứ tự cột của file mẫu (Tự chủ và tự học … Trách nhiệm), 3 ô nhận xét, cột Z = kì.
+- File GK2 không có học sinh: app thêm 35 dòng; CK1: điểm KTĐK ghi vào cột F, điểm 11 bị từ chối.
+- Chọn nhầm file (file NLPC vào ô môn học), chưa tải Sổ báo giảng HK II mà chọn GK2: app báo rõ, không làm hỏng gì.
+
+Cần thử trên app thật
+a) Đánh giá → Định kỳ → GK1 → Tổng hợp → xem vài em ở từng môn và ở Năng lực – phẩm chất.
+b) Chốt mức HĐTN, Đạo đức (nếu chưa có ghi nhận), điền các mục năng lực còn trống.
+c) Tải 2 file mẫu GK1 từ hệ thống → xuất → thử nộp lên hệ thống, báo lại hệ thống có nhận không.
+
+Phần sau: chụp bài kiểm tra để AI đọc điểm; "Viết lại bằng AI" cho cuối kì; nhận xét GVCN cuối năm.

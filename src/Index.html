@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <?!= include('Styles'); ?>
+</head>
+<body>
+  <header>
+    <div class="hang" style="flex-wrap:nowrap">
+      <button id="nutLui" class="nut-lui an" onclick="quayLai()" title="Quay lại">←</button>
+      <div style="flex:1;min-width:0"><h1 id="tieuDe">Sổ theo dõi học sinh</h1><div class="phu" id="phuDe">Đang tải…</div></div>
+      <button class="nut-lui" onclick="moTab('huongdan')" title="Hướng dẫn sử dụng" style="font-size:20px;font-weight:700">?</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ======================= TRANG CHỦ ======================= -->
+    <section id="v-trangchu">
+      <div class="the">
+        <div class="ngay-lon" id="tcNgay"></div>
+        <div class="nho" id="tcTuan"></div>
+      </div>
+      <div id="tcNhac"></div>
+      <div class="the">
+        <div class="luoi-nut">
+          <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
+          <button class="nut" onclick="moTab('sotheodoi')">📝<br>Sổ theo dõi</button>
+          <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
+        </div>
+      </div>
+      <div class="the">
+        <h2>Lịch dạy hôm nay</h2>
+        <div id="tcLich"></div>
+      </div>
+    </section>
+
+    <!-- ======================= ĐIỂM DANH ======================= -->
+    <section id="v-diemdanh" class="an">
+      <div class="the">
+        <div class="hang gian">
+          <h2 style="margin:0">Điểm danh</h2>
+          <input type="date" id="ddNgay" onchange="doiNgayDiemDanh()">
+        </div>
+        <div class="hang" style="margin-top:6px">
+          <span class="chip on" id="ddCheNgay" onclick="ddCheDo('ngay')">Điểm danh</span>
+          <span class="chip" id="ddCheTH" onclick="ddCheDo('th')">📊 Tổng hợp</span>
+        </div>
+        <div class="nho" id="ddTomTat" style="margin-top:6px"></div>
+      </div>
+      <div id="ddVungNgay">
+      <div class="the" id="ddDs"></div>
+      <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="datLaiDiemDanh()">Bỏ thay đổi</button><button class="nut lon" onclick="luuDiemDanhUI()">Lưu điểm danh</button></div></div>
+      </div>
+      <div id="ddVungTH" class="an">
+        <div class="the">
+          <div class="hang">
+            <label>Xem <select id="thKieu" onchange="thDoiKieu()">
+              <option value="tuan">Tuần</option><option value="thang">Tháng</option><option value="hk1">Học kì I</option>
+              <option value="hk2">Học kì II</option><option value="nam">Cả năm học</option><option value="tuy">Tuỳ chọn</option></select></label>
+            <span id="thO"></span>
+            <button class="nut" onclick="taiTongHopDD()">Tổng hợp</button>
+          </div>
+          <div id="thTomTat" class="nho" style="margin-top:8px"></div>
+        </div>
+        <div class="the an" id="thBangThe">
+          <label class="nho"><input type="checkbox" id="thChiVang" onchange="veTongHopDD()"> Chỉ em có vắng</label>
+          <div class="cuon" id="thBang" style="margin-top:6px"></div>
+          <button class="nut" style="margin-top:10px" onclick="xuatTongHopDD()">⬇ Xuất file Excel</button>
+          <div id="thKetQua"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================= SỔ THEO DÕI ======================= -->
+    <section id="v-sotheodoi" class="an">
+      <div class="the">
+        <div class="hang gian">
+          <h2 style="margin:0">Sổ theo dõi</h2>
+          <input type="date" id="stNgay" onchange="doiNgaySTD()">
+        </div>
+        <div class="hang" style="margin-top:8px">
+          <span class="chip on" id="stCheBai" onclick="doiCheDo('bai')">Theo bài học</span>
+          <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
+        </div>
+      </div>
+
+      <div id="stChonBai">
+        <div class="the">
+          <h3 style="margin-top:0">Chọn tiết trong ngày</h3>
+          <div id="stTiet"></div>
+          <details style="margin-top:8px">
+            <summary>Chọn bài khác</summary>
+            <label class="dong">Môn</label><select id="stMon" onchange="taiBaiCuaMon()"></select>
+            <label class="dong">Bài</label><select id="stBai" style="width:100%"></select>
+            <div style="margin-top:8px"><button class="nut phu" onclick="moBaiTuChon()">Mở bài này</button></div>
+          </details>
+        </div>
+      </div>
+
+      <div id="stNhap" class="an">
+        <div class="the">
+          <div class="hang gian">
+            <div><div class="nho" id="stMonTen"></div><div style="font-weight:700" id="stBaiTen"></div></div>
+            <button class="nut phu" onclick="moChonBai()">← Đổi bài</button>
+          </div>
+          <div class="nho" id="stTam"></div>
+          <h3>1. Hoạt động</h3><div id="stHoatDong"></div>
+          <h3>2. Mức</h3><div class="muc" id="stMuc"></div>
+          <h3>3. Nhận xét <span class="nho">(chạm để chọn, có thể chọn nhiều câu)</span></h3>
+          <div id="stCau"></div>
+          <textarea id="stGhiChu" placeholder="Ghi thêm (không bắt buộc)…"></textarea>
+          <h3 class="hang gian"><span>4. Học sinh</span>
+            <span><button class="nut phu" onclick="chonCaLop(true)">Cả lớp</button> <button class="nut phu" onclick="chonCaLop(false)">Bỏ chọn</button></span></h3>
+          <div class="nho" style="margin-bottom:6px">Chấm màu góc phải: mức đã ghi cho hoạt động đang chọn.</div>
+          <div class="hs-luoi" id="stHocSinh"></div>
+        </div>
+        <div class="the">
+          <details><summary>Đã ghi cho bài này <span id="stVuaGhiSo"></span> – xem / xoá</summary>
+            <div class="nho" style="margin:6px 0">Ghi nhầm thì bấm Xoá rồi ghi lại.</div>
+            <div class="cuon" id="stVuaGhi"></div></details>
+        </div>
+        <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="boChonHet()">Bỏ chọn</button><button class="nut lon" id="stLuu" onclick="luuNhanXetUI()">Lưu nhận xét</button></div></div>
+      </div>
+    </section>
+
+<?!= include('DanhGia'); ?>
+
+    <!-- ======================= HỌC SINH ======================= -->
+    <section id="v-hocsinh" class="an">
+      <div class="the">
+        <h2>Tải danh sách học sinh</h2>
+        <div class="nho">Dùng file "Danh sách học sinh" xuất từ hệ thống của trường (.xlsx). Tải lại khi có học sinh chuyển đến/chuyển đi.</div>
+        <input type="file" id="hsFile" accept=".xlsx,.xls" onchange="docFileHocSinh(this)" style="margin-top:8px">
+        <div id="hsXem"></div>
+      </div>
+      <div class="the">
+        <h2>Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
+        <input id="hsTim" placeholder="Tìm tên…" oninput="veHocSinh()" style="width:100%;margin-bottom:8px">
+        <div id="hsDs"></div>
+        <details style="margin-top:10px"><summary>Học sinh đã chuyển đi</summary><div id="hsChuyenDi"></div></details>
+      </div>
+    </section>
+
+<?!= include('HuongDan'); ?>
+
+    <!-- ======================= CÀI ĐẶT ======================= -->
+    <section id="v-caidat" class="an">
+      <div class="the hang gian">
+        <div><b>Hướng dẫn sử dụng</b><div class="nho">Cách dùng từng màn hình, việc cần làm mỗi học kì, xử lí khi thao tác nhầm.</div></div>
+        <button class="nut phu" onclick="moTab('huongdan')">📖 Mở</button>
+      </div>
+
+      <div class="the">
+        <h2>Mở app nhanh trên điện thoại, máy tính</h2>
+        <div class="nho">Quét mã QR bằng camera điện thoại để mở app, rồi "Thêm vào màn hình chính" để lần sau chỉ cần chạm biểu tượng.</div>
+        <div class="hang" style="margin-top:10px;align-items:flex-start">
+          <div id="qrApp" style="background:#fff;padding:6px;border:1px solid var(--vien);border-radius:8px"></div>
+          <div style="flex:1;min-width:180px">
+            <div class="nho" id="linkApp" style="word-break:break-all"></div>
+            <button class="nut phu" style="margin-top:8px" onclick="chepLink()">📋 Chép đường link</button>
+            <details style="margin-top:8px"><summary>Cách tạo biểu tượng trên màn hình</summary>
+              <ul class="nho" style="padding-left:18px;line-height:1.5">
+                <li><b>Điện thoại Android</b> (Chrome): mở app → menu ⋮ → "Thêm vào màn hình chính" → Thêm.</li>
+                <li><b>iPhone</b> (Safari): mở app → nút Chia sẻ (ô vuông có mũi tên) → "Thêm vào MH chính".</li>
+                <li><b>Máy tính</b> (Chrome): mở app → menu ⋮ → "Truyền, lưu và chia sẻ" → "Tạo lối tắt…" → tích "Mở dưới dạng cửa sổ" → Tạo.</li>
+                <li>Trên máy tính còn có thể mở file Google Trang tính dữ liệu → menu "📒 Sổ theo dõi" → Mở app.</li>
+              </ul></details>
+          </div>
+        </div>
+      </div>
+      <div class="the">
+        <h2>Học kì đang dùng</h2>
+        <div id="cdHocKy"></div>
+      </div>
+
+      <div class="the">
+        <h2>Tải Sổ báo giảng</h2>
+        <div class="hang">
+          <label>Năm học <input id="sbgNamHoc" size="10"></label>
+          <label>Học kì <select id="sbgHocKy"><option>I</option><option>II</option></select></label>
+        </div>
+        <input type="file" id="sbgFile" accept=".docx" onchange="docFileSBG(this)" style="margin-top:8px">
+        <div id="sbgXem"></div>
+      </div>
+
+      <div class="the">
+        <h2>Kho thư viện nhận xét</h2>
+        <div id="khoKiemTra"></div>
+        <input type="file" id="tvFile" accept=".xlsx" onchange="docFileThuVien(this)" style="margin-top:8px">
+        <div id="tvXem"></div>
+        <details style="margin-top:8px"><summary>Các thư viện trong kho</summary><div id="khoDs"></div></details>
+      </div>
+
+      <div class="the">
+        <h2>Ghép tiết với bài</h2>
+        <div class="nho">App tự ghép tiết trong Sổ báo giảng với bài trong thư viện. Dòng tô vàng là app đoán, dòng tô đỏ là chưa ghép – cô kiểm tra và sửa.</div>
+        <div class="hang" style="margin:8px 0"><select id="ghMon" onchange="doiMonGhep()"></select>
+          <label class="nho"><input type="checkbox" id="ghChiCanXem" onchange="veGhep()"> Chỉ hiện dòng cần xem</label></div>
+        <div class="cuon" id="ghBang"></div>
+        <div class="hang" style="margin-top:8px"><button class="nut" onclick="luuGhepUI()">Lưu thay đổi</button><button class="nut phu" onclick="boDoiGhep()">Bỏ thay đổi</button><span class="nho" id="ghTrangThai"></span></div>
+      </div>
+
+      <div class="the">
+        <h2>Môn học</h2>
+        <div class="nho">Các môn cô đánh giá. "Tên trong Sổ báo giảng" ghi đúng tên môn trong sổ (nhiều tên cách nhau bởi dấu ;).</div>
+        <div class="cuon"><table class="bang" id="mhBang"></table></div>
+        <div class="hang" style="margin-top:8px">
+          <button class="nut phu" onclick="themMon()">+ Thêm môn</button>
+          <button class="nut" onclick="luuMonUI()">Lưu môn học</button>
+        </div>
+      </div>
+
+      <div class="the">
+        <h2>Trợ lý AI (Gemini) – tuỳ chọn</h2>
+        <div id="aiTrangThai" class="nho"></div>
+        <div class="nho" style="margin-top:6px;line-height:1.5">Dùng để: đọc điểm từ ảnh bài kiểm tra; (sắp có) viết lại nhận xét cuối kì, nhận xét GVCN cuối năm. Không có khoá thì app vẫn chạy đầy đủ, chỉ ẩn các nút AI.</div>
+        <details style="margin-top:6px"><summary>Lấy khoá ở đâu? Có an toàn không?</summary>
+          <ul class="nho" style="padding-left:18px;line-height:1.5">
+            <li>Vào <b>aistudio.google.com</b> → "Get API key" → tạo khoá trong một dự án Google Cloud <b>đã bật thanh toán</b> (gói trả phí). <b>Không dùng gói miễn phí</b>: Google có thể dùng dữ liệu gửi lên gói miễn phí để cải thiện sản phẩm.</li>
+            <li>Khoá được cất trong phần cài đặt riêng của Apps Script (Script Properties), <b>không nằm trong Trang tính</b>; app không hiển thị lại khoá, chỉ hiện 4 ký tự cuối.</li>
+            <li>App <b>không gửi</b> họ tên, ngày sinh, mã định danh của học sinh cho AI. Đọc điểm: chỉ gửi phần ảnh trong khung ô "Điểm".</li>
+            <li>Chi phí đọc điểm rất nhỏ (khoảng vài chục đồng mỗi ảnh).</li>
+          </ul></details>
+        <label class="dong">Khoá API Gemini</label>
+        <input id="aiKhoa" type="password" autocomplete="off" placeholder="Dán khoá mới vào đây (để trống nếu không đổi)" style="width:100%">
+        <label class="dong">Mẫu AI <span class="nho">(để mặc định nếu không rõ)</span></label>
+        <input id="aiModel" style="width:100%">
+        <div class="hang" style="margin-top:10px">
+          <button class="nut" onclick="luuAI()">Lưu</button>
+          <button class="nut phu" onclick="thuAI()">Thử kết nối</button>
+          <button class="nut phu an" id="aiXoa" onclick="xoaKhoaAI()">Xoá khoá</button>
+        </div>
+      </div>
+
+      <div class="the">
+        <h2>Năm học và lưu trữ</h2>
+        <div id="nhNoiDung" class="nho">Đang tải…</div>
+      </div>
+
+      <div class="the">
+        <h2>Dung lượng ảnh</h2>
+        <div id="dlNoiDung" class="nho">Đang tải…</div>
+      </div>
+
+      <div class="the">
+        <h2>Thông tin chung</h2>
+        <label class="dong">Trường</label><input id="cdTruong" style="width:100%">
+        <div class="hang">
+          <div><label class="dong">Lớp</label><input id="cdLop" size="6"></div>
+          <div><label class="dong">Khối</label><input id="cdKhoi" size="3"></div>
+          <div><label class="dong">Năm học</label><input id="cdNamHoc" size="10"></div>
+        </div>
+        <label class="dong">Bộ sách</label><input id="cdBoSach" style="width:100%">
+        <div class="hang">
+          <div><label class="dong">Nhắc nhận xét tháng từ ngày</label><input id="cdNgayNhac" type="number" min="1" max="31" style="width:80px"></div>
+          <div><label class="dong">Nhắc trước khi hết học kì (ngày)</label><input id="cdSoNgayHK" type="number" min="1" max="60" style="width:80px"></div>
+        </div>
+        <button class="nut" style="margin-top:10px" onclick="luuThongTinUI()">Lưu thông tin</button>
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <button data-t="trangchu" onclick="moTab('trangchu')"><span class="ic">🏠</span>Trang chủ</button>
+    <button data-t="diemdanh" onclick="moTab('diemdanh')"><span class="ic">✅</span>Điểm danh</button>
+    <button data-t="sotheodoi" onclick="moTab('sotheodoi')"><span class="ic">📝</span>Sổ theo dõi</button>
+    <button data-t="danhgia" onclick="moTab('danhgia')"><span class="ic">📊</span>Đánh giá</button>
+    <button data-t="hocsinh" onclick="moTab('hocsinh')"><span class="ic">👧</span>Học sinh</button>
+    <button data-t="caidat" onclick="moTab('caidat')"><span class="ic">⚙️</span>Cài đặt</button>
+  </nav>
+
+  <div class="modal" id="hoSo" onclick="if(event.target===this)dongHoSo()"><div class="the" id="hoSoNoiDung"></div></div>
+  <div class="modal" id="mcModal" style="z-index:16"><div class="the" id="mcNoiDung"></div></div>
+  <div class="modal" id="mcXem" style="z-index:17" onclick="if(event.target===this)mcDongXem()"><div class="the" id="mcXemNoiDung"></div></div>
+  <input type="file" id="mcCam" accept="image/*" capture="environment" class="an" onchange="mcNhanAnh(this)">
+  <input type="file" id="mcAnh" accept="image/*" multiple class="an" onchange="mcNhanAnh(this)">
+  <div class="modal" id="ndModal"><div class="the" id="ndNoiDung"></div></div>
+  <input type="file" id="ndCam" accept="image/*" capture="environment" class="an" onchange="ndNhanAnh(this)">
+  <input type="file" id="ndAnh" accept="image/*" class="an" onchange="ndNhanAnh(this)">
+  <div id="toast"></div>
+  <div id="cho"><div>Đang xử lý…</div></div>
+
+  <?!= include('Parsers'); ?>
+  <?!= include('Client'); ?>
+</body>
+</html>

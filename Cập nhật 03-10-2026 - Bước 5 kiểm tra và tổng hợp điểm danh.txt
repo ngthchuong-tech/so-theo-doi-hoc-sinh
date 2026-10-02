@@ -1,0 +1,31 @@
+CẬP NHẬT 03/10/2026 – BỔ SUNG TỔNG HỢP ĐIỂM DANH + BƯỚC 5 (KIỂM TRA, SỬA LỖI)
+
+1. Mới: Tổng hợp điểm danh (yêu cầu ở Bước 1: "xuất file tổng hợp theo ngày, tuần, tháng, học kỳ, cả năm")
+- Điểm danh → "📊 Tổng hợp" → chọn Tuần / Tháng / Học kì I / Học kì II / Cả năm học / Tuỳ chọn → Tổng hợp.
+- Bảng cả lớp: vắng có phép, vắng không phép (ngày; vắng nửa buổi = 0,5 ngày), tỉ lệ chuyên cần, các ngày vắng; lọc "Chỉ em có vắng".
+- Nhắc các ngày có dạy (theo Sổ báo giảng) mà chưa điểm danh.
+- "⬇ Xuất file Excel": sheet "Tổng hợp" (có tiêu đề trường, lớp, năm học, khoảng thời gian) và "Chi tiết ngày vắng"; bản sao lưu vào Drive.
+
+2. Bước 5 – thử các trường hợp lạ trên máy (11 chỗ tải file, ảnh lớn, app trống) và đã sửa
+   Lỗi tìm được                                                        → Đã sửa
+   a) Chọn nhầm file khác ở "Tải danh sách học sinh" → hiện "0 học sinh"  → Chặn: báo "không phải file Danh sách học sinh", không cho nhập.
+      kèm nút Nhập; bấm thì CẢ LỚP bị chuyển thành "đã chuyển đi"            Máy chủ cũng chặn danh sách rỗng. Nếu file làm quá nửa lớp
+                                                                           thành "chuyển đi" → cảnh báo đỏ và hỏi lại.
+   b) Chọn file Word khác ở Sổ báo giảng → "0 tiết" vẫn có nút Nhập        → Chặn, báo "không phải Sổ báo giảng".
+   c) Chọn nhầm file định kỳ GK1 ở ô xuất nhận xét tháng → app vẫn điền    → App đọc dòng tiêu đề để nhận diện đúng loại biểu mẫu
+      (tên sheet trùng) → ghi sai cột vào file GK1                            (tháng / môn học / năng lực – phẩm chất / GVCN) trước khi điền;
+      Tương tự với file năng lực – phẩm chất, file GVCN                       sai loại thì báo rõ, không điền. Chỉ điền vào sheet đúng mẫu.
+   d) File CK2 môn học tải về khi chưa đến kì chỉ có sheet HuongDan        → Báo: "hệ thống chưa tạo dữ liệu của kì này – tải lại khi đến kì".
+   e) File hỏng / sai loại → thông báo tiếng Anh khó hiểu                  → "File bị hỏng hoặc không phải file Excel/Word… tải lại file gốc".
+   f) Chọn nhiều ảnh minh chứng mà lẫn 1 file hỏng → dừng, mất cả ảnh tốt   → Bỏ qua file hỏng, nhận các ảnh còn lại, báo tên file bỏ qua.
+   g) App trống: "Lưu điểm danh" khi chưa có học sinh vẫn báo "đã lưu";    → Báo "chưa có danh sách học sinh"; "chưa đặt năm học".
+      chưa đặt năm học thì câu báo bị thiếu chữ
+   Không lỗi: ảnh rất lớn (6000×8000) được thu nhỏ còn 1200×1600; file không phải ảnh báo rõ; app trống không treo ở màn nào;
+   file đúng vẫn xuất bình thường (đã thử lại: tháng, GK1 môn, NLPC GK1, NLPC GK2, GVCN; Sổ báo giảng thật 576 tiết; danh sách 36 em).
+
+3. Việc tiếp theo của Bước 5 (cần cô): dùng thử toàn bộ theo "Bước 5 - Phiếu thử app cho cô giáo.docx", ghi lại lỗi/ý kiến.
+   Những điều chỉ kiểm tra được trên Google thật: hệ thống của Bộ có nhận file không; tốc độ khi dữ liệu lớn (cả năm ~30 000 ghi nhận);
+   tải file/PDF về trên điện thoại; quyền Drive, Gemini.
+
+Cách cập nhật
+- Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai. Không có bảng mới, không cần quyền mới.

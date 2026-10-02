@@ -1,0 +1,32 @@
+CẬP NHẬT 03/10/2026 – BƯỚC 4, PHẦN 1: NHẬN XÉT THÁNG (BIỂU MẪU ĐÁNH GIÁ THƯỜNG XUYÊN)
+
+Có gì mới
+- Thanh dưới có thêm mục "📊 Đánh giá".
+- Chọn tháng → "Tổng hợp": app ghép sẵn nhận xét cho từng em, từng sheet của biểu mẫu tháng
+  (Sổ tổng hợp các môn + các môn cô dạy), gồm 4 ô: Môn học, Năng lực chung, Năng lực đặc thù, Phẩm chất.
+  Nguồn: các câu cô đã chọn trong Sổ theo dõi của tháng đó (không dùng AI, dữ liệu không ra ngoài Google).
+- Cô sửa trực tiếp, app tự lưu; "↺ Bản app ghép" để bỏ phần đã sửa. Ô quá 250 ký tự hiện số đỏ và app không cho xuất.
+- Xuất file: chọn file mẫu tháng tải từ hệ thống của trường → app điền đúng ô (theo mã định danh), giữ nguyên định dạng
+  → "Tải file đã điền về máy". Bản sao tự lưu vào Google Drive: App Sổ theo dõi / Biểu mẫu đã xuất / <năm học>.
+- Trang chủ: từ ngày 25, thẻ nhắc dẫn thẳng tới Đánh giá.
+- Hướng dẫn sử dụng có thêm mục 6 "Đánh giá – nhận xét tháng".
+
+Cách cập nhật
+1. Apps Script: dán lại 2 file Code.gs và Index.html (thư mục "Ma nguon Apps Script") → Lưu.
+2. Triển khai → Quản lý các bản triển khai → bút chì → Phiên bản mới → Triển khai.
+3. Lần đầu mở app sau khi cập nhật, Google sẽ HỎI CẤP QUYỀN MỚI (quyền lưu file vào Google Drive để cất bản sao
+   biểu mẫu đã xuất) → chọn tài khoản của cô → Nâng cao → Đi tới… → Cho phép.
+   Nếu app báo lỗi quyền: trong Apps Script chọn hàm "caiDatLanDau" → Chạy một lần để cấp quyền.
+4. Bảng dữ liệu mới "NhanXetThang" (lưu phần cô sửa) được app tự tạo, không cần làm gì.
+
+Đã kiểm tra trên máy (dữ liệu giả lập 777 ghi nhận tháng 9, file mẫu tháng 9 thật của lớp 2/5)
+- 35/35 em được điền ở các sheet Sổ tổng hợp, Tiếng việt, Toán, Hoạt động trải nghiệm, Đạo đức;
+  các sheet môn cô không dạy (TNXH, Âm nhạc, Mĩ thuật, GDTC) giữ nguyên.
+- Mọi ô trong file khớp đúng với nội dung trên màn hình, kể cả ô cô đã sửa; định dạng, ô gộp, sheet HuongDan giữ nguyên.
+
+Cần thử trên app thật
+a) Đánh giá → tháng 9 (hoặc 10) → Tổng hợp → đọc thử nhận xét vài em.
+b) Sửa 1 ô → chạm ra ngoài → thấy "Đã lưu".
+c) Tải file mẫu tháng từ hệ thống → chọn ở "Xuất file nộp hệ thống" → tải file đã điền → mở xem → thử nộp lên hệ thống.
+   (Quan trọng: báo lại hệ thống có nhận file không.)
+d) Nếu nút "Tải file đã điền về máy" không tải được: dùng link "mở file" trong Google Drive ngay bên dưới để tải.
