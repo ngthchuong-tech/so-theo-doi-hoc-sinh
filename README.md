@@ -6,9 +6,19 @@ Web app trên **Google Apps Script + Google Trang tính + Google Drive** cho 1 g
 ## Chức năng chính
 - Trang chủ: ngày, tuần học, lịch dạy hôm nay (từ Sổ báo giảng), thẻ nhắc việc.
 - Điểm danh hằng ngày; tổng hợp theo tuần / tháng / học kì / năm, xuất Excel.
-- Sổ theo dõi: ghi nhận xét theo bài học bằng thư viện câu mẫu (4 mức), phẩm chất – năng lực.
-- Đánh giá: nhận xét tháng, định kỳ GK1 / CK1 / GK2 / CK2 (môn học T/H/C, điểm KTĐK, 15 mục năng lực – phẩm chất),
-  nhận xét GVCN cuối năm; điền thẳng vào file mẫu tải từ hệ thống của Bộ GD&ĐT.
+- Sổ theo dõi:
+  - Đánh giá tháng theo yêu cầu cần đạt (Kiến thức / Kỹ năng × HTXS, HTT, HT, CHT; câu gợi ý + mẫu của cô; nút Cả lớp: HTT).
+  - Nộp vở hằng ngày 4 mức + Chưa nộp (mặc định mức lần trước).
+  - Phong trào – cuộc thi.
+  - Tuỳ chọn: ghi nhận xét theo bài học.
+- Đánh giá:
+  - Thường xuyên hằng tháng: mức Kiến thức / Kỹ năng tự tính từ các yêu cầu; nhận xét ghép điều làm tốt → điều cần cố gắng → vở.
+  - Định kỳ GK1 / CK1 / GK2 / CK2 gợi ý từ các tháng (môn học T/H/C, điểm KTĐK, 15 mục năng lực – phẩm chất).
+  - Nhận xét GVCN cuối năm.
+  - Điền thẳng vào file mẫu tải từ hệ thống của Bộ GD&ĐT.
+- Học sinh:
+  - Hồ sơ từng em.
+  - Nhóm cần quan tâm (Bồi dưỡng, Cần rèn thêm, Cần chú ý) có ghi chú và lọc; app gợi ý, cô xác nhận.
 - Tuỳ chọn AI (Gemini, gói trả phí): đọc điểm từ ảnh bài kiểm tra; "Viết lại bằng AI" nhận xét cuối kì / GVCN (xem trước, hoàn tác).
 - Minh chứng: chụp tài liệu nhiều trang, gộp PDF; dung lượng ảnh, xoá ảnh năm cũ; chuyển năm học mới (sao lưu năm cũ).
 
@@ -24,7 +34,7 @@ Web app trên **Google Apps Script + Google Trang tính + Google Drive** cho 1 g
 ## Sửa và cài đặt
 1. Sửa trong `src/`, rồi chạy `python build.py`.
 2. Chạy thử trên máy: mở `xem-thu/ban-phat-hanh.html` qua một máy chủ web tĩnh (VD `python -m http.server 8765 --directory xem-thu`);
-   thêm `?ngay=2026-11-10` vào đường link để giả lập ngày.
+   thêm `?ngay=10/11/2026` vào đường link để giả lập ngày phía trình duyệt (máy chủ giả lập vẫn dùng ngày thật).
 3. Cài lên Google: mở Apps Script gắn với file Trang tính dữ liệu → dán `Ma nguon Apps Script/Code.gs` và `Index.html`
    → Lưu → Triển khai → Quản lý các bản triển khai → Phiên bản mới (quyền truy cập: "Chỉ mình tôi").
 

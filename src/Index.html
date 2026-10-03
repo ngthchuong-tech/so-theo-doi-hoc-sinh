@@ -32,7 +32,8 @@
       <div class="the">
         <div class="luoi-nut">
           <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
-          <button class="nut" onclick="moTab('sotheodoi')">📒<br>Nộp vở</button>
+          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })">📒<br>Nộp vở</button>
+          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })">📋<br>Đánh giá tháng</button>
           <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
         </div>
       </div>
@@ -136,7 +137,7 @@
           <div class="hs-luoi" id="stHocSinh"></div>
         </div>
         <div class="the">
-          <details><summary>Đã ghi cho bài này <span id="stVuaGhiSo"></span> – xem / xoá</summary>
+          <details><summary>Đã ghi <span id="stVuaGhiSo"></span> – xem / xoá</summary>
             <div class="nho" style="margin:6px 0">Ghi nhầm thì bấm Xoá rồi ghi lại.</div>
             <div class="cuon" id="stVuaGhi"></div></details>
         </div>

@@ -244,6 +244,11 @@ function hkSau_(hk, namHoc) {    // học kì kế tiếp
   var y = /(\d{4})-(\d{4})/.exec(hk.NamHoc); return { namHoc: y ? (+y[1] + 1) + '-' + (+y[2] + 1) : '', hocKy: 'I' };
 }
 function monDangDay_() { return doc_('MonHoc').filter(function (m) { return m.DangDay === 'Có'; }); }
+function thieuThuVienThang_(t) {                // Toán, TV đang dạy mà chưa có thư viện yêu cầu của tháng t
+  var cd = caiDat_(), hk = hocKyCuaThang_(t), co = {};
+  doc_('ThuVienYeuCau').forEach(function (r) { if (String(r.Khoi) === String(cd.Khoi) && r.BoSach === cd.BoSach && r.HocKy === hk && +r.Thang === +t) co[r.Mon] = 1; });
+  return monDangDay_().map(function (m) { return m.TenMon; }).filter(function (m) { return MON_VO.indexOf(m) >= 0 && !co[m]; });
+}
 function khoThieu_(khoi, boSach, hocKy) {       // các môn đang dạy chưa có thư viện cho học kì này
   var kho = doc_('KhoThuVien');
   return monDangDay_().map(function (m) { return m.TenMon; }).filter(function (mon) {
@@ -271,12 +276,20 @@ function layTrangChu() {
     .sort(function (a, b) { return +a.Tiet - +b.Tiet; })
     .map(function (r) { return { tiet: r.Tiet, buoi: r.Buoi, monSBG: r.MonSBG, mon: r.Mon, ten: r.TenBaiDay, bai: r.Bai }; });
 
-  // Nhắc: thư viện còn thiếu cho học kì hiện tại
-  var thieu = khoThieu_(cd.Khoi, cd.BoSach, hk.HocKy);
+  // Nhắc: thư viện còn thiếu – theo bài (chỉ khi bật ghi theo bài) và thư viện yêu cầu theo tháng (tháng này; từ ngày 20 cả tháng sau)
+  var theoBai = out.giaoDien.chucNang && out.giaoDien.chucNang.theoBai;
+  var thieu = theoBai ? khoThieu_(cd.Khoi, cd.BoSach, hk.HocKy) : [];
   if (thieu.length) out.nhac.push({ muc: 'vang', text: 'Đang dùng thư viện tạm cho: ' + thieu.join(', ') + ' (HK ' + hk.HocKy + '). Tải thư viện khi có.', toi: 'caidat' });
+  var thNay = d.getMonth() + 1, thSau = thNay === 12 ? 1 : thNay + 1;
+  [thNay].concat(d.getDate() >= 20 ? [thSau] : []).forEach(function (t) {
+    if (t >= 6 && t <= 8) return;
+    var m = thieuThuVienThang_(t);
+    if (m.length) out.nhac.push({ muc: 'vang', text: 'Chưa có thư viện yêu cầu kiến thức, kỹ năng tháng ' + t + ' cho ' + m.join(', ') +
+      ' – tải file "Thư viện nhận xét THÁNG…" ở Cài đặt → Kho thư viện để ghi đánh giá tháng ' + t + '.', toi: 'caidat' });
+  });
   // Nhắc: sắp hết học kì / đã hết học kì
   var conLai = soNgay_(nay, hk.NgayDayCuoi), soNgayNhac = +(cd.SoNgayNhacHK || 14), sau = hkSau_(hk, cd.NamHoc);
-  var thieuSau = khoThieu_(cd.Khoi, cd.BoSach, sau.hocKy);
+  var thieuSau = theoBai ? khoThieu_(cd.Khoi, cd.BoSach, sau.hocKy) : [];
   var chuanBi = 'Sổ báo giảng HK ' + sau.hocKy + (thieuSau.length ? ' và thư viện nhận xét: ' + thieuSau.join(', ') : '');
   if (conLai < 0 && hk.HocKy === 'II') out.nhac.push({ muc: 'do', text: 'Năm học ' + hk.NamHoc + ' đã kết thúc (' + hk.NgayDayCuoi + '). Cô xuất đủ CK2 môn học, năng lực – phẩm chất CK2 và Nhận xét GVCN; sau đó Cài đặt → Năm học → Bắt đầu năm học mới.', toi: 'caidat' });
   else if (conLai < 0) out.nhac.push({ muc: 'do', text: 'Học kì ' + hk.HocKy + ' đã kết thúc (' + hk.NgayDayCuoi + '). Cô tải ' + chuanBi + ' để bắt đầu học kì mới.', toi: 'caidat' });
@@ -285,8 +298,10 @@ function layTrangChu() {
   // Nhắc: đánh giá định kỳ, nhận xét GVCN (các mục này chỉ hiện quanh thời điểm cần làm)
   out.giaoDien.kyNhac.forEach(function (k) { out.nhac.push({ muc: 'vang', text: 'Đến kì đánh giá ' + TEN_KY[k] + ' (' + k + '): vào Đánh giá → Định kỳ → chọn ' + k + ' → Tổng hợp.', toi: 'danhgia' }); });
   if (out.giaoDien.hienGVCN && out.giaoDien.kyNhac.indexOf('CK2') >= 0) out.nhac.push({ muc: 'vang', text: 'Cuối năm: viết Nhận xét của GVCN – vào Đánh giá → Định kỳ → Nhận xét GVCN cuối năm.', toi: 'danhgia' });
-  // Nhắc: nhận xét tháng
-  if (d.getDate() >= +(cd.NgayNhacThang || 25)) out.nhac.push({ muc: 'xanh', text: 'Đến kì đánh giá thường xuyên tháng ' + (d.getMonth() + 1) + ': vào Đánh giá → Thường xuyên (hằng tháng) → chọn mức Toán, Tiếng Việt cho từng em → xuất file mẫu đánh giá thường xuyên.', toi: 'danhgia' });
+  // Nhắc: đánh giá tháng (cuối tháng: ghi; đầu tháng sau: hoàn tất, xuất file tháng trước)
+  var thTruoc = thNay === 1 ? 12 : thNay - 1;
+  if (d.getDate() >= +(cd.NgayNhacThang || 25) && !(thNay >= 6 && thNay <= 8)) out.nhac.push({ muc: 'xanh', text: 'Cuối tháng ' + thNay + ': ghi đánh giá ở Sổ theo dõi → 📋 Đánh giá tháng (Tiếng Việt, Toán theo từng yêu cầu), rồi Đánh giá → Thường xuyên để xem, sửa nhận xét và xuất file.', toi: 'sotheodoi:thang' });
+  else if (d.getDate() <= 5 && !(thTruoc >= 6 && thTruoc <= 8)) out.nhac.push({ muc: 'xanh', text: 'Đầu tháng: hoàn tất đánh giá tháng ' + thTruoc + ' (Sổ theo dõi → 📋 Đánh giá tháng), rồi Đánh giá → Thường xuyên → tháng ' + thTruoc + ' → xuất file nộp hệ thống.', toi: 'sotheodoi:thang' });
   return out;
 }
 
@@ -806,78 +821,6 @@ function nhanXetNangLuc_(ghi, gioiHan) {
 }
 function namCuaThang_(namHoc, thang) { var y = /(\d{4})-(\d{4})/.exec(namHoc || ''); return y ? (+thang >= 8 ? +y[1] : +y[2]) : new Date().getFullYear(); }
 
-function layBieuMauThang(thang) {
-  thang = +thang;
-  var cd = caiDat_(), namHoc = cd.NamHoc || '', nam = namCuaThang_(namHoc, thang);
-  var dauThang = '01/' + ('0' + thang).slice(-2) + '/' + nam;
-  var mon = monDangDay_();
-  // PC/NL của từng hoạt động (theo thư viện) và của từng nhóm nhận xét chung
-  var pcnl = {};
-  doc_('ThuVien').forEach(function (r) { if (r.Khoi === cd.Khoi) pcnl[r.Mon + '|' + r.Bai + '|' + r.HoatDong] = r.PCNL; });
-  doc_('NhanXetChung').forEach(function (r) { pcnl['Chung||' + r.Nhom] = r.PCNL; });
-  var baiCuaCau = {}; _CAU_CHUNG = {};
-  doc_('ThuVien').forEach(function (r) {
-    if (r.Khoi !== cd.Khoi) return;
-    tachCau_(r.NoiDung).forEach(function (c) { var k = r.Mon + '|' + c; (baiCuaCau[k] = baiCuaCau[k] || {})[r.Bai] = 1; });
-  });
-  Object.keys(baiCuaCau).forEach(function (k) { if (Object.keys(baiCuaCau[k]).length >= 3) _CAU_CHUNG[k.split('|').slice(1).join('|')] = 1; });
-  var hs = doc_('HocSinh').filter(function (h) {
-    return h.TrangThai !== 'Đã chuyển đi' || (h.NgayChuyenDi && key_(h.NgayChuyenDi) > key_(dauThang));
-  }).sort(function (a, b) { return +a.ThuTu - +b.ThuTu; });
-  var ghiTheoHS = {};
-  doc_('SoTheoDoi').forEach(function (r) {
-    if (+r.Thang !== thang || String(r.MaHK).indexOf(namHoc) !== 0) return;
-    var pl = phanLoaiPCNL_(pcnl[r.Mon + '|' + r.Bai + '|' + r.HoatDong] || '');
-    (ghiTheoHS[r.MaDinhDanh] = ghiTheoHS[r.MaDinhDanh] || []).push({ muc: r.MucDo, nd: r.NoiDung, mon: r.Mon, pl: pl, ngay: r.Ngay });
-  });
-  var daSua = {};
-  doc_('NhanXetThang').forEach(function (r) { if (r.NamHoc === namHoc && +r.Thang === thang) daSua[r.MaDinhDanh + '|' + r.Sheet] = r; });
-  var sheets = [{ ten: TEN_SHEET_TONG_HOP, mon: '' }].concat(mon.map(function (m) { return { ten: m.TenSheetBieuMau || m.TenMon, mon: m.TenMon }; }));
-  var du = {};
-  hs.forEach(function (h) {
-    var ghi = (ghiTheoHS[h.MaDinhDanh] || []).sort(function (a, b) { return key_(a.ngay) - key_(b.ngay); });
-    du[h.MaDinhDanh] = {};
-    sheets.forEach(function (s) {
-      var o;
-      if (!s.mon) {     // Sổ tổng hợp: mỗi môn 1 câu tiêu biểu; năng lực, phẩm chất từ mọi ghi nhận (kể cả nhận xét chung)
-        var phan = mon.map(function (m) {
-          var g = ghi.filter(function (x) { return x.mon === m.TenMon; }); if (!g.length) return '';
-          var c = chonCau_(g), cau = cauTieuBieu_(c);
-          return cau ? m.TenMon + ': ' + chuThuong_(cau) : '';
-        }).filter(Boolean);
-        var nl = nhanXetNangLuc_(ghi, GIOI_HAN_THANG);
-        o = { mon: noiCau_(phan, GIOI_HAN_THANG), nlc: nl.nlc, nld: nl.nld, pc: nl.pc, soGhi: ghi.length };
-      } else {
-        var gm = ghi.filter(function (x) { return x.mon === s.mon; });
-        var nl2 = nhanXetNangLuc_(gm, GIOI_HAN_THANG);
-        o = { mon: ghepNhanXetMon_(gm, GIOI_HAN_THANG), nlc: nl2.nlc, nld: nl2.nld, pc: nl2.pc, soGhi: gm.length };
-      }
-      o.goc = { mon: o.mon, nlc: o.nlc, nld: o.nld, pc: o.pc };       // bản app ghép (để "↺ Lấy lại bản app")
-      var sua = daSua[h.MaDinhDanh + '|' + s.ten];
-      if (sua) { o.mon = sua.NXMon; o.nlc = sua.NLChung; o.nld = sua.NLDacThu; o.pc = sua.PhamChat; o.sua = true; o.luc = sua.CapNhat; }
-      du[h.MaDinhDanh][s.ten] = o;
-    });
-  });
-  return { namHoc: namHoc, thang: thang, nam: nam, gioiHan: GIOI_HAN_THANG, sheets: sheets,
-           hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, ns: h.NgaySinh, stt: i + 1 }; }), du: du };
-}
-// Lưu phần cô sửa của 1 em ở 1 sheet (x: {ma, sheet, mon, nlc, nld, pc})
-function luuNhanXetThang(thang, x) {
-  return voiKhoa_(function () {
-    var namHoc = caiDat_().NamHoc || '', luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
-    var cung = function (r) { return r.NamHoc === namHoc && +r.Thang === +thang && r.MaDinhDanh === x.ma && r.Sheet === x.sheet; };
-    thayTheTheo_('NhanXetThang', function (r) { return !cung(r); }, [hang_('NhanXetThang', {
-      NamHoc: namHoc, Thang: thang, MaDinhDanh: x.ma, Sheet: x.sheet, NXMon: x.mon, NLChung: x.nlc, NLDacThu: x.nld, PhamChat: x.pc, CapNhat: luc })]);
-    return luc;
-  });
-}
-function boSuaThang(thang, ma, sheet) {
-  return voiKhoa_(function () {
-    var namHoc = caiDat_().NamHoc || '';
-    thayTheTheo_('NhanXetThang', function (r) { return !(r.NamHoc === namHoc && +r.Thang === +thang && r.MaDinhDanh === ma && r.Sheet === sheet); }, []);
-    return 'Đã lấy lại bản app ghép.';
-  });
-}
 // Lưu bản sao file biểu mẫu đã xuất vào Google Drive của cô: App Sổ theo dõi / Biểu mẫu đã xuất / <năm học>
 function luuFileXuat(tenFile, base64) {
   var namHoc = caiDat_().NamHoc || 'Chưa rõ năm học';
@@ -1914,15 +1857,18 @@ function layNopVo(ngay) {
       truoc[kk] = { k: key_(r.Ngay), m: g[ma] }; if (!ngayTruoc[r.Mon] || key_(ngayTruoc[r.Mon]) < key_(r.Ngay)) ngayTruoc[r.Mon] = r.Ngay;
     });
   });
+  var vang = {};                                     // em vắng cả ngày: không điền sẵn mức
+  doc_('DiemDanh').forEach(function (r) { if (r.Ngay === ngay && r.TrangThai !== 'Có mặt' && r.Buoi !== 'Sáng' && r.Buoi !== 'Chiều') vang[r.MaDinhDanh] = 1; });
   return { ngay: ngay, muc: MUC_VO, mon: MON_VO, daLuu: daLuu, ngayTruoc: ngayTruoc,
     hs: hocSinhDangHoc_(ngay).map(function (h) {
       var tt = {}, ma = h.MaDinhDanh;
       MON_VO.forEach(function (m) {
         if (daLuu[m]) tt[m] = hom[m][ma] || '';
+        else if (vang[ma]) tt[m] = '';
         else if (cuHom && cuHom[ma + '|' + m] === 'Chưa nộp') tt[m] = 'N';
         else tt[m] = (truoc[ma + '|' + m] || {}).m || '';
       });
-      return { ma: ma, ten: h.HoTen, tt: tt };
+      return { ma: ma, ten: h.HoTen, tt: tt, vang: !!vang[ma] };
     }) };
 }
 // ds: [{ma, tt: {môn: mã mức}}] – mỗi môn 1 dòng; em chưa chọn mức thì không ghi
