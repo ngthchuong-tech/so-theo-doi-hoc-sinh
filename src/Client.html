@@ -1818,12 +1818,21 @@ function noiDsJS(ds) { return ds.length < 2 ? ds.join('') : ds.slice(0, -1).join
 function chon4(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }   // mỗi em 1 mẫu câu, cố định
 function tgO(ma, phan) { var d = tg.du[ma] = tg.du[ma] || {}; return d[phan] = d[phan] || { mucKT: '', mucKN: '', muc: '', nx: '' }; }
 function tgMon(ten) { return tg.mon.filter(function (m) { return m.ten === ten; })[0]; }
+// Câu vở của tháng: mức gặp nhiều nhất (bằng nhau lấy mức tốt hơn) + nhắc nộp vở – giống hệt cauVoDem_ trên máy chủ
+var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đẹp, đúng.', C: 'Bài làm trong vở đúng, biết trình bày.',
+               D: 'Bài làm trong vở đúng nhưng chưa biết trình bày.', E: 'Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn.' };
+function cauVoDem(v, soNgayCu) {
+  if (!v) return soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '';
+  var tot = '', n = 0;
+  ['A', 'B', 'C', 'D', 'E'].forEach(function (k) { if (v[k] > n) { n = v[k]; tot = k; } });
+  var thieu = v.N + v.cu, nhac = !thieu ? '' : v.cu ? (thieu <= 2 ? 'Đôi khi còn chưa nộp vở, chưa làm xong bài.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.')
+    : (thieu <= 2 ? 'Đôi khi còn chưa nộp vở.' : 'Cần chú ý nộp vở đầy đủ, đúng hạn.');
+  if (!tot) return nhac || (soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '');
+  return CAU_VO[tot] + (nhac ? ' ' + nhac : '');
+}
 function cauVo(ma, mon) {
   if (!tg.soNgayVo || MON_CO_VO.indexOf(mon) < 0) return '';
-  var v = (tg.vo[ma] || {})[mon], bad = v ? v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn'] : 0;
-  if (!bad) return 'Nộp vở đầy đủ, đúng hạn.';
-  var loai = []; if (v['Chưa nộp']) loai.push('chưa nộp vở'); if (v['Chưa làm xong']) loai.push('chưa làm xong bài'); if (v['Nộp muộn']) loai.push('nộp vở muộn');
-  return bad <= 2 ? 'Đôi khi còn ' + noiDsJS(loai) + '.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.';
+  return cauVoDem((tg.vo[ma] || {})[mon], tg.soNgayVoCu);
 }
 function mucNLD(ma, mon) {
   var o = tgO(ma, mon), m = [o.mucKT, o.mucKN].filter(Boolean);
@@ -1898,9 +1907,11 @@ function tgONX(ma, phan, nhan) {
 }
 function tgTheVo(ma, mon) {
   if (MON_CO_VO.indexOf(mon) < 0 || !tg.soNgayVo) return '';
-  var v = (tg.vo[ma] || {})[mon], bad = v ? v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn'] : 0;
-  return bad ? '<span class="tag vang">Vở: ' + ['Chưa nộp', 'Chưa làm xong', 'Nộp muộn'].filter(function (k) { return v[k]; }).map(function (k) { return k.toLowerCase() + ' ' + v[k]; }).join(', ') + '</span>'
-    : '<span class="tag xanh">Vở: đủ</span>';
+  var v = (tg.vo[ma] || {})[mon]; if (!v) return tg.soNgayVoCu ? '<span class="tag xanh">Vở: đủ</span>' : '';
+  var ten = {}; (tg.mucVo || []).forEach(function (x) { ten[x[0]] = x[1]; });
+  var ds = ['A', 'B', 'C', 'D', 'E', 'N'].filter(function (k) { return v[k]; }).map(function (k) { return ten[k] + ' ' + v[k]; });
+  if (v.cu) ds.push('chưa xong / muộn ' + v.cu);
+  return '<span class="tag ' + (v.N + v.cu > 2 || v.E ? 'vang' : 'xanh') + '" title="Số lần trong tháng">Vở: ' + esc(ds.join(' · ')) + '</span>';
 }
 function veThang() {
   if (!tg) return;
@@ -1998,7 +2009,9 @@ function xuatThang(input) {
 
 // ============================================================================ NỘP VỞ HẰNG NGÀY (Sổ theo dõi → 📒 Nộp vở)
 var vo = null, voMon = 'Tiếng Việt';
-var VO_NUT = [['Đã nộp', 'Nộp', 'co'], ['Chưa nộp', 'Chưa nộp', 'kp'], ['Chưa làm xong', 'Chưa xong', 'p'], ['Nộp muộn', 'Muộn', 'p']];
+var VO_NUT = [['A', 'Nhanh, đẹp, đúng', 'co'], ['B', 'Đẹp, đúng', 'co'], ['C', 'Đúng, biết trình bày', 'p'],
+              ['D', 'Đúng, chưa biết trình bày', 'p'], ['E', 'Chưa đúng – chưa đẹp', 'kp'], ['N', 'Chưa nộp', 'kp']];
+var VO_TEN = {}; VO_NUT.forEach(function (b) { VO_TEN[b[0]] = b[1]; });
 function moNopVo() {
   $('stChonBai').classList.add('an'); $('stNhap').classList.add('an'); $('stPT').classList.add('an'); $('stVo').classList.remove('an');
   ['stCheBai', 'stCheChung', 'stChePT'].forEach(function (id) { $(id).classList.remove('on'); }); $('stCheVo').classList.add('on');
@@ -2011,21 +2024,28 @@ function taiNopVo() {
 function veNopVo() {
   if (!vo) return;
   $('voMonChip').innerHTML = vo.mon.map(function (m) { return '<span class="chip' + (m === voMon ? ' on' : '') + '" data-m="' + esc(m) + '" onclick="voChonMon(this.dataset.m)">' + esc(m) + '</span>'; }).join('');
-  $('voTomTat').innerHTML = vo.ngay + ' · ' + vo.mon.map(function (m) { var k = vo.hs.filter(function (h) { return h.tt[m] !== 'Đã nộp'; }).length; return m + ': ' + (k ? k + ' em chưa đủ' : 'đủ'); }).join(' · ') + ' · ' +
-    (vo.sua ? '<span class="tag vang">chưa lưu</span>' : vo.daLuu ? '<span class="tag xanh">đã lưu</span>' : '<span class="tag">chưa ghi</span>');
+  var dem = {}; vo.hs.forEach(function (h) { var k = h.tt[voMon] || '–'; dem[k] = (dem[k] || 0) + 1; });
+  $('voTomTat').innerHTML = vo.ngay + ' · ' + (vo.sua ? '<span class="tag vang">chưa lưu</span>' : vo.daLuu[voMon] ? '<span class="tag xanh">đã lưu</span>' :
+    '<span class="tag">chưa lưu' + (vo.ngayTruoc[voMon] ? ' – mức theo lần ' + esc(vo.ngayTruoc[voMon]) : '') + '</span>');
+  var chua = dem['–'] || 0;
+  $('voNhanh').innerHTML = '<span class="nho">' + esc(voMon) + ': ' + VO_NUT.filter(function (b) { return dem[b[0]]; }).map(function (b) { return b[1] + ' ' + dem[b[0]]; }).join(' · ') +
+    (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'B\')">Em chưa chọn: Đẹp, đúng</button>' : '');
   $('voDs').innerHTML = vo.hs.length ? vo.hs.map(function (h, i) {
-    return '<div class="dd-hang"><div><span class="nho">' + (i + 1) + '.</span> ' + esc(h.ten) + '</div><span class="seg">' + VO_NUT.map(function (b) {
-      return '<button class="' + (h.tt[voMon] === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + VO_NUT.indexOf(b) + ')">' + b[1] + '</button>';
-    }).join('') + '</span></div>';
+    return '<div class="vo-hang"><div><span class="nho">' + (i + 1) + '.</span> ' + esc(h.ten) + (h.tt[voMon] ? '' : ' <span class="tag vang">chưa chọn</span>') + '</div><div class="vo-nut">' + VO_NUT.map(function (b, k) {
+      return '<button class="' + (h.tt[voMon] === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + k + ')">' + b[1] + '</button>';
+    }).join('') + '</div></div>';
   }).join('') : '<div class="nho">Chưa có danh sách học sinh.</div>';
 }
 function voChonMon(m) { voMon = m; veNopVo(); }
 function voDat(i, k) { var tt = VO_NUT[k][0]; if (vo.hs[i].tt[voMon] !== tt) { vo.hs[i].tt[voMon] = tt; vo.sua = true; } veNopVo(); }
+function voCaLop(m) { var n = 0; vo.hs.forEach(function (h) { if (!h.tt[voMon]) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
 function voBoThayDoi() { if (!vo || !vo.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại?')) taiNopVo(); }
 function voLuu() {
   if (!vo || !vo.hs.length) return bao('Chưa có danh sách học sinh.');
   var ngay = vo.ngay, cu = vo;                   // lưu ngầm như điểm danh
-  vo.daLuu = true; vo.sua = false; veNopVo(); bao('Đang lưu nộp vở…', 20000);
+  var thieu = vo.mon.map(function (m) { var k = vo.hs.filter(function (h) { return !h.tt[m]; }).length; return k ? m + ' ' + k + ' em' : ''; }).filter(Boolean);
+  if (thieu.length && !confirm('Còn em chưa chọn mức (' + thieu.join(', ') + ') – các em này không được ghi. Vẫn lưu?')) return;
+  vo.mon.forEach(function (m) { vo.daLuu[m] = true; }); vo.sua = false; veNopVo(); bao('Đang lưu nộp vở…', 20000);
   goi('luuNopVo', ngay, vo.hs.map(function (h) { return { ma: h.ma, tt: h.tt }; })).then(function (m) { bao(m, 5000); },
     function (e) { if (vo === cu) { vo.sua = true; veNopVo(); } bao('Chưa lưu được nộp vở ' + ngay + ': ' + ((e && e.message) || e) + ' – bấm Lưu lần nữa.', 9000); });
 }

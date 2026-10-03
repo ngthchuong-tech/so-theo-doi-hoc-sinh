@@ -1572,7 +1572,6 @@ function layTaiTruoc(ngay, ds) {
 // HĐTN, Đạo đức: cô tự nhận xét (có câu gợi ý theo mức). NL đặc thù: app tự suy từ mức Toán, TV. NL chung, phẩm chất: cô chọn mức.
 // Máy chủ chỉ lưu MỨC cô chọn và phần cô SỬA (DanhGiaThang); câu nhận xét được ghép trên máy theo thư viện.
 var MUC_THANG = ['HTXS', 'HTT', 'HT', 'CCG'];
-var TRANG_THAI_VO = ['Đã nộp', 'Chưa nộp', 'Chưa làm xong', 'Nộp muộn'];
 var MON_VO = ['Tiếng Việt', 'Toán'];
 function hocKyCuaThang_(t) { t = +t; return (t >= 8 || t === 1) ? 'I' : 'II'; }
 function nhapThuVienThang(tenFile, tv) {
@@ -1765,13 +1764,7 @@ function duLieuThang_(thang) {
     if (r.NamHoc !== namHoc || +r.Thang !== thang) return;
     (du[r.MaDinhDanh] = du[r.MaDinhDanh] || {})[r.Phan] = { mucKT: r.MucKT, mucKN: r.MucKN, muc: r.Muc, nx: r.NhanXet };
   });
-  var vo = {}, ngayVo = {};                     // nộp vở trong tháng: chỉ lưu các lần chưa nộp / chưa xong / muộn + dấu "đã lưu ngày"
-  doc_('NopVo').forEach(function (r) {
-    var p = String(r.Ngay).split('/'); if (+p[1] !== thang || +p[2] !== nam) return;
-    if (r.MaDinhDanh === '*') { ngayVo[r.Ngay] = 1; return; }
-    var o = (vo[r.MaDinhDanh] = vo[r.MaDinhDanh] || {})[r.Mon] = (vo[r.MaDinhDanh] || {})[r.Mon] || { 'Chưa nộp': 0, 'Chưa làm xong': 0, 'Nộp muộn': 0 };
-    if (o[r.TrangThai] != null) o[r.TrangThai]++;
-  });
+  var dv = demVo_(function (ngay) { var p = String(ngay).split('/'); return +p[1] === thang && +p[2] === nam; }), vo = dv.vo;
   // Môn ghi theo yêu cầu: mức Kiến thức / Kỹ năng luôn tính từ các yêu cầu (phần nhận xét cô sửa vẫn giữ)
   Object.keys(yc.mon).forEach(function (m) {
     hs.forEach(function (h) {
@@ -1780,7 +1773,7 @@ function duLieuThang_(thang) {
       o.mucKT = mucYC_(g.kt); o.mucKN = mucYC_(g.kn);
     });
   });
-  return { thang: thang, nam: nam, namHoc: namHoc, hocKy: hk, gioiHan: GIOI_HAN_THANG, lib: lib, nxChung: nxChung, du: du, vo: vo, soNgayVo: Object.keys(ngayVo).length,
+  return { thang: thang, nam: nam, namHoc: namHoc, hocKy: hk, gioiHan: GIOI_HAN_THANG, lib: lib, nxChung: nxChung, du: du, vo: vo, soNgayVo: dv.soNgay, soNgayVoCu: dv.soNgayCu, mucVo: MUC_VO,
            yc: yc.mon, ghi: yc.ghi,
            hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; }),
            mon: mon.map(function (m) { return { ten: m.TenMon, sheet: m.TenSheetBieuMau || m.TenMon, tieuChi: !!lib[m.TenMon] || !!yc.mon[m.TenMon], yc: !!yc.mon[m.TenMon] }; }),
@@ -1799,32 +1792,77 @@ function luuDanhGiaThang(thang, ds) {
 }
 
 // ============================================================================ NỘP VỞ HẰNG NGÀY (Tiếng Việt, Toán)
+// Nộp vở (theo ý cô, 03/10/2026): 4 mức chất lượng (mức 3 có 2 câu) + "Chưa nộp". Mã: A–E, N.
+// Lưu gọn: mỗi ngày mỗi môn 1 dòng (MaDinhDanh '*', GhiChu = "mã:A mã:B …"). Dữ liệu cách cũ (mỗi em 1 dòng
+// Chưa nộp / Chưa làm xong / Nộp muộn + dòng '*' môn '*') vẫn đọc được.
+var MUC_VO = [['A', 'Nhanh, đẹp, đúng'], ['B', 'Đẹp, đúng'], ['C', 'Đúng, biết trình bày'], ['D', 'Đúng, chưa biết trình bày'], ['E', 'Chưa đúng – chưa đẹp'], ['N', 'Chưa nộp']];
+var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đẹp, đúng.', C: 'Bài làm trong vở đúng, biết trình bày.',
+               D: 'Bài làm trong vở đúng nhưng chưa biết trình bày.', E: 'Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn.' };
+function giaiMaVo_(s) { var o = {}; String(s || '').split(/\s+/).forEach(function (x) { var p = x.split(':'); if (p.length === 2 && p[1]) o[p[0]] = p[1]; }); return o; }
+// Đếm các lần trong những ngày thoả loc(ngay): {vo: {ma: {môn: {A.., N, cu: số lần chưa xong/muộn cách cũ}}}, soNgay, soNgayCu}
+function demVo_(loc) {
+  var vo = {}, ngay = {}, ngayCu = {};
+  var o = function (ma, m) { var a = vo[ma] = vo[ma] || {}; return a[m] = a[m] || { A: 0, B: 0, C: 0, D: 0, E: 0, N: 0, cu: 0 }; };
+  doc_('NopVo').forEach(function (r) {
+    if (!loc(r.Ngay)) return;
+    if (r.MaDinhDanh === '*') {
+      if (r.Mon === '*') { ngayCu[r.Ngay] = 1; return; }
+      ngay[r.Ngay] = 1; var g = giaiMaVo_(r.GhiChu);
+      Object.keys(g).forEach(function (ma) { var x = o(ma, r.Mon); if (x[g[ma]] != null) x[g[ma]]++; });
+      return;
+    }
+    var x = o(r.MaDinhDanh, r.Mon);                 // cách cũ
+    if (r.TrangThai === 'Chưa nộp') x.N++; else x.cu++;
+  });
+  return { vo: vo, soNgay: Object.keys(ngay).length + Object.keys(ngayCu).length, soNgayCu: Object.keys(ngayCu).length };
+}
+// Câu nhận xét vở từ số lần: mức gặp nhiều nhất (bằng nhau thì lấy mức tốt hơn) + nhắc nộp vở. Giống hệt cauVoDem trên máy.
+function cauVoDem_(v, soNgayCu) {
+  if (!v) return soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '';
+  var tot = '', n = 0;
+  ['A', 'B', 'C', 'D', 'E'].forEach(function (k) { if (v[k] > n) { n = v[k]; tot = k; } });
+  var thieu = v.N + v.cu, nhac = !thieu ? '' : v.cu ? (thieu <= 2 ? 'Đôi khi còn chưa nộp vở, chưa làm xong bài.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.')
+    : (thieu <= 2 ? 'Đôi khi còn chưa nộp vở.' : 'Cần chú ý nộp vở đầy đủ, đúng hạn.');
+  if (!tot) return nhac || (soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '');
+  return CAU_VO[tot] + (nhac ? ' ' + nhac : '');
+}
+function cong_(a, b) { if (!b) return a; a = a || { A: 0, B: 0, C: 0, D: 0, E: 0, N: 0, cu: 0 }; Object.keys(b).forEach(function (k) { a[k] = (a[k] || 0) + b[k]; }); return a; }
 function layNopVo(ngay) {
   ngay = ngay || homNay_();
-  var co = {}, daLuu = false;
+  var k = key_(ngay), hom = {}, daLuu = {}, cuHom = null, truoc = {}, ngayTruoc = {};
   doc_('NopVo').forEach(function (r) {
-    if (r.Ngay !== ngay) return;
-    if (r.MaDinhDanh === '*') { daLuu = true; return; }
-    (co[r.MaDinhDanh] = co[r.MaDinhDanh] || {})[r.Mon] = { tt: r.TrangThai, gc: r.GhiChu };
+    if (r.MaDinhDanh !== '*') { if (r.Ngay === ngay) (cuHom = cuHom || {})[r.MaDinhDanh + '|' + r.Mon] = r.TrangThai; return; }
+    if (r.Mon === '*') { if (r.Ngay === ngay) cuHom = cuHom || {}; return; }
+    var g = giaiMaVo_(r.GhiChu);
+    if (r.Ngay === ngay) { hom[r.Mon] = g; daLuu[r.Mon] = true; return; }
+    if (key_(r.Ngay) > k) return;
+    Object.keys(g).forEach(function (ma) {            // mặc định: mức của lần chấm gần nhất trước đó (bỏ qua "Chưa nộp")
+      var kk = ma + '|' + r.Mon; if (g[ma] === 'N' || (truoc[kk] && truoc[kk].k > key_(r.Ngay))) return;
+      truoc[kk] = { k: key_(r.Ngay), m: g[ma] }; if (!ngayTruoc[r.Mon] || key_(ngayTruoc[r.Mon]) < key_(r.Ngay)) ngayTruoc[r.Mon] = r.Ngay;
+    });
   });
-  return { ngay: ngay, trangThai: TRANG_THAI_VO, mon: MON_VO, daLuu: daLuu,
+  return { ngay: ngay, muc: MUC_VO, mon: MON_VO, daLuu: daLuu, ngayTruoc: ngayTruoc,
     hs: hocSinhDangHoc_(ngay).map(function (h) {
-      var c = co[h.MaDinhDanh] || {}, tt = {};
-      MON_VO.forEach(function (m) { tt[m] = c[m] ? c[m].tt : 'Đã nộp'; });
-      return { ma: h.MaDinhDanh, ten: h.HoTen, tt: tt };
+      var tt = {}, ma = h.MaDinhDanh;
+      MON_VO.forEach(function (m) {
+        if (daLuu[m]) tt[m] = hom[m][ma] || '';
+        else if (cuHom && cuHom[ma + '|' + m] === 'Chưa nộp') tt[m] = 'N';
+        else tt[m] = (truoc[ma + '|' + m] || {}).m || '';
+      });
+      return { ma: ma, ten: h.HoTen, tt: tt };
     }) };
 }
-// ds: [{ma, tt: {môn: trạng thái}}] – chỉ lưu các em không "Đã nộp", thêm 1 dòng đánh dấu ngày đã lưu
+// ds: [{ma, tt: {môn: mã mức}}] – mỗi môn 1 dòng; em chưa chọn mức thì không ghi
 function luuNopVo(ngay, ds) {
   return voiKhoa_(function () {
-    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm'), moi = [hang_('NopVo', { Ngay: ngay, MaDinhDanh: '*', Mon: '*', TrangThai: 'Đã lưu', CapNhat: luc })], dem = {};
-    ds.forEach(function (x) { MON_VO.forEach(function (m) {
-      var tt = x.tt[m]; if (!tt || tt === 'Đã nộp') return;
-      dem[m] = (dem[m] || 0) + 1;
-      moi.push(hang_('NopVo', { Ngay: ngay, MaDinhDanh: x.ma, Mon: m, TrangThai: tt, CapNhat: luc }));
-    }); });
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm'), moi = [], dem = {};
+    MON_VO.forEach(function (m) {
+      var ma = ds.filter(function (x) { return x.tt[m]; }).map(function (x) { return x.ma + ':' + x.tt[m]; });
+      dem[m] = { co: ma.length, chua: ds.filter(function (x) { return x.tt[m] === 'N'; }).length };
+      if (ma.length) moi.push(hang_('NopVo', { Ngay: ngay, MaDinhDanh: '*', Mon: m, TrangThai: 'Đã lưu', GhiChu: ma.join(' '), CapNhat: luc }));
+    });
     thayTheTheo_('NopVo', function (r) { return r.Ngay !== ngay; }, moi);
-    return 'Đã lưu nộp vở ' + ngay + ': ' + MON_VO.map(function (m) { return m + (dem[m] ? ' – ' + dem[m] + ' em chưa đủ' : ' – cả lớp đã nộp'); }).join('; ') + '.';
+    return 'Đã lưu nộp vở ' + ngay + ': ' + MON_VO.map(function (m) { return m + ' ' + dem[m].co + ' em' + (dem[m].chua ? ' (' + dem[m].chua + ' chưa nộp)' : ''); }).join('; ') + '.';
   });
 }
 
@@ -1857,17 +1895,9 @@ function layDanhGiaThang(thang) {
 // Chọn 1 trong các mẫu câu – mỗi em 1 mẫu cố định (giống hệt trên máy)
 function chon4_(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }
 function noiCauRong_(ds, n) { return noiCau_(ds.filter(function (x) { return x; }), n); }
-function cauVoDem_(bad, ngay, nguong) {
-  if (!ngay) return '';
-  if (!bad) return 'Nộp vở đầy đủ, đúng hạn.';
-  return bad <= nguong ? '' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.';
-}
 function cauVoThang_(t, ma, mon) {
   if (!t.soNgayVo || MON_VO.indexOf(mon) < 0) return '';
-  var v = (t.vo[ma] || {})[mon], bad = v ? v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn'] : 0;
-  if (!bad) return 'Nộp vở đầy đủ, đúng hạn.';
-  var loai = []; if (v['Chưa nộp']) loai.push('chưa nộp vở'); if (v['Chưa làm xong']) loai.push('chưa làm xong bài'); if (v['Nộp muộn']) loai.push('nộp vở muộn');
-  return bad <= 2 ? 'Đôi khi còn ' + noiDs_(loai) + '.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.';
+  return cauVoDem_((t.vo[ma] || {})[mon], t.soNgayVoCu);
 }
 function mucNLDThang_(rec) {
   var m = [rec.mucKT, rec.mucKN].filter(function (x) { return x; });
@@ -1904,7 +1934,7 @@ function thangTrongKy_(pv) {
   while (d <= b) { ds.push(d.getMonth() + 1); d = new Date(d.getFullYear(), d.getMonth() + 1, 1); }
   return ds;
 }
-function laCauVo_(c) { return /nộp vở|làm xong bài/i.test(c); }
+function laCauVo_(c) { return /nộp vở|làm xong bài|trong vở/i.test(c); }
 // Gộp câu nhận xét các tháng (tối đa 3 tháng gần nhất, bỏ trùng, bỏ câu nộp vở) + 1 câu nộp vở cả kì
 function ghepNhieuThang_(T, ma, phan, voCaKy) {
   var cau = [];
@@ -1922,14 +1952,14 @@ function goiYTuThang_(pv, hs, mon) {
   hs.forEach(function (h) {
     var ma = h.MaDinhDanh, o = { mon: {}, nlpc: null };
     mon.forEach(function (m) {
-      var diem = [], soThang = 0, bad = 0, ngayVo = 0;
+      var diem = [], soThang = 0, vKy = null, ngayVo = 0, ngayCu = 0;
       T.forEach(function (t) {
         var rec = (t.du[ma] || {})[m.TenMon] || {}, ds = (t.lib[m.TenMon] || t.yc[m.TenMon] ? [rec.mucKT, rec.mucKN] : [rec.muc]).filter(function (x) { return x; });
         if (ds.length) soThang++;
         ds.forEach(function (x) { diem.push(DIEM_THANG[x] || 0); });
-        if (MON_VO.indexOf(m.TenMon) >= 0) { ngayVo += t.soNgayVo; var v = (t.vo[ma] || {})[m.TenMon]; if (v) bad += v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn']; }
+        if (MON_VO.indexOf(m.TenMon) >= 0) { ngayVo += t.soNgayVo; ngayCu += t.soNgayVoCu; vKy = cong_(vKy, (t.vo[ma] || {})[m.TenMon]); }
       });
-      var voKy = MON_VO.indexOf(m.TenMon) >= 0 ? (!ngayVo ? '' : !bad ? 'Nộp vở đầy đủ, đúng hạn.' : bad <= 3 ? 'Đôi khi còn chưa nộp vở, chưa làm xong bài.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.') : '';
+      var voKy = MON_VO.indexOf(m.TenMon) >= 0 && ngayVo ? cauVoDem_(vKy, ngayCu) : '';
       o.mon[m.TenMon] = { mucGoiY: mucMon_(tb(diem)), nx: ghepNhieuThang_(T, ma, m.TenMon, voKy), soGhi: soThang };
     });
     var dTV = [], dToan = [], dNLC = [], dPC = [], soThangNL = 0;
