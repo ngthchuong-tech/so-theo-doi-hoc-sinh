@@ -128,6 +128,7 @@ var Parsers = (function () {
     var tt = {};
     (sheets['ThongTin'] || []).forEach(function (r) { if (r && r[0]) tt[String(r[0]).trim()] = r[1] == null ? '' : String(r[1]).trim(); });
     if (tt.Loai !== 'ThuVienThang') throw new Error('File không phải thư viện nhận xét THEO THÁNG (sheet ThongTin, Loai = ThuVienThang).');
+    if (String(tt.PhienBanDinhDang) === '2') return parseThuVienYeuCau(sheets, tt);
     var out = { thongTin: tt, mon: [] };
     Object.keys(sheets).forEach(function (name) {
       var aoa = sheets[name]; if (!aoa || !aoa.length) return;
@@ -142,6 +143,36 @@ var Parsers = (function () {
       if (dong.length) out.mon.push({ ten: name.split('–')[0].trim(), dong: dong });
     });
     if (!out.mon.length) throw new Error('Không thấy sheet môn nào có các cột Tháng – Tiêu chí – Mức độ – Nội dung nhận xét.');
+    return out;
+  }
+  // Bản 2 (theo ý cô): sheet môn có cột Tháng – Nội dung (Kiến thức/Kỹ năng) – Mã – Yêu cầu cần đạt – Mức độ – Mẫu – Nội dung nhận xét;
+  // căn cứ của từng yêu cầu lấy ở sheet "Yêu cầu theo tháng"
+  function parseThuVienYeuCau(sheets, tt) {
+    var so = function (v) { return (/(\d+)/.exec(s(v)) || [])[1] || ''; }, canCu = {};
+    var yc = sheets['Yêu cầu theo tháng'];
+    if (yc && yc.length) {
+      var H0 = yc[0].map(function (v) { return String(v || '').trim(); }), j = function (t) { for (var i = 0; i < H0.length; i++) if (H0[i].indexOf(t) === 0) return i; return -1; };
+      for (var r = 1; r < yc.length; r++) { var y = yc[r]; if (!y) continue; canCu[s(y[j('Môn')]) + '|' + so(y[j('Tháng')]) + '|' + s(y[j('Mã')])] = s(y[j('Căn cứ')]); }
+    }
+    var out = { thongTin: tt, mon: [], v2: true };
+    Object.keys(sheets).forEach(function (name) {
+      var aoa = sheets[name]; if (!aoa || !aoa.length || name === 'Yêu cầu theo tháng') return;
+      var H = aoa[0].map(function (v) { return String(v || '').trim(); }), ix = function (t) { return H.indexOf(t); };
+      if (ix('Tháng') < 0 || ix('Nội dung') < 0 || ix('Yêu cầu cần đạt') < 0 || ix('Mức độ') < 0 || ix('Nội dung nhận xét') < 0) return;
+      var ten = name.split('–')[0].trim(), dong = [];
+      for (var k = 1; k < aoa.length; k++) {
+        var x = aoa[k]; if (!x || !s(x[ix('Nội dung nhận xét')]) || !s(x[ix('Yêu cầu cần đạt')])) continue;
+        var th = so(x[ix('Tháng')]), ma = s(x[ix('Mã')]);
+        dong.push({ thang: th, noiDung: /kỹ năng/i.test(s(x[ix('Nội dung')])) ? 'Kỹ năng' : 'Kiến thức', ma: ma, yeuCau: s(x[ix('Yêu cầu cần đạt')]),
+                    canCu: canCu[ten + '|' + th + '|' + ma] || '', mucDo: s(x[ix('Mức độ')]).split(/\s+[–-]\s+/)[0].trim().toUpperCase(),
+                    mau: s(x[ix('Mẫu')]), cau: s(x[ix('Nội dung nhận xét')]) });
+      }
+      if (dong.length) out.mon.push({ ten: ten, dong: dong });
+    });
+    if (!out.mon.length) throw new Error('Không thấy sheet môn nào có các cột Tháng – Nội dung – Yêu cầu cần đạt – Mức độ – Nội dung nhận xét.');
+    var sai = [];
+    out.mon.forEach(function (m) { m.dong.forEach(function (d) { if (['HTXS', 'HTT', 'HT', 'CHT'].indexOf(d.mucDo) < 0) sai.push(m.ten + ' – ' + d.yeuCau + ': mức "' + d.mucDo + '"'); }); });
+    if (sai.length) throw new Error('Có mức độ không đúng (chỉ dùng HTXS, HTT, HT, CHT): ' + sai.slice(0, 3).join('; ') + (sai.length > 3 ? '…' : ''));
     return out;
   }
   function parseThuVien(sheets) {
