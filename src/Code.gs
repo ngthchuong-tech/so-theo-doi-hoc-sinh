@@ -32,7 +32,9 @@ var BANG = {
   BaiKiemTra:   ['NamHoc', 'Ky', 'MaDinhDanh', 'Mon', 'FileId', 'Url', 'DiemAI', 'CapNhat'],
   PhienBanNX:   ['NamHoc', 'Ky', 'MaDinhDanh', 'Phan', 'Truong', 'Truoc', 'Sau', 'Lo', 'Luc'],
   MinhChung:    ['MaMC', 'NamHoc', 'MaDinhDanh', 'Ten', 'Loai', 'SoTrang', 'NgayTai', 'GhiChu', 'ThuMucId'],
-  MinhChung_Trang: ['MaMC', 'TrangSo', 'FileId', 'Url', 'KichThuoc', 'AnhNho']
+  MinhChung_Trang: ['MaMC', 'TrangSo', 'FileId', 'Url', 'KichThuoc', 'AnhNho'],
+  PhongTrao:    ['MaPT', 'NamHoc', 'Ten', 'Loai', 'Cap', 'Ngay', 'GhiChu', 'CapNhat'],
+  ThamGia:      ['MaPT', 'MaDinhDanh', 'KetQua', 'GhiChu', 'CapNhat']
 };
 var MUC4 = ['Hoàn thành xuất sắc', 'Hoàn thành tốt', 'Hoàn thành', 'Chưa hoàn thành'];
 var MUC_PC = ['Tốt', 'Đạt', 'Cần cố gắng'];
@@ -624,7 +626,7 @@ function layHoSo(ma) {
   var nx = doc_('SoTheoDoi').filter(function (r) { return r.MaDinhDanh === ma; })
     .sort(function (a, b) { return key_(b.Ngay) - key_(a.Ngay) || (a.ThoiGian < b.ThoiGian ? 1 : -1); });
   var dd = doc_('DiemDanh').filter(function (r) { return r.MaDinhDanh === ma && r.TrangThai !== 'Có mặt'; });
-  return { hs: h, nhanXet: nx, vang: dd };
+  return { hs: h, nhanXet: nx, vang: dd, phongTrao: phongTraoCuaHS_(caiDat_().NamHoc || '')[ma] || [] };
 }
 
 // ============================================================================ NHẬN XÉT THÁNG (biểu mẫu đánh giá thường xuyên)
@@ -1117,7 +1119,7 @@ function tomTatNam_(d, nguon) {
   var dem = { T: 0, 'Đ': 0, C: 0 }; nguon.dsNLPC.forEach(function (t) { var m = d.nlpc.muc[t]; if (dem[m] != null) dem[m]++; });
   return 'Môn học: ' + mon + '. Năng lực, phẩm chất: Tốt ' + dem.T + ', Đạt ' + dem['Đ'] + ', Cần cố gắng ' + dem.C + '.';
 }
-function ghepNhanXetGVCN_(d, nguon, lopSau) {
+function ghepNhanXetGVCN_(d, nguon, lopSau, thanhTich) {
   var theo = { T: [], H: [], C: [] }, cau = [];
   nguon.mon.forEach(function (m) { var x = d.mon[m.ten]; if (theo[x.muc]) theo[x.muc].push(m.ten); });
   var phan = [];
@@ -1132,6 +1134,7 @@ function ghepNhanXetGVCN_(d, nguon, lopSau) {
   var p = d.nlpc, tot = nguon.dsNLPC.filter(function (t) { return p.muc[t] === 'T'; }), can = nguon.dsNLPC.filter(function (t) { return p.muc[t] === 'C'; });
   var pcTot = tot.filter(function (t) { return CUM_PC[t]; }).map(function (t) { return CUM_PC[t]; });
   var nlTot = tot.filter(function (t) { return !CUM_PC[t]; }).map(chuThuong_);
+  cau = cau.concat(cauThanhTich_(thanhTich));                // phong trào, cuộc thi, giải thưởng trong năm
   if (pcTot.length) cau.push('Em ' + noiDs_(pcTot) + '.');
   if (nlTot.length) cau.push('Em thể hiện tốt năng lực ' + noiDs_(nlTot) + '.');
   if (!pcTot.length && !nlTot.length) cau.push('Em ngoan, thực hiện tốt nội quy lớp học.');
@@ -1148,14 +1151,17 @@ function layNhanXetGVCN_() {
     catch (e2) { throw new Error('Chưa có dữ liệu cuối kì để soạn nhận xét GVCN (cần Sổ báo giảng và đánh giá cuối kì).'); }
   }
   var lopSau = +cd.Khoi ? (+cd.Khoi + 1) : '';
+  var thanhTich = phongTraoCuaHS_(namHoc);
   var hsTat = {}; doc_('HocSinh').forEach(function (h) { hsTat[h.MaDinhDanh] = h; });
   var daSua = {};
   doc_('DanhGiaKy').forEach(function (r) { if (r.NamHoc === namHoc && r.Ky === 'GVCN' && r.Phan === 'GVCN') daSua[r.MaDinhDanh] = r; });
   var du = {};
   nguon.hs.forEach(function (h) {
-    var d = nguon.du[h.ma], goc = ghepNhanXetGVCN_(d, nguon, lopSau);
+    var d = nguon.du[h.ma], goc = ghepNhanXetGVCN_(d, nguon, lopSau, thanhTich[h.ma]);
     var soGhi = 0; nguon.mon.forEach(function (m) { soGhi += d.mon[m.ten].soGhi || 0; });
-    var x = { muc: '', diem: '', soGhi: soGhi, nx: goc, goc: { nx: goc }, tomTat: tomTatNam_(d, nguon) };
+    var tt = thanhTich[h.ma] || [];
+    var x = { muc: '', diem: '', soGhi: soGhi, nx: goc, goc: { nx: goc }, tomTat: tomTatNam_(d, nguon) +
+      (tt.length ? ' Phong trào, cuộc thi: ' + tt.map(function (p) { return p.ten + ' (' + p.kq + (p.cap && p.cap !== 'Lớp' ? ', cấp ' + p.cap.toLowerCase() : '') + ')'; }).join('; ') + '.' : '') };
     var s = daSua[h.ma]; if (s) { x.nx = s.NhanXet; x.sua = true; }
     du[h.ma] = { mon: { GVCN: x } };
   });
@@ -1308,7 +1314,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';
@@ -1396,4 +1402,105 @@ function layTongHopDiemDanh(yc) {
       return { stt: i + 1, ma: h.MaDinhDanh, ten: h.HoTen, chuyenDi: h.TrangThai === 'Đã chuyển đi', P: o.P, KP: o.KP,
                chuyenCan: soNgay ? Math.round((1 - (o.P + o.KP) / soNgay) * 1000) / 10 : null, ngay: o.ngay };
     }) };
+}
+
+// ============================================================================ PHONG TRÀO – CUỘC THI
+// Ghi theo từng phong trào / cuộc thi: thông tin chung (PhongTrao) + các em tham gia và kết quả (ThamGia).
+// Dùng trong hồ sơ học sinh, bản nháp nhận xét GVCN cuối năm, và xuất Excel báo cáo nhà trường.
+var LOAI_PT = ['Phong trào', 'Cuộc thi', 'Hoạt động ngoại khoá', 'Khác'];
+var CAP_PT = ['Lớp', 'Trường', 'Phường/Xã', 'Quận/Huyện', 'Thành phố/Tỉnh', 'Toàn quốc'];
+var KET_QUA_PT = ['Tham gia', 'Giải Nhất', 'Giải Nhì', 'Giải Ba', 'Giải Khuyến khích', 'Huy chương Vàng', 'Huy chương Bạc', 'Huy chương Đồng', 'Đạt', 'Được khen'];
+function laGiai_(kq) { return !!kq && kq !== 'Tham gia'; }
+function layPhongTrao() {
+  var namHoc = caiDat_().NamHoc || '', tg = {};
+  doc_('ThamGia').forEach(function (r) { var o = tg[r.MaPT] = tg[r.MaPT] || { so: 0, giai: 0 }; o.so++; if (laGiai_(r.KetQua)) o.giai++; });
+  return { loai: LOAI_PT, cap: CAP_PT, ketQua: KET_QUA_PT, namHoc: namHoc,
+    ds: doc_('PhongTrao').filter(function (p) { return p.NamHoc === namHoc; })
+      .sort(function (a, b) { return key_(b.Ngay) - key_(a.Ngay); })
+      .map(function (p) { var o = tg[p.MaPT] || { so: 0, giai: 0 }; return { maPT: p.MaPT, ten: p.Ten, loai: p.Loai, cap: p.Cap, ngay: p.Ngay, ghiChu: p.GhiChu, so: o.so, giai: o.giai }; }) };
+}
+function layMotPhongTrao(maPT) {
+  var p = maPT === 'moi' ? { MaPT: '', Ten: '', Loai: 'Cuộc thi', Cap: 'Trường', Ngay: homNay_(), GhiChu: '' }      // mục mới
+    : doc_('PhongTrao').filter(function (x) { return x.MaPT === maPT; })[0];
+  if (!p) throw new Error('Không tìm thấy phong trào / cuộc thi này.');
+  var tg = {}; doc_('ThamGia').forEach(function (r) { if (r.MaPT === maPT) tg[r.MaDinhDanh] = r; });
+  var hs = doc_('HocSinh').filter(function (h) { return h.TrangThai !== 'Đã chuyển đi' || tg[h.MaDinhDanh]; })
+    .sort(function (a, b) { return +a.ThuTu - +b.ThuTu; });
+  return { pt: { maPT: p.MaPT, ten: p.Ten, loai: p.Loai, cap: p.Cap, ngay: p.Ngay, ghiChu: p.GhiChu },
+    hs: hs.map(function (h) { var r = tg[h.MaDinhDanh]; return { ma: h.MaDinhDanh, ten: h.HoTen, chuyenDi: h.TrangThai === 'Đã chuyển đi', kq: r ? r.KetQua : '', gc: r ? r.GhiChu : '' }; }) };
+}
+// info: {maPT?, ten, loai, cap, ngay (dd/MM/yyyy), ghiChu} → maPT
+function luuPhongTrao(info) {
+  var ten = String(info.ten || '').trim();
+  if (!ten) throw new Error('Cô ghi tên phong trào / cuộc thi.');
+  return voiKhoa_(function () {
+    var namHoc = caiDat_().NamHoc || '', maPT = info.maPT || ('PT' + Utilities.getUuid().replace(/-/g, '').slice(0, 10));
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+    thayTheTheo_('PhongTrao', function (r) { return r.MaPT !== maPT; }, [hang_('PhongTrao', {
+      MaPT: maPT, NamHoc: namHoc, Ten: ten.slice(0, 150), Loai: info.loai || 'Phong trào', Cap: info.cap || 'Lớp',
+      Ngay: info.ngay || homNay_(), GhiChu: String(info.ghiChu || '').slice(0, 300), CapNhat: luc })]);
+    return maPT;
+  });
+}
+// ds: [{ma, kq, gc}] – danh sách đầy đủ các em tham gia (em không có trong ds = không tham gia)
+function luuThamGia(maPT, ds) {
+  return voiKhoa_(function () {
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+    thayTheTheo_('ThamGia', function (r) { return r.MaPT !== maPT; }, ds.map(function (x) {
+      return hang_('ThamGia', { MaPT: maPT, MaDinhDanh: x.ma, KetQua: x.kq || 'Tham gia', GhiChu: String(x.gc || '').slice(0, 200), CapNhat: luc });
+    }));
+    var giai = ds.filter(function (x) { return laGiai_(x.kq); }).length;
+    return 'Đã lưu: ' + ds.length + ' em tham gia' + (giai ? ', ' + giai + ' em đạt giải / được khen' : '') + '.';
+  });
+}
+function xoaPhongTrao(maPT) {
+  return voiKhoa_(function () {
+    thayTheTheo_('ThamGia', function (r) { return r.MaPT !== maPT; }, []);
+    thayTheTheo_('PhongTrao', function (r) { return r.MaPT !== maPT; }, []);
+    return 'Đã xoá phong trào / cuộc thi.';
+  });
+}
+// Phong trào của 1 em trong năm học (hồ sơ, nhận xét GVCN)
+function phongTraoCuaHS_(namHoc) {
+  var pt = {}; doc_('PhongTrao').forEach(function (p) { if (p.NamHoc === namHoc) pt[p.MaPT] = p; });
+  var theo = {};
+  doc_('ThamGia').forEach(function (r) {
+    var p = pt[r.MaPT]; if (!p) return;
+    (theo[r.MaDinhDanh] = theo[r.MaDinhDanh] || []).push({ ten: p.Ten, loai: p.Loai, cap: p.Cap, ngay: p.Ngay, kq: r.KetQua, gc: r.GhiChu });
+  });
+  Object.keys(theo).forEach(function (m) { theo[m].sort(function (a, b) { return key_(a.ngay) - key_(b.ngay); }); });
+  return theo;
+}
+// "cuộc thi Viết chữ đẹp cấp trường" (không lặp chữ "cuộc thi" nếu tên đã có)
+function tenPT_(x) {
+  var tien = x.loai === 'Cuộc thi' ? 'cuộc thi ' : x.loai === 'Phong trào' ? 'phong trào ' : '';
+  var ten = x.ten.trim();
+  if (tien && ten.toLowerCase().indexOf(tien.trim()) === 0) { tien = ''; ten = chuThuong_(ten); }
+  return tien + ten + (x.cap && x.cap !== 'Lớp' ? ' cấp ' + x.cap.toLowerCase() : '');
+}
+// Câu thành tích cho nhận xét GVCN: giải/khen trước (tối đa 3), rồi các phong trào tham gia (tối đa 3)
+function cauThanhTich_(ds) {
+  if (!ds || !ds.length) return [];
+  var giai = ds.filter(function (x) { return laGiai_(x.kq); }), thamGia = ds.filter(function (x) { return !laGiai_(x.kq); }), cau = [];
+  if (giai.length) cau.push('Em ' + noiDs_(giai.slice(0, 3).map(function (x) {
+    var kq = x.kq === 'Được khen' ? 'được khen trong' : x.kq === 'Đạt' ? 'đạt' : 'đạt ' + chuThuong_(x.kq);
+    return kq + ' ' + tenPT_(x);
+  })) + '.');
+  if (thamGia.length) cau.push('Em tích cực tham gia ' + noiDs_(thamGia.slice(0, 3).map(tenPT_)) + '.');
+  return cau;
+}
+// Báo cáo cả năm: mỗi dòng 1 em tham gia 1 phong trào (để xuất Excel)
+function layBaoCaoPhongTrao() {
+  var cd = caiDat_(), namHoc = cd.NamHoc || '', hs = {};
+  doc_('HocSinh').forEach(function (h) { hs[h.MaDinhDanh] = h; });
+  var pt = doc_('PhongTrao').filter(function (p) { return p.NamHoc === namHoc; }).sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); });
+  var tg = {}; doc_('ThamGia').forEach(function (r) { (tg[r.MaPT] = tg[r.MaPT] || []).push(r); });
+  var dong = [];
+  pt.forEach(function (p) {
+    (tg[p.MaPT] || []).sort(function (a, b) { return (+(hs[a.MaDinhDanh] || {}).ThuTu || 0) - (+(hs[b.MaDinhDanh] || {}).ThuTu || 0); }).forEach(function (r) {
+      var h = hs[r.MaDinhDanh] || {};
+      dong.push({ ngay: p.Ngay, ten: p.Ten, loai: p.Loai, cap: p.Cap, stt: h.ThuTu || '', ma: r.MaDinhDanh, hoTen: h.HoTen || '', ns: h.NgaySinh || '', kq: r.KetQua, gc: r.GhiChu });
+    });
+  });
+  return { namHoc: namHoc, lop: cd.Lop || '', truong: cd.Truong || '', soPT: pt.length, dong: dong };
 }

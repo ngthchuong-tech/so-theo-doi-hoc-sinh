@@ -98,7 +98,9 @@ function apDung(tt) {
   if (t === 'danhgia') moDanhGia();
   if (t === 'sotheodoi') {
     if (tt.ngay) $('stNgay').value = tt.ngay;
-    if (tt.buoc === 'nhap') moBaiThat(tt.mon, tt.bai, tt.tiet, tt.ten);
+    $('stPT').classList.add('an'); $('stChePT').classList.remove('on');
+    if (tt.buoc === 'pt') moPhongTrao(tt.maPT);
+    else if (tt.buoc === 'nhap') moBaiThat(tt.mon, tt.bai, tt.tiet, tt.ten);
     else if (tt.buoc === 'chung') moNhanXetChungThat();
     else hienChonBai();
   }
@@ -109,6 +111,7 @@ function chuaLuu() {
   if (hienTai.tab === 'sotheodoi' && (hienTai.buoc === 'nhap' || hienTai.buoc === 'chung') &&
       (Object.keys(st.chon).length || Object.keys(st.cau).length || $('stGhiChu').value.trim())) return 'nhận xét đang chọn';
   if (hienTai.tab === 'caidat' && ghData && ghData.doi && Object.keys(ghData.doi).length) return 'ghép tiết với bài';
+  if (hienTai.tab === 'sotheodoi' && hienTai.buoc === 'pt' && hienTai.maPT && typeof ptCT !== 'undefined' && ptCT && ptCT.sua) return 'phong trào / cuộc thi chưa lưu';
   if (typeof mcTL !== 'undefined' && mcTL && mcTL.trang.length) return mcTL.trang.length + ' trang tài liệu vừa chụp chưa lưu';
   if (hienTai.tab === 'danhgia' && !hienTai.nhapDiem && typeof dkXem !== 'undefined' && Object.keys(dkXem).length) return Object.keys(dkXem).length + ' bản AI chưa chọn (Dùng / Giữ bản cũ)';
   return '';
@@ -189,6 +192,7 @@ function luuDiemDanhUI() {
 // ============================================================================ SỔ THEO DÕI
 var st = { tiet: [], mon: '', bai: '', soTiet: '', bo: null, hd: 0, muc: '', cau: {}, hs: [], chon: {} };
 function doiCheDo(c) {
+  if (c === 'pt') { if (hienTai.buoc !== 'pt' || hienTai.maPT) diToi({ tab: 'sotheodoi', buoc: 'pt' }); return; }
   if (c === 'chung') { if (hienTai.buoc !== 'chung') diToi({ tab: 'sotheodoi', buoc: 'chung', ngay: $('stNgay').value }); }
   else if (hienTai.buoc) moChonBai();
 }
@@ -391,6 +395,10 @@ function hienHoSo(ma) {
       '<h3>Vắng: ' + d.vang.length + ' buổi</h3>' + (d.vang.length ? '<div class="nho">' + d.vang.map(function (v) { return esc(v.Ngay) + ' (' + esc(v.TrangThai) + ')'; }).join(', ') + '</div>' : '') +
       '<h3>📎 Minh chứng</h3><div class="hang"><button class="nut" onclick="mcMoi(\'' + ma + '\')">📷 Chụp tài liệu</button>' +
       '<button class="nut phu" onclick="mcMoi(\'' + ma + '\', true)">🖼 Chọn ảnh có sẵn</button></div><div id="mcDs" class="nho" style="margin-top:6px">Đang tải…</div>' +
+      '<h3>🏆 Phong trào – Cuộc thi (' + d.phongTrao.length + ')</h3>' + (d.phongTrao.length ? d.phongTrao.map(function (p) {
+        return '<div class="dd-hang"><span>' + esc(p.ten) + ' <span class="nho">· ' + esc(p.loai) + ', cấp ' + esc(p.cap.toLowerCase()) + ' · ' + esc(p.ngay) + '</span></span>' +
+          '<span class="tag' + (p.kq !== 'Tham gia' ? ' xanh' : '') + '">' + esc(p.kq) + '</span></div>';
+      }).join('') : '<div class="nho">Chưa có. Ghi ở Sổ theo dõi → 🏆 Phong trào – Cuộc thi.</div>') +
       '<h3>Sổ theo dõi (' + d.nhanXet.length + ')</h3>' +
       (d.nhanXet.length ? '<div class="cuon"><table class="bang"><tr><th>Ngày</th><th>Môn / Bài</th><th>Hoạt động</th><th>Mức</th><th>Nhận xét</th><th></th></tr>' + d.nhanXet.map(function (r) {
         return '<tr><td>' + esc(r.Ngay) + '</td><td>' + esc(r.Mon) + '<div class="nho">' + esc(r.Bai) + '</div></td><td>' + esc(r.HoatDong) + '</td><td><span class="tag" style="background:' + (MAU_MUC[r.MucDo] || '#eee') + '">' + esc(r.MucDo) +
@@ -1483,6 +1491,103 @@ function xuatTongHopDD() {
   XLSX.utils.book_append_sheet(wb, s1, 'Tổng hợp'); XLSX.utils.book_append_sheet(wb, s2, 'Chi tiết ngày vắng');
   var ten = ('Diem danh ' + th.ten + ' - Lop ' + th.lop).replace(/[\\/:*?"<>|]/g, '-') + '.xlsx';
   hienKetQuaXuat($('thKetQua'), ten, XLSX.write(wb, { bookType: 'xlsx', type: 'base64' }), '<div class="nho">' + th.hs.length + ' học sinh · sheet "Tổng hợp" và "Chi tiết ngày vắng".</div>', false);
+}
+
+// ============================================================================ PHONG TRÀO – CUỘC THI (trong Sổ theo dõi)
+var ptData = null, ptCT = null;   // ptCT: { pt, hs, chon: {mã: {kq, gc}}, sua }
+function moPhongTrao(maPT) {
+  $('stChonBai').classList.add('an'); $('stNhap').classList.add('an'); $('stPT').classList.remove('an');
+  $('stCheBai').classList.remove('on'); $('stCheChung').classList.remove('on'); $('stChePT').classList.add('on');
+  if (maPT) return ptMoChiTiet(maPT);
+  ptCT = null; $('ptCT').classList.add('an'); $('ptDsThe').classList.remove('an');
+  chay('layPhongTrao').then(function (d) { ptData = d; veDsPT(); });
+}
+function veDsPT() {
+  $('ptDs').innerHTML = ptData.ds.length ? ptData.ds.map(function (p) {
+    return '<div class="the pt-the" onclick="diToi({ tab: \'sotheodoi\', buoc: \'pt\', maPT: \'' + p.maPT + '\' })"><b>' + esc(p.ten) + '</b>' +
+      '<div class="nho">' + esc(p.loai) + ' · cấp ' + esc(p.cap.toLowerCase()) + ' · ' + esc(p.ngay) + (p.ghiChu ? ' · ' + esc(p.ghiChu) : '') + '</div>' +
+      '<div style="margin-top:4px"><span class="tag">' + p.so + ' em tham gia</span>' + (p.giai ? ' <span class="tag xanh">' + p.giai + ' em đạt giải / được khen</span>' : '') + '</div></div>';
+  }).join('') : '<div class="the nho">Chưa có phong trào, cuộc thi nào trong năm học ' + esc(ptData.namHoc) + '. Bấm "+ Thêm" – VD: Viết chữ đẹp, Kể chuyện theo sách, Trạng nguyên Tiếng Việt, Hội khoẻ Phù Đổng, Vở sạch chữ đẹp, Kế hoạch nhỏ…</div>';
+}
+function ptMoi() { diToi({ tab: 'sotheodoi', buoc: 'pt', maPT: 'moi' }); }
+function ptMoChiTiet(maPT) {
+  $('ptDsThe').classList.add('an'); $('ptCT').classList.remove('an'); $('ptCT').innerHTML = '';
+  var lay = ptData ? Promise.resolve(ptData) : goi('layPhongTrao').then(function (d) { ptData = d; return d; });
+  Promise.all([lay, chay('layMotPhongTrao', maPT)]).then(function (k) {
+    var d = k[1], chon = {};
+    d.hs.forEach(function (h) { if (h.kq) chon[h.ma] = { kq: h.kq, gc: h.gc }; });
+    ptCT = { pt: d.pt, hs: d.hs, chon: chon, sua: false };
+    veChiTietPT();
+  });
+}
+function ptDocForm() {
+  if (!$('ptTen')) return;
+  var p = ptCT.pt; p.ten = $('ptTen').value; p.loai = $('ptLoai').value; p.cap = $('ptCap').value;
+  p.ngay = $('ptNgay').value ? isoToDmy($('ptNgay').value) : p.ngay; p.ghiChu = $('ptGhiChu').value;
+}
+function veChiTietPT() {
+  var p = ptCT.pt, o = function (ds, v) { return ds.map(function (x) { return '<option' + (x === v ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join(''); };
+  var chon = Object.keys(ptCT.chon), giai = chon.filter(function (m) { return ptCT.chon[m].kq !== 'Tham gia'; }).length;
+  $('ptCT').innerHTML = '<div class="the"><div class="hang gian"><h3 style="margin:0">' + (p.maPT ? 'Sửa phong trào / cuộc thi' : 'Thêm phong trào / cuộc thi') + '</h3>' +
+      '<button class="nut phu" onclick="quayLai()">← Danh sách</button></div>' +
+      '<label class="dong">Tên</label><input id="ptTen" style="width:100%" maxlength="150" placeholder="VD: Viết chữ đẹp" value="' + esc(p.ten) + '" oninput="ptCT.sua=true">' +
+      '<div class="hang"><div><label class="dong">Loại</label><select id="ptLoai" onchange="ptCT.sua=true">' + o(ptData.loai, p.loai) + '</select></div>' +
+      '<div><label class="dong">Cấp</label><select id="ptCap" onchange="ptCT.sua=true">' + o(ptData.cap, p.cap) + '</select></div>' +
+      '<div><label class="dong">Ngày</label><input type="date" id="ptNgay" value="' + (p.ngay ? dmyToIso(p.ngay) : '') + '" onchange="ptCT.sua=true"></div></div>' +
+      '<label class="dong">Ghi chú <span class="nho">(không bắt buộc)</span></label><input id="ptGhiChu" style="width:100%" maxlength="300" value="' + esc(p.ghiChu) + '" oninput="ptCT.sua=true"></div>' +
+    '<div class="the"><h3 class="hang gian" style="margin-top:0"><span>Học sinh tham gia (' + chon.length + (giai ? ', ' + giai + ' đạt giải' : '') + ')</span>' +
+      '<span><button class="nut phu" onclick="ptCaLop(true)">Cả lớp</button> <button class="nut phu" onclick="ptCaLop(false)">Bỏ chọn</button></span></h3>' +
+      '<div class="nho" style="margin-bottom:6px">Chạm tên em để chọn / bỏ chọn. Kết quả mặc định "Tham gia" – đổi ở danh sách bên dưới.</div>' +
+      '<div class="hs-luoi">' + ptCT.hs.map(function (h, i) {
+        var c = ptCT.chon[h.ma];
+        return '<div class="hs' + (c ? ' on' : '') + '" onclick="ptChonHS(\'' + h.ma + '\')"><div class="stt">' + (i + 1) + '</div>' + esc(h.ten) +
+          (c && c.kq !== 'Tham gia' ? '<span class="kq">🏆 ' + esc(c.kq) + '</span>' : '') + '</div>';
+      }).join('') + '</div>' +
+      (chon.length ? '<h3>Kết quả</h3>' + ptCT.hs.filter(function (h) { return ptCT.chon[h.ma]; }).map(function (h) {
+        var c = ptCT.chon[h.ma];
+        return '<div class="pt-hang"><span class="ten">' + esc(h.ten) + '</span><select onchange="ptDatKQ(\'' + h.ma + '\', this.value)">' + o(ptData.ketQua, c.kq) + '</select>' +
+          '<input placeholder="ghi chú (VD: bài dự thi…)" maxlength="200" style="flex:1;min-width:120px" value="' + esc(c.gc) + '" oninput="ptCT.chon[\'' + h.ma + '\'].gc=this.value;ptCT.sua=true"></div>';
+      }).join('') : '') + '</div>' +
+    '<div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap">' + (p.maPT ? '<button class="nut phu" onclick="ptXoa()">Xoá</button>' : '') +
+      '<button class="nut lon" onclick="ptLuu()">Lưu' + (chon.length ? ' (' + chon.length + ' em)' : '') + '</button></div></div>';
+}
+function ptChonHS(ma) { ptDocForm(); if (ptCT.chon[ma]) delete ptCT.chon[ma]; else ptCT.chon[ma] = { kq: 'Tham gia', gc: '' }; ptCT.sua = true; veChiTietPT(); }
+function ptDatKQ(ma, kq) { ptDocForm(); ptCT.chon[ma].kq = kq; ptCT.sua = true; veChiTietPT(); }
+function ptCaLop(co) {
+  ptDocForm();
+  ptCT.hs.forEach(function (h) { if (co && !h.chuyenDi && !ptCT.chon[h.ma]) ptCT.chon[h.ma] = { kq: 'Tham gia', gc: '' }; if (!co) delete ptCT.chon[h.ma]; });
+  ptCT.sua = true; veChiTietPT();
+}
+function ptLuu() {
+  ptDocForm();
+  var p = ptCT.pt;
+  if (!p.ten.trim()) return bao('Cô ghi tên phong trào / cuộc thi.');
+  var ds = Object.keys(ptCT.chon).map(function (m) { return { ma: m, kq: ptCT.chon[m].kq, gc: ptCT.chon[m].gc }; });
+  chay('luuPhongTrao', p).then(function (maPT) { return chay('luuThamGia', maPT, ds); }).then(function (m) {
+    ptCT.sua = false; ptData = null; bao(m, 5000); quayLai();
+  });
+}
+function ptXoa() {
+  if (!confirm('Xoá "' + ptCT.pt.ten + '" và kết quả của ' + Object.keys(ptCT.chon).length + ' em?')) return;
+  chay('xoaPhongTrao', ptCT.pt.maPT).then(function (m) { ptCT.sua = false; ptData = null; bao(m); quayLai(); });
+}
+function ptXuat() {
+  chay('layBaoCaoPhongTrao').then(function (d) {
+    if (!d.dong.length) return bao('Chưa có em nào tham gia phong trào, cuộc thi trong năm học này.');
+    var dau = function (tieuDe) { return [[tieuDe], [(d.truong ? 'Trường: ' + d.truong + ' · ' : '') + 'Lớp: ' + d.lop + ' · Năm học: ' + d.namHoc], [],
+      ['STT', 'Ngày', 'Phong trào / cuộc thi', 'Loại', 'Cấp', 'Mã định danh', 'Họ và tên', 'Ngày sinh', 'Kết quả', 'Ghi chú']]; };
+    var dongX = function (ds) { return ds.map(function (r, i) { return [i + 1, r.ngay, r.ten, r.loai, r.cap, r.ma, r.hoTen, r.ns, r.kq, r.gc]; }); };
+    var giai = d.dong.filter(function (r) { return r.kq !== 'Tham gia'; });
+    var wb = XLSX.utils.book_new(), rong = [5, 11, 32, 18, 14, 13, 26, 11, 18, 26].map(function (w) { return { wch: w }; });
+    [['Đạt giải, được khen', dau('DANH SÁCH HỌC SINH ĐẠT GIẢI, ĐƯỢC KHEN').concat(dongX(giai))],
+     ['Tất cả tham gia', dau('DANH SÁCH HỌC SINH THAM GIA PHONG TRÀO, CUỘC THI').concat(dongX(d.dong))]].forEach(function (x) {
+      var sh = XLSX.utils.aoa_to_sheet(x[1]); sh['!cols'] = rong; sh['!merges'] = [0, 1].map(function (r) { return { s: { r: r, c: 0 }, e: { r: r, c: 9 } }; });
+      XLSX.utils.book_append_sheet(wb, sh, x[0]);
+    });
+    var ten = ('Phong trao cuoc thi ' + d.namHoc + ' - Lop ' + d.lop).replace(/[\\/:*?"<>|]/g, '-') + '.xlsx';
+    hienKetQuaXuat($('ptKetQua'), ten, XLSX.write(wb, { bookType: 'xlsx', type: 'base64' }),
+      '<div class="nho">' + d.soPT + ' phong trào / cuộc thi · ' + d.dong.length + ' lượt tham gia · ' + giai.length + ' lượt đạt giải, được khen.</div>', false);
+  });
 }
 
 // ============================================================================ KHỞI ĐỘNG

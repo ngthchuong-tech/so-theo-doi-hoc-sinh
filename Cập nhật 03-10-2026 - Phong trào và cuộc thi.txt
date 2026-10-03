@@ -1,0 +1,30 @@
+CẬP NHẬT 03/10/2026 – PHONG TRÀO, CUỘC THI (theo phản ánh của cô; yêu cầu ở Bước 1:
+"ghi lại những hoạt động phong trào, những ghi chú cần thiết khác cho từng học sinh")
+
+Có gì mới – Sổ theo dõi → "🏆 Phong trào – Cuộc thi"
+- Danh sách phong trào, cuộc thi của năm học (mới nhất trên cùng): số em tham gia, số em đạt giải / được khen.
+- "+ Thêm": tên (VD Viết chữ đẹp, Trạng nguyên Tiếng Việt, Kế hoạch nhỏ…), loại (Phong trào / Cuộc thi / Hoạt động ngoại khoá / Khác),
+  cấp (Lớp / Trường / Phường-Xã / Quận-Huyện / Thành phố-Tỉnh / Toàn quốc), ngày, ghi chú.
+- Chạm chọn các em tham gia (hoặc "Cả lớp"); mặc định kết quả "Tham gia", đổi cho em đạt giải:
+  Giải Nhất / Nhì / Ba / Khuyến khích, Huy chương Vàng / Bạc / Đồng, Đạt, Được khen; mỗi em có ô ghi chú. → Lưu.
+  Chạm vào 1 mục để sửa, thêm / bớt em, hoặc Xoá. Rời màn khi chưa lưu: app hỏi lại.
+- "⬇ Xuất Excel": sheet "Đạt giải, được khen" và "Tất cả tham gia" (STT, ngày, phong trào, loại, cấp, mã định danh, họ tên,
+  ngày sinh, kết quả, ghi chú) – dùng báo cáo nhà trường; bản sao lưu vào Drive.
+
+Thành tích được dùng ở đâu
+- Hồ sơ học sinh: mục "🏆 Phong trào – Cuộc thi" (tên, loại, cấp, ngày, kết quả).
+- Bản nháp Nhận xét GVCN cuối năm tự thêm câu, VD:
+  "Em đạt giải Nhì cuộc thi Viết chữ đẹp cấp trường. Em tích cực tham gia phong trào Kế hoạch nhỏ."
+  (tối đa 3 giải + 3 phong trào; vẫn trong giới hạn 200 chữ). "Viết lại bằng AI" cũng nhận các thông tin này.
+  Em nào cô đã sửa nhận xét GVCN từ trước: bấm "↺ Bản app gợi ý" để lấy bản nháp mới có thành tích.
+- Năm học mới: danh sách phong trào được sao lưu cùng dữ liệu năm cũ rồi làm trống.
+
+Cách cập nhật
+- Dán lại Code.gs và Index.html → Lưu → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+- Bảng mới "PhongTrao", "ThamGia" được tự tạo.
+
+Đã thử trên máy: tạo cuộc thi Viết chữ đẹp (3 em, 2 em đạt giải) và phong trào Kế hoạch nhỏ (cả lớp); sửa, quay lại, xoá;
+hồ sơ hiện đúng; nhận xét GVCN có câu thành tích; file Excel đúng 2 sheet. Giao diện điện thoại hiển thị tốt.
+
+Nhờ cô góp ý: danh sách "loại", "cấp", "kết quả" đã đủ chưa (VD cần thêm "Giải Đặc biệt", "Giải Phong cách"…)?
+Có cần ghi phong trào / thi đua theo tháng (VD "Bông hoa điểm tốt") hay chỉ theo từng đợt?
