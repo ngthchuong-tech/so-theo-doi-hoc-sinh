@@ -135,6 +135,7 @@ function docTrangTinh_(ten) {     // mảng các dòng (mảng giá trị), khô
   var sh = sheetNho_(ten), n = sh.getLastRow();
   return n < 2 ? [] : sh.getRange(2, 1, n - 1, BANG[ten].length).getDisplayValues();
 }
+function phienMoi_() { return Date.now() + '_' + Math.random().toString(36).slice(2, 8); }   // không trùng kể cả khi ghi 2 lần trong 1 mili-giây
 var _PB = null;                   // phiên bản các bảng, đọc 1 lần mỗi lần gọi máy chủ
 function phienBan_(ten) { if (!_PB) _PB = thuocTinh_().getProperties(); return _PB['pb_' + ten] || '0'; }
 function docDem_(ten) {
@@ -157,10 +158,10 @@ function docDem_(ten) {
 }
 function boNho_(ten) {            // gọi sau mỗi lần ghi bảng
   delete _NHO[ten];
-  if (BANG_DEM[ten]) { var v = String(Date.now()); thuocTinh_().setProperty('pb_' + ten, v); if (_PB) _PB['pb_' + ten] = v; }
+  if (BANG_DEM[ten]) { var v = phienMoi_(); thuocTinh_().setProperty('pb_' + ten, v); if (_PB) _PB['pb_' + ten] = v; }
 }
 function lamMoiDuLieu() {         // menu: sau khi sửa trực tiếp trên Trang tính
-  _NHO = {}; _PB = null; Object.keys(BANG_DEM).forEach(function (t) { thuocTinh_().setProperty('pb_' + t, String(Date.now())); });
+  _NHO = {}; _PB = null; Object.keys(BANG_DEM).forEach(function (t) { thuocTinh_().setProperty('pb_' + t, phienMoi_()); });
   try { SpreadsheetApp.getActive().toast('App sẽ đọc lại dữ liệu mới từ Trang tính.', 'Đã làm mới', 5); } catch (e) {}
 }
 function doc_(ten) {            // đọc bảng thành mảng đối tượng {cột: giá trị} (bản sao, sửa thoải mái)
@@ -248,6 +249,7 @@ function layTrangChu() {
     namHoc: cd.NamHoc || '', hocKy: hk ? hk.HocKy : '', tuan: '', chuDe: '', lich: [], nhac: [], siSo: 0
   };
   out.siSo = hocSinhDangHoc_(nay).length;
+  out.giaoDien = giaoDien_();
   if (!cd.NamHoc || !out.siSo) out.nhac.push({ muc: 'do', text: 'Chưa có danh sách học sinh. Vào Học sinh → Tải danh sách.', toi: 'hocsinh' });
   if (!hk) {
     out.nhac.push({ muc: 'do', text: 'Chưa có dữ liệu học kì. Vào Cài đặt → Tải dữ liệu học kì.', toi: 'caidat' });
@@ -270,6 +272,9 @@ function layTrangChu() {
   else if (conLai < 0) out.nhac.push({ muc: 'do', text: 'Học kì ' + hk.HocKy + ' đã kết thúc (' + hk.NgayDayCuoi + '). Cô tải ' + chuanBi + ' để bắt đầu học kì mới.', toi: 'caidat' });
   else if (conLai === 0) out.nhac.push({ muc: 'do', text: 'Hôm nay là ngày dạy cuối HK ' + hk.HocKy + '. Cô hoàn thành đánh giá cuối kì và chuẩn bị ' + chuanBi + '.', toi: 'caidat' });
   else if (conLai <= soNgayNhac) out.nhac.push({ muc: 'vang', text: 'Còn ' + conLai + ' ngày nữa kết thúc HK ' + hk.HocKy + ' (ngày dạy cuối ' + hk.NgayDayCuoi + '). Cô chuẩn bị ' + chuanBi + '.', toi: 'caidat' });
+  // Nhắc: đánh giá định kỳ, nhận xét GVCN (các mục này chỉ hiện quanh thời điểm cần làm)
+  out.giaoDien.kyNhac.forEach(function (k) { out.nhac.push({ muc: 'vang', text: 'Đến kì đánh giá ' + TEN_KY[k] + ' (' + k + '): vào Đánh giá → Định kỳ → chọn ' + k + ' → Tổng hợp.', toi: 'danhgia' }); });
+  if (out.giaoDien.hienGVCN && out.giaoDien.kyNhac.indexOf('CK2') >= 0) out.nhac.push({ muc: 'vang', text: 'Cuối năm: viết Nhận xét của GVCN – vào Đánh giá → Định kỳ → Nhận xét GVCN cuối năm.', toi: 'danhgia' });
   // Nhắc: nhận xét tháng
   if (d.getDate() >= +(cd.NgayNhacThang || 25)) out.nhac.push({ muc: 'xanh', text: 'Đến kì đánh giá thường xuyên tháng ' + (d.getMonth() + 1) + ': vào Đánh giá → Thường xuyên (hằng tháng) → Tổng hợp → xem, sửa → xuất file mẫu đánh giá thường xuyên.', toi: 'danhgia' });
   return out;
@@ -1503,4 +1508,37 @@ function layBaoCaoPhongTrao() {
     });
   });
   return { namHoc: namHoc, lop: cd.Lop || '', truong: cd.Truong || '', soPT: pt.length, dong: dong };
+}
+
+// ============================================================================ GIAO DIỆN GỌN: CHỨC NĂNG BẬT/TẮT + HIỆN THEO THỜI ĐIỂM
+// Cô bật dần các chức năng nâng cao ở Cài đặt → Chức năng. Đánh giá định kỳ / Nhận xét GVCN / Năm học mới chỉ hiện quanh
+// thời điểm cần làm (trừ khi cô chọn "Luôn hiện"). Trả về cùng Trang chủ để không thêm lần gọi máy chủ.
+var CHUC_NANG_MAC_DINH = { tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' };
+var TEN_KY = { GK1: 'giữa học kì I', CK1: 'cuối học kì I', GK2: 'giữa học kì II', CK2: 'cuối năm' };
+function chucNang_() {
+  var o = {}; try { o = JSON.parse(caiDat_().ChucNang || '{}'); } catch (e) {}
+  var cn = {}; Object.keys(CHUC_NANG_MAC_DINH).forEach(function (k) { cn[k] = o[k] == null ? CHUC_NANG_MAC_DINH[k] : o[k]; });
+  if (o.ai == null && thuocTinh_().getProperty('GEMINI_API_KEY')) cn.ai = true;     // đã cài khoá AI từ trước thì bật sẵn
+  return cn;
+}
+function luuChucNang(o) {
+  var cn = {}; Object.keys(CHUC_NANG_MAC_DINH).forEach(function (k) { if (o[k] != null) cn[k] = k === 'thoiDiem' ? (o[k] === 'luon' ? 'luon' : 'tuDong') : !!o[k]; });
+  voiKhoa_(function () { luuCaiDat_('ChucNang', JSON.stringify(cn)); });
+  _NHO = {};
+  return giaoDien_();
+}
+function giaoDien_() {
+  var cn = chucNang_(), nay = homNay_(), namHoc = caiDat_().NamHoc || '';
+  var lech = function (moc) { return soNgay_(moc, nay); };            // số ngày từ mốc đến hôm nay (âm: chưa tới)
+  var ky = [];
+  ['GK1', 'CK1', 'GK2', 'CK2'].forEach(function (k) { try { ky.push({ ky: k, den: phamViKy_(k).den }); } catch (e) {} });
+  // Định kỳ hiện từ 14 ngày trước hết kì đánh giá đến 30 ngày sau (cuối năm: 60 ngày); GVCN quanh cuối năm
+  var kyHien = ky.filter(function (x) { var d = lech(x.den); return d >= -14 && d <= (x.ky === 'CK2' ? 60 : 30); }).map(function (x) { return x.ky; });
+  var kyNhac = ky.filter(function (x) { var d = lech(x.den); return d >= -14 && d <= 7; }).map(function (x) { return x.ky; });
+  var ck2 = ky.filter(function (x) { return x.ky === 'CK2'; })[0];
+  var hienGVCN = !!ck2 && lech(ck2.den) >= -21 && lech(ck2.den) <= 60;
+  var hk2 = doc_('HocKy').filter(function (h) { return h.NamHoc === namHoc && h.HocKy === 'II'; })[0];
+  var hienNamHoc = !namHoc || (!!hk2 && lech(hk2.NgayDayCuoi) >= -7);
+  if (cn.thoiDiem === 'luon') { kyHien = ['GK1', 'CK1', 'GK2', 'CK2']; hienGVCN = true; hienNamHoc = true; }
+  return { chucNang: cn, kyHien: kyHien, kyNhac: kyNhac, hienGVCN: hienGVCN, hienNamHoc: hienNamHoc };
 }

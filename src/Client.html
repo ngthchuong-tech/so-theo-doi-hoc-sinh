@@ -87,7 +87,7 @@ function apDung(tt) {
   if (mcTL || mcXemTT) { $('mcModal').style.display = 'none'; $('mcXem').style.display = 'none'; mcTL = null; mcXemTT = null; }
   if (cu.nhapDiem && t === 'danhgia' && cu.tab === t) { $('nutLui').classList.toggle('an', !(nganXep.length > 0)); veDanhGiaKy(); return; }   // chỉ đóng cửa sổ nhập điểm
   ['trangchu', 'diemdanh', 'sotheodoi', 'danhgia', 'hocsinh', 'caidat', 'huongdan'].forEach(function (x) { $('v-' + x).classList.toggle('an', x !== t); });
-  document.querySelectorAll('nav button').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
+  document.querySelectorAll('nav button, header .nut-dau[data-t]').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
   $('nutLui').classList.toggle('an', !(nganXep.length > 0 || t !== 'trangchu'));
   $('hoSo').style.display = tt.hoSo ? 'block' : 'none';
   if (!(cu.tab === t && tt.hoSo !== cu.hoSo)) window.scrollTo(0, 0);
@@ -136,6 +136,7 @@ function taiTrangChu() {
 }
 function veTrangChu(d) {
   d = JSON.parse(JSON.stringify(d));
+  if (d.giaoDien) apDungGiaoDien(d.giaoDien);
   {
     $('phuDe').textContent = [d.truong, d.lop ? 'Lớp ' + d.lop : '', d.namHoc ? 'Năm học ' + d.namHoc : ''].filter(Boolean).join(' · ') || 'Chưa có thông tin lớp';
     $('tcNgay').textContent = d.thu + ', ' + d.homNay;
@@ -393,18 +394,18 @@ function hienHoSo(ma) {
     $('hoSoNoiDung').innerHTML = '<div class="hang gian"><h2 style="margin:0">' + esc(h.HoTen) + '</h2><button class="nut phu" onclick="dongHoSo()">← Đóng</button></div>' +
       '<div class="nho">Mã định danh ' + esc(h.MaDinhDanh) + ' · ' + esc(h.NgaySinh) + ' · ' + esc(h.GioiTinh) + ' · ' + esc(h.TrangThai) + ' · SĐT ' + esc(h.SDT) + '</div>' +
       '<h3>Vắng: ' + d.vang.length + ' buổi</h3>' + (d.vang.length ? '<div class="nho">' + d.vang.map(function (v) { return esc(v.Ngay) + ' (' + esc(v.TrangThai) + ')'; }).join(', ') + '</div>' : '') +
-      '<h3>📎 Minh chứng</h3><div class="hang"><button class="nut" onclick="mcMoi(\'' + ma + '\')">📷 Chụp tài liệu</button>' +
-      '<button class="nut phu" onclick="mcMoi(\'' + ma + '\', true)">🖼 Chọn ảnh có sẵn</button></div><div id="mcDs" class="nho" style="margin-top:6px">Đang tải…</div>' +
-      '<h3>🏆 Phong trào – Cuộc thi (' + d.phongTrao.length + ')</h3>' + (d.phongTrao.length ? d.phongTrao.map(function (p) {
+      (!cnBat('minhChung') ? '' : '<h3>📎 Minh chứng</h3><div class="hang"><button class="nut" onclick="mcMoi(\'' + ma + '\')">📷 Chụp tài liệu</button>' +
+      '<button class="nut phu" onclick="mcMoi(\'' + ma + '\', true)">🖼 Chọn ảnh có sẵn</button></div><div id="mcDs" class="nho" style="margin-top:6px">Đang tải…</div>') +
+      (!cnBat('phongTrao') && !d.phongTrao.length ? '' : '<h3>🏆 Phong trào – Cuộc thi (' + d.phongTrao.length + ')</h3>' + (d.phongTrao.length ? d.phongTrao.map(function (p) {
         return '<div class="dd-hang"><span>' + esc(p.ten) + ' <span class="nho">· ' + esc(p.loai) + ', cấp ' + esc(p.cap.toLowerCase()) + ' · ' + esc(p.ngay) + '</span></span>' +
           '<span class="tag' + (p.kq !== 'Tham gia' ? ' xanh' : '') + '">' + esc(p.kq) + '</span></div>';
-      }).join('') : '<div class="nho">Chưa có. Ghi ở Sổ theo dõi → 🏆 Phong trào – Cuộc thi.</div>') +
+      }).join('') : '<div class="nho">Chưa có. Ghi ở Sổ theo dõi → 🏆 Phong trào – Cuộc thi.</div>')) +
       '<h3>Sổ theo dõi (' + d.nhanXet.length + ')</h3>' +
       (d.nhanXet.length ? '<div class="cuon"><table class="bang"><tr><th>Ngày</th><th>Môn / Bài</th><th>Hoạt động</th><th>Mức</th><th>Nhận xét</th><th></th></tr>' + d.nhanXet.map(function (r) {
         return '<tr><td>' + esc(r.Ngay) + '</td><td>' + esc(r.Mon) + '<div class="nho">' + esc(r.Bai) + '</div></td><td>' + esc(r.HoatDong) + '</td><td><span class="tag" style="background:' + (MAU_MUC[r.MucDo] || '#eee') + '">' + esc(r.MucDo) +
           '</span></td><td>' + esc(r.NoiDung) + (r.GhiChu ? '<div class="nho">' + esc(r.GhiChu) + '</div>' : '') + '</td><td><button class="nut phu" onclick="xoaNX(\'' + r.ID + '\',\'' + ma + '\')">Xoá</button></td></tr>';
       }).join('') + '</table></div>' : '<div class="nho">Chưa có nhận xét.</div>');
-    taiMinhChung(ma);
+    if (cnBat('minhChung')) taiMinhChung(ma);
   });
 }
 function xoaNX(id, ma) { if (confirm('Xoá nhận xét này?')) chay('xoaNhanXet', id).then(function (m) { bao(m); hienHoSo(ma); }); }
@@ -422,7 +423,7 @@ function taiCaiDat() {
       return '<div class="dd-hang"><div><b>' + esc(h.MaHK) + '</b> <span class="nho">' + esc(h.NgayBatDau) + ' → ' + esc(h.NgayDayCuoi) + ' · ' + esc(h.SoTiet) + ' tiết</span>' +
         (h.MaHK === d.hienTai ? ' <span class="tag xanh">đang dùng</span>' : '') + '</div>' + (h.MaHK === d.hienTai ? '' : '<button class="nut phu" onclick="chonHK(\'' + h.MaHK + '\')">Dùng học kì này</button>') + '</div>';
     }).join('') : '<div class="nho">Chưa có. Tải Sổ báo giảng bên dưới để tạo học kì.</div>';
-    veKho(); veMon(); veMaQR(); taiCaiDatAI(); taiNamHoc();
+    veKho(); veMon(); veMaQR(); taiCaiDatAI(); taiNamHoc(); veChucNang();
     var monCu = $('ghMon').value;
     $('ghMon').innerHTML = d.monHoc.filter(function (m) { return m.DangDay === 'Có'; }).map(function (m) { return '<option' + (m.TenMon === monCu ? ' selected' : '') + '>' + esc(m.TenMon) + '</option>'; }).join('');
     taiGhep();
@@ -725,7 +726,7 @@ function veDanhGiaKy() {
     ? 'Mức có chữ "gợi ý" là app tính từ Sổ theo dõi; ô viền đỏ là mục chưa có dữ liệu – cô phải chọn (bắt buộc đủ 15 mục). <button class="nut phu" onclick="dkDienDatChoTrong()">Điền "Đ" cho mọi mục còn trống</button>'
     : 'Mức sẵn có là app gợi ý từ Sổ theo dõi trong kì – cô chạm để đổi.' + (dk.cuoiKy ? ' Nhập điểm KTĐK (số nguyên 1–10) cho môn có bài kiểm tra.' : '') +
       (dk.cuoiKy && dk.mon.some(function (m) { return m.ten === dkPhan && m.coDiem; }) ?
-        '<div style="margin-top:8px"><button class="nut" onclick="moNhapDiem()">✍ Nhập điểm lần lượt cả lớp (bàn phím hoặc chụp bài)</button></div>' : '');
+        '<div style="margin-top:8px"><button class="nut" onclick="moNhapDiem()">✍ Nhập điểm lần lượt cả lớp' + (cnBat('chupBai') || cnBat('ai') ? ' (bàn phím hoặc chụp bài)' : '') + '</button></div>' : '');
   $('kyGhiChu').insertAdjacentHTML('beforeend', thanhAI());
   var q = ($('kyTim').value || '').toLowerCase(), chi = $('kyChiCanXem').checked;
   var ds = dk.hs.filter(function (h) { return (!q || h.ten.toLowerCase().indexOf(q) >= 0) && (!chi || dkCanXem(h)); });
@@ -779,7 +780,7 @@ function theMon(h) {
   return '<div class="the bm-hs' + (x.muc ? '' : ' trong') + '">' + dau(h, x, dkPhan) +
     '<div class="hang" style="margin-top:8px"><span class="nho">Mức đạt được</span> ' + seg(MUC_MON, x.muc, x.mucGoiY, "dkDatMuc('" + h.ma + "','$M')", TEN_MUC) +
     (dk.cuoiKy && m.coDiem ? ' <label class="nho">Điểm KTĐK <input type="number" inputmode="numeric" min="1" max="10" step="1" style="width:70px" value="' + esc(x.diem) + '" onchange="dkDatDiem(\'' + h.ma + '\', this)"></label>' +
-      ' <button class="nut phu" style="padding:8px 10px" title="Chụp bài / nhập điểm" onclick="moNhapDiem(\'' + h.ma + '\')">📷</button>' +
+      ' <button class="nut phu" style="padding:8px 10px" title="Nhập điểm" onclick="moNhapDiem(\'' + h.ma + '\')">' + (cnBat('chupBai') || cnBat('ai') ? '📷' : '✍') + '</button>' +
       (x.anh ? ' <a class="nho" href="' + esc(x.anh) + '" target="_blank">ảnh bài</a>' : '') : '') + '</div>' +
     oChu(h.ma, dkPhan, 'nx', x.nx, 'Nội dung nhận xét') + '</div>';
 }
@@ -975,7 +976,7 @@ function moNhapDiem(ma) {
   if (!ma) { i = ds.findIndex(function (m) { return !coDiem(m, mon); }); if (i < 0) { bao('Cả lớp đã có điểm môn này – mở từ em đầu tiên để xem lại.'); i = 0; } }
   if (!roiDiDuoc()) return;
   nganXep.push(hienTai); hienTai = { tab: 'danhgia', nhapDiem: 1 }; ghiLichSu(hienTai);   // nút Back / ← chỉ đóng cửa sổ này
-  nd = { mon: mon, ds: ds, i: i, chiThieu: !ma, anh: null, ai: null, khung: null };
+  nd = { mon: mon, ds: ds, i: i, chiThieu: !ma, anh: null, ai: null, khung: null, khongLuu: !cnBat('chupBai') };
   $('ndModal').style.display = 'block'; $('ndModal').scrollTop = 0; veNhapDiem();
 }
 function dongNhapDiem() { if (hienTai.nhapDiem) return quayLai(); $('ndModal').style.display = 'none'; nd = null; veDanhGiaKy(); }
@@ -991,12 +992,13 @@ function veNhapDiem() {
   html += '<div class="nd-luoi">' + [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function (n) {
     return '<button class="nd-so' + (String(n) === String(x.diem) ? ' dang' : '') + (nd.ai && nd.ai.diem === n ? ' goiy' : '') + '" onclick="ndChon(' + n + ')">' + n + '</button>';
   }).join('') + '</div>';
-  if (!nd.anh) {
+  if (!(cnBat('chupBai') || cnBat('ai'))) { /* chụp bài đang tắt: chỉ nhập bằng nút số */ }
+  else if (!nd.anh) {
     html += '<div class="hang"><button class="nut phu" onclick="$(\'ndCam\').click()">📷 Chụp bài</button><button class="nut phu" onclick="$(\'ndAnh\').click()">🖼 Chọn ảnh có sẵn</button></div>' +
-      '<div class="nho" style="margin-top:4px">' + (aiCD.coKhoa ? 'Chụp cả trang đầu bài kiểm tra; AI chỉ nhận phần ảnh trong khung ô "Điểm", không nhận tên học sinh.' :
-        'Chưa cài khoá AI (Cài đặt → Trợ lý AI): ảnh chỉ được lưu vào Drive, cô tự chạm điểm.') + '</div>';
+      '<div class="nho" style="margin-top:4px">' + (aiCD.coKhoa && cnBat('ai') ? 'Chụp cả trang đầu bài kiểm tra; AI chỉ nhận phần ảnh trong khung ô "Điểm", không nhận tên học sinh.' :
+        (cnBat('ai') ? 'Chưa cài khoá AI (Cài đặt → Trợ lý AI): ' : '') + 'Ảnh được lưu vào Drive, cô tự chạm điểm.') + '</div>';
   } else {
-    html += '<div class="hang">' + (aiCD.coKhoa ? '<button class="nut" onclick="ndDocAI()">🔎 ' + (nd.ai ? 'Đọc lại' : 'Đọc điểm bằng AI') + '</button>' : '') +
+    html += '<div class="hang">' + (aiCD.coKhoa && cnBat('ai') ? '<button class="nut" onclick="ndDocAI()">🔎 ' + (nd.ai ? 'Đọc lại' : 'Đọc điểm bằng AI') + '</button>' : '') +
       '<button class="nut phu" onclick="$(\'ndCam\').click()">📷 Chụp lại</button><button class="nut phu" onclick="ndBoAnh()">Bỏ ảnh</button></div>' +
       '<label class="nho" style="display:block;margin-top:6px"><input type="checkbox" id="ndLuuAnh"' + (nd.khongLuu ? '' : ' checked') + ' onchange="nd.khongLuu=!this.checked"> Lưu ảnh bài vào Google Drive (thư mục Bài kiểm tra)</label>' +
       '<div class="nho" style="margin-top:6px">Kéo khung vàng vào đúng ô <b>Điểm</b> (kéo ô vuông ở góc để đổi cỡ, hoặc chạm vào chỗ khác trên ảnh). Khung được nhớ cho các bài sau.</div>' +
@@ -1043,7 +1045,7 @@ function ndNhanAnh(input) {
     nd.anh = { src: c.toDataURL('image/jpeg', 0.75) }; nd.ai = null;
     var k = khungDaLuu(); nd.khung = k || JSON.parse(JSON.stringify(KHUNG_MAC_DINH));
     veNhapDiem();
-    if (k && aiCD.coKhoa) ndDocAI();     // cô đã chỉnh khung từ lần trước → đọc luôn
+    if (k && aiCD.coKhoa && cnBat('ai')) ndDocAI();     // cô đã chỉnh khung từ lần trước → đọc luôn
   };
   img.onerror = function () { bao('Không mở được ảnh này.'); };
   img.src = url;
@@ -1088,7 +1090,7 @@ function ndDocAI() {
 // dkXem['mã|phần|trường'] = { sau, lan, lo }: bản AI đang chờ cô chọn. dk.lichSu: các lần đã dùng bản AI (để hoàn tác, xoá khi xuất file).
 var dkXem = {};
 var TEN_TRUONG = { nlc: 'Năng lực chung', nld: 'Năng lực đặc thù', pc: 'Phẩm chất chủ yếu' };
-function coAI() { return !!(dk && dk.cuoiKy && aiCD.coKhoa); }
+function coAI() { return !!(dk && dk.cuoiKy && aiCD.coKhoa && cnBat('ai')); }
 function oCua(ma, phan) { return phan === 'NLPC' ? dk.du[ma].nlpc : dk.du[ma].mon[phan]; }
 function tachKhoa(key) { var a = key.split('|'); return { ma: a[0], phan: a[1], truong: a[2] }; }
 function thoatRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
@@ -1202,7 +1204,7 @@ function aiCaLop() {
 }
 // Thanh AI ở đầu danh sách: viết lại cả lớp, dùng/bỏ tất cả bản chờ, hoàn tác lần gần nhất
 function thanhAI() {
-  if (!dk || !dk.cuoiKy) return '';
+  if (!dk || !dk.cuoiKy || !cnBat('ai')) return '';
   if (!aiCD.coKhoa) return '<div class="nho" style="margin-top:8px">✨ Viết lại nhận xét bằng AI: cài khoá ở Cài đặt → Trợ lý AI để dùng (tuỳ chọn).</div>';
   var laNL = dkPhan === 'NLPC', cho = Object.keys(dkXem).filter(function (k) { return k.split('|')[1] === dkPhan; });
   var cuoi = dk.lichSu.filter(function (l) { return laNL ? l.phan === 'NLPC' : l.phan === dkPhan; }).slice(-1)[0];
@@ -1589,6 +1591,49 @@ function ptXuat() {
       '<div class="nho">' + d.soPT + ' phong trào / cuộc thi · ' + d.dong.length + ' lượt tham gia · ' + giai.length + ' lượt đạt giải, được khen.</div>', false);
   });
 }
+
+// ============================================================================ GIAO DIỆN GỌN: chức năng bật/tắt + hiện theo thời điểm
+// GD lấy cùng Trang chủ (máy chủ tính), nhớ trên máy để lần mở sau áp dụng ngay.
+var GD = { chucNang: { tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' }, kyHien: [], kyNhac: [], hienGVCN: false, hienNamHoc: true };
+try { var _gd = JSON.parse(localStorage.getItem('giaoDien') || 'null'); if (_gd && _gd.chucNang) GD = _gd; } catch (e) {}
+function cnBat(k) { return !!(GD.chucNang && GD.chucNang[k]); }
+var DS_CN = [
+  ['tongHopDD', '📊 Tổng hợp điểm danh', 'Xem, xuất Excel số ngày vắng theo tuần, tháng, học kì, năm (trong màn Điểm danh).'],
+  ['phongTrao', '🏆 Phong trào – Cuộc thi', 'Ghi các em tham gia, đạt giải; đưa vào hồ sơ và nhận xét GVCN (trong Sổ theo dõi).'],
+  ['minhChung', '📎 Minh chứng', 'Chụp tài liệu, bài làm, giấy khen vào hồ sơ từng em; gộp thành PDF.'],
+  ['chupBai', '📷 Chụp bài kiểm tra khi nhập điểm', 'Lưu ảnh bài kiểm tra vào Google Drive khi nhập điểm cuối kì.'],
+  ['ai', '✨ Trợ lý AI (Gemini)', 'Đọc điểm từ ảnh bài kiểm tra, viết lại nhận xét cuối kì và nhận xét GVCN. Cần khoá AI gói trả phí.']
+];
+function apDungGiaoDien(gd) {
+  if (gd && gd.chucNang) { GD = gd; try { localStorage.setItem('giaoDien', JSON.stringify(gd)); } catch (e) {} }
+  var an = function (id, a) { var e = $(id); if (e) e.classList.toggle('an', !!a); };
+  an('ddCheRow', !cnBat('tongHopDD'));
+  if (!cnBat('tongHopDD') && !$('ddVungTH').classList.contains('an')) ddCheDo('ngay');
+  an('stChePT', !cnBat('phongTrao'));
+  var coKy = GD.kyHien.length > 0 || GD.hienGVCN;          // Đánh giá: phần Định kỳ chỉ hiện khi đến kì
+  an('dgChonThe', !coKy);
+  if (!coKy && !$('dgKy').classList.contains('an')) dgChonLoai('thang');
+  [].forEach.call($('kyChon').options, function (o) { o.hidden = o.disabled = o.value === 'GVCN' ? !GD.hienGVCN : GD.kyHien.indexOf(o.value) < 0; });
+  an('theAI', !cnBat('ai')); an('theNamHoc', !GD.hienNamHoc); an('theDungLuong', !(cnBat('minhChung') || cnBat('chupBai')));
+  veChucNang();
+}
+function veChucNang() {
+  if (!$('cnDs')) return;
+  $('cnDs').innerHTML = DS_CN.map(function (c) {
+    return '<label class="cn-hang"><input type="checkbox"' + (cnBat(c[0]) ? ' checked' : '') + ' onchange="doiChucNang(\'' + c[0] + '\', this.checked)">' +
+      '<span><b>' + c[1] + '</b><div class="nho">' + c[2] + '</div></span></label>';
+  }).join('') +
+    '<div style="margin-top:10px"><label class="dong">Đánh giá định kỳ, nhận xét GVCN, năm học mới</label><select onchange="doiChucNang(\'thoiDiem\', this.value)">' +
+    '<option value="tuDong"' + (GD.chucNang.thoiDiem !== 'luon' ? ' selected' : '') + '>Chỉ hiện khi đến kì (khuyên dùng)</option>' +
+    '<option value="luon"' + (GD.chucNang.thoiDiem === 'luon' ? ' selected' : '') + '>Luôn hiện</option></select>' +
+    '<div class="nho" style="margin-top:4px">Lúc này đang hiện: ' + (GD.kyHien.length ? 'đánh giá ' + GD.kyHien.join(', ') : 'chưa đến kì đánh giá định kỳ nào') +
+    (GD.hienGVCN ? ', nhận xét GVCN' : '') + (GD.hienNamHoc ? ', năm học mới' : '') + '.</div></div>';
+}
+function doiChucNang(k, v) {
+  var o = JSON.parse(JSON.stringify(GD.chucNang)); o[k] = v;
+  chay('luuChucNang', o).then(function (gd) { apDungGiaoDien(gd); bao('Đã lưu. ' + (v === true ? 'Đã bật' : v === false ? 'Đã tắt' : 'Đã đổi') + ' chức năng.'); });
+}
+apDungGiaoDien();
 
 // ============================================================================ KHỞI ĐỘNG
 $('stNgay').value = homNayIso(); $('ddNgay').value = homNayIso();

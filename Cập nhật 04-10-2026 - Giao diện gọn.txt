@@ -1,0 +1,31 @@
+CẬP NHẬT – GIAO DIỆN GỌN (giảm "ngộp" khi mới dùng)
+
+Nguyên tắc: không bỏ chức năng nào – chỉ hiện đúng thứ cô cần vào lúc cần.
+
+1. Thanh dưới cùng còn 4 nút dùng hằng ngày: Trang chủ · Điểm danh · Sổ theo dõi · Đánh giá.
+   Học sinh 👧 và Cài đặt ⚙️ chuyển lên góc trên bên phải (cạnh nút ?). Đầu trang gọn 2 dòng trên điện thoại.
+
+2. Cài đặt → "Chức năng": cô bật / tắt các phần nâng cao (tắt chỉ ẩn khỏi màn hình, dữ liệu vẫn giữ):
+     📊 Tổng hợp điểm danh ............ BẬT sẵn
+     🏆 Phong trào – Cuộc thi ......... BẬT sẵn (cô vừa yêu cầu)
+     📎 Minh chứng ..................... tắt sẵn
+     📷 Chụp bài kiểm tra khi nhập điểm  tắt sẵn
+     ✨ Trợ lý AI (Gemini) ............. tắt sẵn (tự bật nếu đã cài khoá AI từ trước)
+   Khi tắt: mục tương ứng ẩn khỏi Điểm danh / Sổ theo dõi / hồ sơ học sinh / nhập điểm / Cài đặt (thẻ AI, Dung lượng ảnh).
+
+3. Hiện theo thời điểm (mặc định "Chỉ hiện khi đến kì"; chọn "Luôn hiện" nếu muốn xem bất cứ lúc nào):
+   - Đánh giá → Định kỳ: chỉ hiện từ 14 ngày trước khi hết giữa kì / cuối kì đến 30 ngày sau (cuối năm: 60 ngày),
+     và chỉ hiện đúng kì đó (VD đầu tháng 11 chỉ có GK1). Ngoài thời gian đó, màn Đánh giá chỉ có Thường xuyên (hằng tháng).
+   - Nhận xét GVCN: chỉ hiện quanh cuối năm. Thẻ "Năm học và lưu trữ": chỉ hiện khi sắp / đã hết học kì II.
+   - Trang chủ nhắc khi đến kì: "Đến kì đánh giá giữa học kì I (GK1): vào Đánh giá → Định kỳ → chọn GK1 → Tổng hợp."
+   - App tính việc "hiện gì" cùng lúc lấy dữ liệu Trang chủ và nhớ trên máy → không thêm thời gian chờ.
+
+4. Sửa thêm: số "phiên bản" bộ nhớ đệm có thêm phần ngẫu nhiên, tránh trường hợp hiếm 2 lần ghi trong cùng 1 mili-giây
+   làm app đọc lại dữ liệu cũ (tìm ra khi thử bật/tắt chức năng liên tiếp).
+
+Đã thử trên máy (khung điện thoại): ngày 05/10 – không có Định kỳ, Cài đặt ẩn thẻ AI/Năm học/Dung lượng, hồ sơ không có Minh chứng;
+ngày 05/11 – Định kỳ chỉ có GK1, Trang chủ nhắc GK1; bật Minh chứng → hồ sơ có Minh chứng; tắt Tổng hợp điểm danh → ẩn;
+"Luôn hiện" → đủ GK1, CK1, GK2, CK2, GVCN, thẻ Năm học.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+Hướng dẫn trong app đã cập nhật (đầu trang hướng dẫn, mục 6b, 9, 10).

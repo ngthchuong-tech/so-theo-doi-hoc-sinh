@@ -15,7 +15,9 @@
     <div class="hang" style="flex-wrap:nowrap">
       <button id="nutLui" class="nut-lui an" onclick="quayLai()" title="Quay lại">←</button>
       <div style="flex:1;min-width:0"><h1 id="tieuDe">Sổ theo dõi học sinh</h1><div class="phu" id="phuDe">Đang tải…</div></div>
-      <button class="nut-lui" onclick="moTab('huongdan')" title="Hướng dẫn sử dụng" style="font-size:20px;font-weight:700">?</button>
+      <button class="nut-lui nut-dau" data-t="hocsinh" onclick="moTab('hocsinh')" title="Học sinh">👧</button>
+      <button class="nut-lui nut-dau" data-t="caidat" onclick="moTab('caidat')" title="Cài đặt">⚙️</button>
+      <button class="nut-lui nut-dau" onclick="moTab('huongdan')" title="Hướng dẫn sử dụng" style="font-weight:700">?</button>
     </div>
   </header>
 
@@ -47,7 +49,7 @@
           <h2 style="margin:0">Điểm danh</h2>
           <input type="date" id="ddNgay" onchange="doiNgayDiemDanh()">
         </div>
-        <div class="hang" style="margin-top:6px">
+        <div class="hang" style="margin-top:6px" id="ddCheRow">
           <span class="chip on" id="ddCheNgay" onclick="ddCheDo('ngay')">Điểm danh</span>
           <span class="chip" id="ddCheTH" onclick="ddCheDo('th')">📊 Tổng hợp</span>
         </div>
@@ -170,6 +172,12 @@
       </div>
 
       <div class="the">
+        <h2>Chức năng</h2>
+        <div class="nho">Để app gọn, các chức năng nâng cao được tắt sẵn. Cô bật khi cần dùng – tắt đi thì chỉ ẩn khỏi màn hình, dữ liệu đã ghi vẫn giữ nguyên.</div>
+        <div id="cnDs" style="margin-top:6px"></div>
+      </div>
+
+      <div class="the">
         <h2>Mở app nhanh trên điện thoại, máy tính</h2>
         <div class="nho">Quét mã QR bằng camera điện thoại để mở app, rồi "Thêm vào màn hình chính" để lần sau chỉ cần chạm biểu tượng.</div>
         <div class="hang" style="margin-top:10px;align-items:flex-start">
@@ -229,7 +237,7 @@
         </div>
       </div>
 
-      <div class="the">
+      <div class="the" id="theAI">
         <h2>Trợ lý AI (Gemini) – tuỳ chọn</h2>
         <div id="aiTrangThai" class="nho"></div>
         <div class="nho" style="margin-top:6px;line-height:1.5">Dùng để: đọc điểm từ ảnh bài kiểm tra; (sắp có) viết lại nhận xét cuối kì, nhận xét GVCN cuối năm. Không có khoá thì app vẫn chạy đầy đủ, chỉ ẩn các nút AI.</div>
@@ -251,12 +259,12 @@
         </div>
       </div>
 
-      <div class="the">
+      <div class="the" id="theNamHoc">
         <h2>Năm học và lưu trữ</h2>
         <div id="nhNoiDung" class="nho">Đang tải…</div>
       </div>
 
-      <div class="the">
+      <div class="the" id="theDungLuong">
         <h2>Dung lượng ảnh</h2>
         <div id="dlNoiDung" class="nho">Đang tải…</div>
       </div>
@@ -284,8 +292,6 @@
     <button data-t="diemdanh" onclick="moTab('diemdanh')"><span class="ic">✅</span>Điểm danh</button>
     <button data-t="sotheodoi" onclick="moTab('sotheodoi')"><span class="ic">📝</span>Sổ theo dõi</button>
     <button data-t="danhgia" onclick="moTab('danhgia')"><span class="ic">📊</span>Đánh giá</button>
-    <button data-t="hocsinh" onclick="moTab('hocsinh')"><span class="ic">👧</span>Học sinh</button>
-    <button data-t="caidat" onclick="moTab('caidat')"><span class="ic">⚙️</span>Cài đặt</button>
   </nav>
 
   <div class="modal" id="hoSo" onclick="if(event.target===this)dongHoSo()"><div class="the" id="hoSoNoiDung"></div></div>
