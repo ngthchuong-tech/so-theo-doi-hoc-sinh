@@ -1,0 +1,24 @@
+CẬP NHẬT – TĂNG TỐC VIỆC HẰNG NGÀY (bước 1 trong kế hoạch "tốc độ + gọn")
+
+Ý tưởng: không làm Google nhanh hơn được (mỗi lần hỏi máy chủ ~1 giây), nên app CHUẨN BỊ TRƯỚC những gì cô sắp dùng.
+
+1. Tải trước khi mở app: trong lúc cô xem Trang chủ, app lặng lẽ tải sẵn (gộp trong 1 lần hỏi máy chủ)
+   bộ nhận xét + danh sách học sinh (kèm dấu "đã ghi") của các tiết hôm nay, và bảng điểm danh hôm nay.
+   Chỉ giữ trong bộ nhớ của trang đang mở, không lưu xuống máy (vì có tên học sinh).
+2. Chạm vào tiết hôm nay (ở Trang chủ hoặc Sổ theo dõi): mở NGAY, không còn "Đang xử lý…".
+   App cập nhật ngầm dấu "đã ghi" mới nhất ngay sau đó (không ghi đè khi cô đang lưu).
+3. Mở Điểm danh hôm nay: hiện NGAY; cập nhật ngầm, không ghi đè nếu cô đã bắt đầu chạm.
+4. Sổ theo dõi: danh sách tiết hôm nay lấy luôn từ Trang chủ (không hỏi lại máy chủ); danh sách môn cho "Chọn bài khác"
+   nhớ trên máy (chỉ tên môn).
+5. Mở bài khác (không phải tiết hôm nay): gộp 2 lần hỏi máy chủ thành 1.
+6. Nhận xét vừa lưu được ghi luôn vào bản tải trước → mở lại tiết đó thấy ngay.
+
+Đo trên máy (bản giả lập cố ý chậm 0,12 giây mỗi lần hỏi máy chủ; "hiện ngay" = đã có nội dung sau 0,05 giây):
+   Mở Sổ theo dõi (danh sách tiết hôm nay) ... hiện ngay (trước: chờ 2 lần hỏi máy chủ)
+   Chạm 1 tiết hôm nay ......................... hiện ngay đủ 35 em và bộ nhận xét (trước: chờ 2 lần hỏi)
+   Mở Điểm danh hôm nay ........................ hiện ngay 35 em (trước: chờ 1 lần hỏi)
+   Mở bài khác (Chọn bài khác) ................ 1 lần hỏi (trước: 2)
+   Ghi nhận xét → mở lại tiết .................. thấy ngay nhận xét vừa lưu, không bị đếm trùng
+Lưu ý: tải trước bắt đầu sau khi Trang chủ hiện ~1–2 giây; nếu cô chạm tiết ngay lập tức thì lần đó vẫn chờ như cũ.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.

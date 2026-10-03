@@ -132,6 +132,7 @@ function taiTrangChu() {
     try { Object.keys(localStorage).forEach(function (k) { if (/^trangChu_/.test(k) && k !== khoa) localStorage.removeItem(k); });
           localStorage.setItem(khoa, JSON.stringify(d)); } catch (e) {}
     veTrangChu(d);
+    taiTruocHomNay(d.lich);
   }, function () {});
 }
 function veTrangChu(d) {
@@ -160,7 +161,12 @@ function moTietTuTrangChu(tiet) {
 var dd = null;
 function taiDiemDanh() {
   if (!$('ddNgay').value) $('ddNgay').value = homNayIso();
-  return chay('layDiemDanh', isoToDmy($('ddNgay').value)).then(function (d) { dd = d; dd.sua = false; veDiemDanh(); });
+  var ngay = isoToDmy($('ddNgay').value);
+  if (TT.dd && TT.ngay === ngay && !(dd && dd.sua && dd.ngay === ngay)) {
+    dd = JSON.parse(JSON.stringify(TT.dd)); dd.sua = false; veDiemDanh();
+    return goi('layDiemDanh', ngay).then(function (d) { TT.dd = d; if (dd && dd.ngay === ngay && !dd.sua) { dd = JSON.parse(JSON.stringify(d)); dd.sua = false; veDiemDanh(); } }, function () {});
+  }
+  return chay('layDiemDanh', ngay).then(function (d) { dd = d; dd.sua = false; veDiemDanh(); });
 }
 function doiNgayDiemDanh() {
   if (dd && dd.sua && !confirm('Cô chưa lưu điểm danh ngày ' + dd.ngay + '. Đổi ngày và bỏ thay đổi?')) { $('ddNgay').value = dmyToIso(dd.ngay); return; }
@@ -186,7 +192,7 @@ function luuDiemDanhUI() {
   var ngay = dd.ngay, cu = dd;
   dd.daLuu = true; dd.sua = false; veDiemDanh(); bao('Đang lưu điểm danh…', 20000);
   goi('luuDiemDanh', ngay, dd.hocSinh.map(function (h) { return { ma: h.ma, trangThai: h.trangThai, buoi: h.trangThai === 'Có mặt' ? '' : h.buoi, ghiChu: h.ghiChu }; }))
-    .then(function (m) { bao(m + ' (Muốn sửa: chạm lại rồi Lưu lần nữa.)', 5000); },
+    .then(function (m) { bao(m + ' (Muốn sửa: chạm lại rồi Lưu lần nữa.)', 5000); if (TT.ngay === ngay) { TT.dd = JSON.parse(JSON.stringify(cu)); TT.dd.sua = false; } },
           function (e) { if (dd === cu) { dd.sua = true; veDiemDanh(); } bao('Chưa lưu được điểm danh ' + ngay + ': ' + ((e && e.message) || e) + ' – bấm Lưu lần nữa.', 9000); });
 }
 
@@ -210,8 +216,12 @@ function hienChonBai() {
 }
 function taiTietTrongNgay() {
   if (!$('stNgay').value) $('stNgay').value = homNayIso();
-  return Promise.all([chay('layTietTheoNgay', isoToDmy($('stNgay').value)), monList()]).then(function (k) {
-    st.tiet = k[0];
+  var ngayST = isoToDmy($('stNgay').value);
+  var tiet = ngayST === isoToDmy(homNayIso()) && window._lichHomNay ? Promise.resolve(window._lichHomNay.filter(function (r) { return r.mon; }))
+    : chay('layTietTheoNgay', ngayST);
+  monList();                       // danh sách môn cho "Chọn bài khác": tải riêng, không bắt danh sách tiết phải chờ
+  return tiet.then(function (ds) {
+    st.tiet = ds;
     $('stTiet').innerHTML = st.tiet.length ? st.tiet.map(function (r) {
       return '<div class="tiet" onclick="chonTiet(' + r.tiet + ')"><div class="so">' + r.tiet + '</div><div><div class="mon">' + esc(r.monSBG) + '</div><div class="ten">' +
         esc(r.bai || r.ten) + (r.bai ? '' : ' <span class="tag vang">thư viện tạm</span>') + '</div></div></div>';
@@ -226,11 +236,14 @@ function doiNgaySTD() {
 var _monHoc = null;
 function monList() {
   if (_monHoc) return Promise.resolve(_monHoc);
-  return goi('layMonDangDay').then(function (ds) {
+  var ve = function (ds) {
     _monHoc = ds;
-    $('stMon').innerHTML = '<option value="">– chọn môn –</option>' + _monHoc.map(function (m) { return '<option>' + esc(m.TenMon) + '</option>'; }).join('');
-    return _monHoc;
-  });
+    $('stMon').innerHTML = '<option value="">– chọn môn –</option>' + ds.map(function (m) { return '<option>' + esc(m.TenMon) + '</option>'; }).join('');
+    return ds;
+  };
+  var cu = null; try { cu = JSON.parse(localStorage.getItem('monDangDay') || 'null'); } catch (e) {}
+  var moi = goi('layMonDangDay').then(function (ds) { try { localStorage.setItem('monDangDay', JSON.stringify(ds)); } catch (e) {} return ve(ds); });
+  return cu ? Promise.resolve(ve(cu)) : moi;
 }
 function taiBaiCuaMon() {
   var mon = $('stMon').value; if (!mon) return;
@@ -251,8 +264,13 @@ function moBaiThat(mon, bai, tiet, tenSBG) {
   st.mon = mon; st.bai = bai || tenSBG || ''; st.soTiet = tiet; st.hd = 0; st.muc = ''; st.cau = {}; st.chon = {}; $('stGhiChu').value = '';
   var ngay = isoToDmy($('stNgay').value);
   $('stCheBai').classList.add('on'); $('stCheChung').classList.remove('on');
-  Promise.all([chay('layBoNhanXet', mon, bai), chay('layHocSinhChoBai', ngay, mon, st.bai)]).then(function (k) {
-    st.bo = k[0]; st.hs = k[1];
+  var khoa = mon + '|' + (bai || '') + '|' + st.bai, co = TT.ngay === ngay && TT.bai[khoa], baiLuc = st.bai;
+  st.khoaTT = khoa;
+  (co ? Promise.resolve(JSON.parse(JSON.stringify(co))) : chay('layMoBai', ngay, mon, bai, st.bai)).then(function (kq) {
+    st.bo = kq.bo; st.hs = kq.hs;
+    if (co) goi('layHocSinhChoBai', ngay, mon, baiLuc).then(function (hs) {      // cập nhật ngầm dấu "đã ghi" mới nhất
+      if (st.mon === mon && st.bai === baiLuc && !stLuuCho) { st.hs = hs; if (!$('stNhap').classList.contains('an')) veHocSinhST(); }
+    }, function () {});
     $('stMonTen').textContent = mon + (tiet ? ' · Tiết ' + tiet : '') + ' · ' + ngay;
     $('stBaiTen').textContent = st.bai || '(chưa ghép bài)';
     $('stTam').innerHTML = st.bo.tam ? '<span class="tag vang">Môn/bài này chưa có thư viện – đang dùng thư viện tạm</span>' : '';
@@ -319,17 +337,23 @@ function luuNhanXetUI() {
   if (!x.mucDo) return bao('Chọn mức trước.');
   if (!nd && !x.ghiChu) return bao('Chọn ít nhất 1 câu nhận xét hoặc ghi thêm.');
   // Lưu chạy ngầm: bỏ chọn ngay để cô chọn tiếp nhóm khác; nếu lỗi thì chọn lại các em để bấm Lưu lần nữa
-  var hsLuc = st.hs;
+  var hsLuc = st.hs, khoaTT = st.khoaTT;
   st.chon = {}; $('stGhiChu').value = ''; veHocSinhST();
   bao('Đang lưu nhận xét cho ' + x.hocSinh.length + ' học sinh…', 20000);
+  stLuuCho++;
   goi('luuNhanXet', x).then(function (kq) {
+    stLuuCho--;
     x.hocSinh.forEach(function (ma, i) {
       var h = hsLuc.filter(function (y) { return y.ma === ma; })[0];
       if (h) h.da.push({ id: kq.ids[i], hd: x.hoatDong, muc: x.mucDo, nd: nd, gc: x.ghiChu, ngay: x.ngay, luc: kq.luc });
     });
     if (st.hs === hsLuc) veHocSinhST();
+    var tt = TT.ngay === x.ngay && TT.bai[khoaTT];            // bản tải trước cũng có ngay nhận xét vừa lưu
+    if (tt) x.hocSinh.forEach(function (ma, i) { var h = tt.hs.filter(function (y) { return y.ma === ma; })[0];
+      if (h) h.da.push({ id: kq.ids[i], hd: x.hoatDong, muc: x.mucDo, nd: nd, gc: x.ghiChu, ngay: x.ngay, luc: kq.luc }); });
     bao(kq.msg, 9000, 'Hoàn tác', function () { hoanTac(kq.ids); });
   }, function (e) {
+    stLuuCho--;
     if (st.hs === hsLuc) { x.hocSinh.forEach(function (ma) { st.chon[ma] = 1; }); if (!$('stGhiChu').value) $('stGhiChu').value = x.ghiChu; veHocSinhST(); }
     bao('Chưa lưu được: ' + ((e && e.message) || e) + '. Các em đã được chọn lại – bấm Lưu lần nữa.', 9000);
   });
@@ -1634,6 +1658,22 @@ function doiChucNang(k, v) {
   chay('luuChucNang', o).then(function (gd) { apDungGiaoDien(gd); bao('Đã lưu. ' + (v === true ? 'Đã bật' : v === false ? 'Đã tắt' : 'Đã đổi') + ' chức năng.'); });
 }
 apDungGiaoDien();
+
+// ============================================================================ TẢI TRƯỚC VIỆC HÔM NAY
+// Khi Trang chủ hiện xong: tải sẵn (1 lần gọi máy chủ) các tiết hôm nay + điểm danh hôm nay. Chỉ giữ trong bộ nhớ của trang
+// (không lưu xuống máy vì có tên học sinh). Mở tiết / điểm danh hôm nay thì hiện ngay, rồi cập nhật ngầm bản mới nhất.
+var TT = { ngay: '', bai: {}, dd: null, luc: 0 }, stLuuCho = 0;
+function taiTruocHomNay(lich) {
+  var ngay = isoToDmy(homNayIso()), co = {}, ds = [];
+  if (TT.ngay === ngay && Date.now() - TT.luc < 5 * 60000) return;      // vừa tải trong 5 phút: thôi
+  (lich || []).forEach(function (r) {
+    if (!r.mon) return;
+    var x = { mon: r.mon, bai: r.bai || '', baiHS: r.bai || r.ten || '' }, k = x.mon + '|' + x.bai + '|' + x.baiHS;
+    if (!co[k]) { co[k] = 1; ds.push(x); }
+  });
+  TT.luc = Date.now();
+  goi('layTaiTruoc', ngay, ds).then(function (kq) { kq.luc = TT.luc; TT = kq; }, function () { TT.luc = 0; });
+}
 
 // ============================================================================ KHỞI ĐỘNG
 $('stNgay').value = homNayIso(); $('ddNgay').value = homNayIso();

@@ -158,6 +158,7 @@ function docDem_(ten) {
 }
 function boNho_(ten) {            // gọi sau mỗi lần ghi bảng
   delete _NHO[ten];
+  if (ten === 'SoTheoDoi') delete _NHO._monBaiSTD;
   if (BANG_DEM[ten]) { var v = phienMoi_(); thuocTinh_().setProperty('pb_' + ten, v); if (_PB) _PB['pb_' + ten] = v; }
 }
 function lamMoiDuLieu() {         // menu: sau khi sửa trực tiếp trên Trang tính
@@ -585,7 +586,7 @@ function layNhanXetChung() {
 function docSTDTheoBai_(mon, bai) {
   var sh = sheetNho_('SoTheoDoi'), n = sh.getLastRow(), cot = BANG.SoTheoDoi, cMon = cot.indexOf('Mon');
   if (n < 2) return [];
-  var mb = sh.getRange(2, cMon + 1, n - 1, 2).getDisplayValues(), dau = -1, cuoi = -1;
+  var mb = _NHO._monBaiSTD || (_NHO._monBaiSTD = sh.getRange(2, cMon + 1, n - 1, 2).getDisplayValues()), dau = -1, cuoi = -1;
   mb.forEach(function (r, i) { if (r[0] === mon && r[1] === bai) { if (dau < 0) dau = i; cuoi = i; } });
   if (dau < 0) return [];
   return sh.getRange(dau + 2, 1, cuoi - dau + 1, cot.length).getDisplayValues().map(function (r) {
@@ -1541,4 +1542,14 @@ function giaoDien_() {
   var hienNamHoc = !namHoc || (!!hk2 && lech(hk2.NgayDayCuoi) >= -7);
   if (cn.thoiDiem === 'luon') { kyHien = ['GK1', 'CK1', 'GK2', 'CK2']; hienGVCN = true; hienNamHoc = true; }
   return { chucNang: cn, kyHien: kyHien, kyNhac: kyNhac, hienGVCN: hienGVCN, hienNamHoc: hienNamHoc };
+}
+
+// ============================================================================ TẢI TRƯỚC (cho việc hằng ngày nhanh)
+// Mở 1 bài: bộ nhận xét + học sinh và các nhận xét đã ghi – 1 lần gọi thay cho 2
+function layMoBai(ngay, mon, bai, baiHS) { return { bo: layBoNhanXet(mon, bai), hs: layHocSinhChoBai(ngay, mon, baiHS || bai) }; }
+// Khi cô đang xem Trang chủ: tải sẵn các tiết hôm nay + điểm danh hôm nay, trong 1 lần gọi
+function layTaiTruoc(ngay, ds) {
+  var out = { ngay: ngay, bai: {}, dd: layDiemDanh(ngay) };
+  (ds || []).slice(0, 8).forEach(function (x) { out.bai[x.mon + '|' + (x.bai || '') + '|' + (x.baiHS || '')] = layMoBai(ngay, x.mon, x.bai, x.baiHS); });
+  return out;
 }
