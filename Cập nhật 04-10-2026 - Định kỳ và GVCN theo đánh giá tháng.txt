@@ -1,0 +1,26 @@
+CẬP NHẬT – ĐỢT 2: GỢI Ý GIỮA KÌ, CUỐI KÌ VÀ NHẬN XÉT GVCN LẤY TỪ ĐÁNH GIÁ HẰNG THÁNG
+
+Vì sao: cô đã bỏ ghi nhận xét theo bài, nên phần gợi ý định kỳ (vốn lấy từ Sổ theo dõi theo bài) sẽ trống. Nay lấy từ các tháng.
+
+Cách app gợi ý (Đánh giá → Định kỳ → GK1 / CK1 / GK2 / CK2)
+- Các tháng trong kì: tháng có ngày nằm trong kì và cô đã đánh giá (VD GK1: tháng 9, 10; nếu đã đánh giá tháng 11 thì có cả 11).
+- Mức môn học T/H/C: trung bình các tháng (HTXS = 4, HTT = 3, HT = 2, CCG = 1; Toán, TV tính cả Kiến thức và Kỹ năng):
+  từ 2,8 → T (Hoàn thành tốt); từ 1,8 → H (Hoàn thành); dưới 1,8 → C (Chưa hoàn thành). HĐTN, Đạo đức theo mức cô chọn hằng tháng.
+- 15 mục năng lực – phẩm chất (T/Đ/C):
+    Ngôn ngữ ← Tiếng Việt; Tính toán ← Toán;
+    3 năng lực chung ← mức năng lực chung hằng tháng; 5 phẩm chất ← mức phẩm chất hằng tháng;
+    Khoa học, Công nghệ, Tin học, Thẩm mĩ, Thể chất: không có dữ liệu tháng → cô chọn (có nút "Điền Đ cho mọi mục còn trống").
+- Nhận xét kì: ghép câu nhận xét của tối đa 3 tháng gần nhất (đúng bản cô thấy / đã sửa ở màn tháng, bỏ câu trùng)
+  + 1 câu nộp vở cả kì ("Nộp vở đầy đủ, đúng hạn." / "Đôi khi còn chưa nộp vở, chưa làm xong bài." / "Cần chú ý nộp vở đầy đủ…"); ≤ 500 ký tự.
+- Màn định kỳ ghi rõ "gợi ý từ đánh giá tháng 9, 10"; mỗi em có nhãn "đánh giá n tháng". Cô vẫn chạm đổi mức, sửa nhận xét, nhập điểm KTĐK như trước.
+- Kì nào chưa có đánh giá tháng nhưng có dữ liệu ghi theo bài (cách cũ): app dùng cách cũ và ghi chú vàng.
+
+Nhận xét GVCN cuối năm: dựa trên kết quả cuối kì (CK2) nên tự lấy theo; câu cụ thể lấy từ nhận xét tháng.
+
+Kỹ thuật: câu gợi ý (HĐTN, Đạo đức, năng lực đặc thù) để một chỗ trên máy chủ, màn tháng dùng chung →
+nhận xét kì ghép đúng y như từng tháng (đã đối chiếu 18 ô: khớp hoàn toàn).
+
+Đã thử trên máy (ngày giả lập 10/11/2026): 3 em đánh giá tháng 9, 10 ở 3 mức → GK1 gợi ý đúng T / H / C, năng lực đúng,
+mục Khoa học để trống; em chưa nộp vở 4 lần có câu "Cần chú ý nộp vở…"; em chưa đánh giá tháng: không gợi ý.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

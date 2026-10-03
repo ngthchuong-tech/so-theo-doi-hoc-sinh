@@ -749,15 +749,16 @@ function veDanhGiaKy() {
   var tong = dk.hs.length;
   $('kyXuatThuong').classList.toggle('an', !!dk.gvcn); $('kyXuatGVCN').classList.toggle('an', !dk.gvcn);
   if (dk.gvcn) return veGVCN();
-  $('kyTomTat').innerHTML = esc(dk.ky) + ' · từ ' + esc(dk.tu) + ' đến ' + esc(dk.den) + ' · ' + tong + ' học sinh · ' + dk.mon.map(function (m) {
+  $('kyTomTat').innerHTML = esc(dk.ky) + ' · từ ' + esc(dk.tu) + ' đến ' + esc(dk.den) + ' · ' + tong + ' học sinh · ' +
+    (dk.nguon === 'thang' ? '<b>gợi ý từ đánh giá tháng ' + dk.thangDung.join(', ') + '</b> · ' : '<span class="tag vang">chưa có đánh giá tháng trong kì – gợi ý từ sổ theo dõi theo bài</span> · ') + dk.mon.map(function (m) {
     var du = dk.hs.filter(function (h) { return dk.du[h.ma].mon[m.ten].muc; }).length;
     return '<span class="tag ' + (du === tong ? 'xanh' : 'vang') + '">' + esc(m.ten) + ': có mức ' + du + '/' + tong + '</span>';
   }).join(' ') + ' <span class="tag ' + (dk.hs.every(function (h) { var p = dk.du[h.ma].nlpc; return dk.dsNLPC.every(function (t) { return p.muc[t]; }); }) ? 'xanh' : 'vang') + '">Năng lực – phẩm chất</span>';
   $('kyPhan').innerHTML = dk.mon.map(function (m) { return '<span class="chip' + (m.ten === dkPhan ? ' on' : '') + '" onclick="dkChonPhan(\'' + esc(m.ten) + '\')">' + esc(m.ten) + '</span>'; }).join('') +
     '<span class="chip' + (dkPhan === 'NLPC' ? ' on' : '') + '" onclick="dkChonPhan(\'NLPC\')">Năng lực – phẩm chất</span>';
   $('kyGhiChu').innerHTML = dkPhan === 'NLPC'
-    ? 'Mức có chữ "gợi ý" là app tính từ Sổ theo dõi; ô viền đỏ là mục chưa có dữ liệu – cô phải chọn (bắt buộc đủ 15 mục). <button class="nut phu" onclick="dkDienDatChoTrong()">Điền "Đ" cho mọi mục còn trống</button>'
-    : 'Mức sẵn có là app gợi ý từ Sổ theo dõi trong kì – cô chạm để đổi.' + (dk.cuoiKy ? ' Nhập điểm KTĐK (số nguyên 1–10) cho môn có bài kiểm tra.' : '') +
+    ? (dk.nguon === 'thang' ? 'Mức gợi ý từ đánh giá tháng: ngôn ngữ (Tiếng Việt), tính toán (Toán), năng lực chung, phẩm chất. Khoa học, công nghệ, tin học, thẩm mĩ, thể chất: cô chọn' : 'Mức có chữ "gợi ý" là app tính từ Sổ theo dõi') + '; ô viền đỏ là mục chưa có dữ liệu – cô phải chọn (bắt buộc đủ 15 mục). <button class="nut phu" onclick="dkDienDatChoTrong()">Điền "Đ" cho mọi mục còn trống</button>'
+    : (dk.nguon === 'thang' ? 'Mức và nhận xét sẵn có là app gợi ý từ đánh giá các tháng trong kì – cô chạm để đổi, sửa nhận xét.' : 'Mức sẵn có là app gợi ý từ Sổ theo dõi trong kì – cô chạm để đổi.') + (dk.cuoiKy ? ' Nhập điểm KTĐK (số nguyên 1–10) cho môn có bài kiểm tra.' : '') +
       (dk.cuoiKy && dk.mon.some(function (m) { return m.ten === dkPhan && m.coDiem; }) ?
         '<div style="margin-top:8px"><button class="nut" onclick="moNhapDiem()">✍ Nhập điểm lần lượt cả lớp' + (cnBat('chupBai') || cnBat('ai') ? ' (bàn phím hoặc chụp bài)' : '') + '</button></div>' : '');
   $('kyGhiChu').insertAdjacentHTML('beforeend', thanhAI());
@@ -786,7 +787,8 @@ function theGVCN(h) {
 }
 function dau(h, o, phan) {
   return '<div class="hang gian"><div><span class="nho">' + h.stt + '.</span> <b>' + esc(h.ten) + '</b> ' +
-    (o.soGhi ? '<span class="tag">' + o.soGhi + ' ghi nhận</span>' : '<span class="tag do">chưa có ghi nhận trong kì</span>') +
+    (dk.nguon === 'thang' ? (o.soGhi ? '<span class="tag">đánh giá ' + o.soGhi + ' tháng</span>' : '<span class="tag do">chưa có đánh giá tháng</span>')
+      : o.soGhi ? '<span class="tag">' + o.soGhi + ' ghi nhận</span>' : '<span class="tag do">chưa có ghi nhận trong kì</span>') +
     (o.sua ? ' <span class="tag xanh">cô đã chốt/sửa</span>' : '') + '</div>' +
     (o.sua ? '<button class="nut phu" onclick="dkLayLai(\'' + h.ma + '\',\'' + esc(phan) + '\')">↺ Bản app gợi ý</button>' : '') + '</div>';
 }
@@ -1749,6 +1751,7 @@ function ghepTongHop(ma) {         // ô "Môn học" của sheet Sổ tổng h�
 }
 function taiThang() {
   chay('layDanhGiaThang', +$('bmThang').value).then(function (d) {
+    if (d.goiY) GOI_Y_MON = d.goiY; if (d.cauNLD) CAU_NLD = d.cauNLD;
     tg = d; if (tgPhan !== 'NLPC' && !tgMon(tgPhan)) tgPhan = d.mon.length ? d.mon[0].ten : 'NLPC';
     $('bmKetQua').innerHTML = ''; $('bmFile').value = ''; $('tgNoiDung').classList.remove('an'); veThang();
   });
