@@ -5,37 +5,38 @@
         <span class="chip" id="dgChonKy" onclick="dgChonLoai('ky')">Định kỳ (giữa kì, cuối kì)</span>
       </div>
 
-      <!-- ---------- NHẬN XÉT THÁNG ---------- -->
+      <!-- ---------- ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới) ---------- -->
       <div id="dgThang">
       <div class="the">
-        <h2>Đánh giá thường xuyên – nhận xét hằng tháng</h2>
-        <div class="nho">App ghép sẵn nhận xét từ các câu cô đã chọn trong Sổ theo dõi của tháng. Cô đọc, sửa nếu cần, rồi xuất vào file mẫu của trường.</div>
+        <h2>Đánh giá thường xuyên – hằng tháng</h2>
+        <div class="nho">Mỗi tháng 1 lần: Toán, Tiếng Việt chọn mức "Hiểu kiến thức" và "Kỹ năng môn học" cho từng em – app ghép nhận xét từ thư viện tháng
+          (kèm kết quả nộp vở). HĐTN, Đạo đức: cô nhận xét. Năng lực đặc thù app tự suy; năng lực chung, phẩm chất cô chọn mức. Cô sửa được mọi ô.</div>
         <div class="hang" style="margin-top:8px">
           <label>Tháng <select id="bmThang"></select></label>
-          <button class="nut" onclick="taiBieuMauThang()">Tổng hợp</button>
+          <button class="nut" onclick="taiThang()">Mở</button>
         </div>
-        <div id="bmTomTat" class="nho" style="margin-top:8px"></div>
+        <div id="tgTomTat" class="nho" style="margin-top:8px"></div>
       </div>
 
-      <div id="bmNoiDung" class="an">
+      <div id="tgNoiDung" class="an">
         <div class="the">
-          <div id="bmSheet"></div>
+          <div id="tgPhan"></div>
+          <div id="tgNhanh" style="margin-top:6px"></div>
           <div class="hang" style="margin-top:6px">
-            <input id="bmTim" placeholder="Tìm tên…" oninput="veBieuMau()" style="flex:1">
-            <label class="nho"><input type="checkbox" id="bmChiCanXem" onchange="veBieuMau()"> Chỉ em cần xem</label>
+            <input id="tgTim" placeholder="Tìm tên…" oninput="veThang()" style="flex:1">
+            <label class="nho"><input type="checkbox" id="tgChiCanXem" onchange="veThang()"> Chỉ em cần xem</label>
           </div>
-          <div class="nho" style="margin-top:6px">Sửa trực tiếp trong ô – app tự lưu khi cô chạm ra ngoài ô. Số ký tự đỏ là vượt giới hạn của biểu mẫu.</div>
         </div>
-        <div id="bmDs"></div>
+        <div id="tgDs"></div>
 
         <div class="the">
           <h2>Xuất file nộp hệ thống</h2>
           <ol class="nho" style="padding-left:18px;line-height:1.5">
-            <li>Tải file mẫu nhận xét tháng (đánh giá thường xuyên) của lớp từ hệ thống của Bộ.</li>
-            <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô, ghép theo mã định danh, giữ nguyên định dạng.</li>
+            <li>Tải file mẫu đánh giá thường xuyên của tháng ("filemau_danhgia_thuongxuyen…") của lớp từ hệ thống của Bộ.</li>
+            <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô (Sổ tổng hợp các môn và từng môn), ghép theo mã định danh, giữ nguyên định dạng.</li>
             <li>Tải file đã điền về, nộp lên hệ thống.</li>
           </ol>
-          <input type="file" id="bmFile" accept=".xlsx" onchange="xuatBieuMauThang(this)">
+          <input type="file" id="bmFile" accept=".xlsx" onchange="xuatThang(this)">
           <div id="bmKetQua"></div>
         </div>
       </div>

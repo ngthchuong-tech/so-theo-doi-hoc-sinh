@@ -129,6 +129,9 @@
   header .nut-dau.on { background: rgba(255,255,255,.35); }
   .cn-hang { display: flex; gap: 10px; align-items: flex-start; padding: 8px 2px; border-bottom: 1px solid var(--vien); cursor: pointer; }
   .cn-hang input { width: 20px; height: 20px; margin-top: 2px; flex: none; }
+  #tgDs .bm-o textarea { min-height: 80px; }
+  .tg-hang { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+  .tg-nhan { min-width: 74px; font-size: 13px; color: var(--mo); }
   .bm-o .dem.vuot { color: var(--do); font-weight: 700; }
   ul.canh { margin: 6px 0; padding-left: 18px; font-size: 14px; color: var(--vang); }
 </style>
@@ -156,7 +159,7 @@
       <div class="the">
         <div class="luoi-nut">
           <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
-          <button class="nut" onclick="moTab('sotheodoi')">📝<br>Sổ theo dõi</button>
+          <button class="nut" onclick="moTab('sotheodoi')">📒<br>Nộp vở</button>
           <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
         </div>
       </div>
@@ -211,6 +214,7 @@
           <input type="date" id="stNgay" onchange="doiNgaySTD()">
         </div>
         <div class="hang" style="margin-top:8px">
+          <span class="chip" id="stCheVo" onclick="doiCheDo('vo')">📒 Nộp vở</span>
           <span class="chip on" id="stCheBai" onclick="doiCheDo('bai')">Theo bài học</span>
           <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
           <span class="chip" id="stChePT" onclick="doiCheDo('pt')">🏆 Phong trào – Cuộc thi</span>
@@ -255,6 +259,16 @@
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="boChonHet()">Bỏ chọn</button><button class="nut lon" id="stLuu" onclick="luuNhanXetUI()">Lưu nhận xét</button></div></div>
       </div>
 
+      <div id="stVo" class="an">
+        <div class="the">
+          <div class="hang gian"><b>Nộp vở hằng ngày</b><span id="voTomTat" class="nho"></span></div>
+          <div class="hang" style="margin-top:6px" id="voMonChip"></div>
+          <div class="nho" style="margin-top:4px">Mặc định cả lớp đã nộp. Chỉ cần chạm em <b>chưa nộp</b>, <b>chưa làm xong</b> hoặc <b>nộp muộn</b>, rồi bấm Lưu. Đổi ngày ở ô ngày phía trên.</div>
+        </div>
+        <div class="the" id="voDs"></div>
+        <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
+      </div>
+
       <div id="stPT" class="an">
         <div id="ptDsThe">
           <div class="the">
@@ -275,37 +289,38 @@
         <span class="chip" id="dgChonKy" onclick="dgChonLoai('ky')">Định kỳ (giữa kì, cuối kì)</span>
       </div>
 
-      <!-- ---------- NHẬN XÉT THÁNG ---------- -->
+      <!-- ---------- ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới) ---------- -->
       <div id="dgThang">
       <div class="the">
-        <h2>Đánh giá thường xuyên – nhận xét hằng tháng</h2>
-        <div class="nho">App ghép sẵn nhận xét từ các câu cô đã chọn trong Sổ theo dõi của tháng. Cô đọc, sửa nếu cần, rồi xuất vào file mẫu của trường.</div>
+        <h2>Đánh giá thường xuyên – hằng tháng</h2>
+        <div class="nho">Mỗi tháng 1 lần: Toán, Tiếng Việt chọn mức "Hiểu kiến thức" và "Kỹ năng môn học" cho từng em – app ghép nhận xét từ thư viện tháng
+          (kèm kết quả nộp vở). HĐTN, Đạo đức: cô nhận xét. Năng lực đặc thù app tự suy; năng lực chung, phẩm chất cô chọn mức. Cô sửa được mọi ô.</div>
         <div class="hang" style="margin-top:8px">
           <label>Tháng <select id="bmThang"></select></label>
-          <button class="nut" onclick="taiBieuMauThang()">Tổng hợp</button>
+          <button class="nut" onclick="taiThang()">Mở</button>
         </div>
-        <div id="bmTomTat" class="nho" style="margin-top:8px"></div>
+        <div id="tgTomTat" class="nho" style="margin-top:8px"></div>
       </div>
 
-      <div id="bmNoiDung" class="an">
+      <div id="tgNoiDung" class="an">
         <div class="the">
-          <div id="bmSheet"></div>
+          <div id="tgPhan"></div>
+          <div id="tgNhanh" style="margin-top:6px"></div>
           <div class="hang" style="margin-top:6px">
-            <input id="bmTim" placeholder="Tìm tên…" oninput="veBieuMau()" style="flex:1">
-            <label class="nho"><input type="checkbox" id="bmChiCanXem" onchange="veBieuMau()"> Chỉ em cần xem</label>
+            <input id="tgTim" placeholder="Tìm tên…" oninput="veThang()" style="flex:1">
+            <label class="nho"><input type="checkbox" id="tgChiCanXem" onchange="veThang()"> Chỉ em cần xem</label>
           </div>
-          <div class="nho" style="margin-top:6px">Sửa trực tiếp trong ô – app tự lưu khi cô chạm ra ngoài ô. Số ký tự đỏ là vượt giới hạn của biểu mẫu.</div>
         </div>
-        <div id="bmDs"></div>
+        <div id="tgDs"></div>
 
         <div class="the">
           <h2>Xuất file nộp hệ thống</h2>
           <ol class="nho" style="padding-left:18px;line-height:1.5">
-            <li>Tải file mẫu nhận xét tháng (đánh giá thường xuyên) của lớp từ hệ thống của Bộ.</li>
-            <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô, ghép theo mã định danh, giữ nguyên định dạng.</li>
+            <li>Tải file mẫu đánh giá thường xuyên của tháng ("filemau_danhgia_thuongxuyen…") của lớp từ hệ thống của Bộ.</li>
+            <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô (Sổ tổng hợp các môn và từng môn), ghép theo mã định danh, giữ nguyên định dạng.</li>
             <li>Tải file đã điền về, nộp lên hệ thống.</li>
           </ol>
-          <input type="file" id="bmFile" accept=".xlsx" onchange="xuatBieuMauThang(this)">
+          <input type="file" id="bmFile" accept=".xlsx" onchange="xuatThang(this)">
           <div id="bmKetQua"></div>
         </div>
       </div>
@@ -418,7 +433,14 @@
       </div>
 
       <div class="the">
-        <details><summary>4. Sổ theo dõi – ghi nhận xét theo bài học</summary>
+        <details><summary>4. Sổ theo dõi – nộp vở, phong trào (và ghi theo bài học nếu bật)</summary>
+          <div><b>📒 Nộp vở hằng ngày</b> (mở Sổ theo dõi là vào ngay):</div>
+          <ol>
+            <li>Chọn môn <b>Tiếng Việt</b> hoặc <b>Toán</b>. Mặc định cả lớp <b>đã nộp</b>.</li>
+            <li>Chạm <b>Chưa nộp</b>, <b>Chưa xong</b> (chưa làm xong bài) hoặc <b>Muộn</b> cho em chưa đủ → làm tiếp môn kia → <b>Lưu nộp vở</b>.</li>
+            <li>Ghi ngày khác: đổi ở ô ngày phía trên. Kết quả cả tháng được đưa vào nhận xét đánh giá thường xuyên.</li>
+          </ol>
+          <div style="margin-top:8px"><b>Ghi nhận xét theo bài học</b> (cách cũ – chỉ hiện khi bật ở Cài đặt → Chức năng):</div>
           <ol>
             <li><b>Chọn tiết</b> trong ngày (hoặc "Chọn bài khác" để chọn môn, bài bất kì). App mở đúng bộ nhận xét của bài.</li>
             <li><b>Hoạt động</b>: VD Đọc thành tiếng, Đọc hiểu, Viết chữ hoa… (Toán: kĩ năng của bài, Giải bài toán có lời văn).</li>
@@ -451,16 +473,20 @@
       </div>
 
       <div class="the">
-        <details><summary>6. Đánh giá thường xuyên – nhận xét hằng tháng (biểu mẫu nộp hệ thống)</summary>
+        <details><summary>6. Đánh giá thường xuyên – hằng tháng (biểu mẫu nộp hệ thống)</summary>
           <ol>
-            <li>Từ ngày 25, Trang chủ nhắc làm đánh giá thường xuyên của tháng. Vào <b>Đánh giá</b> → <b>Thường xuyên (hằng tháng)</b> → chọn <b>tháng</b> → <b>Tổng hợp</b>.</li>
-            <li>App <b>ghép sẵn</b> nhận xét cho từng em từ các câu cô đã chọn trong Sổ theo dõi của tháng: môn học, năng lực chung, năng lực đặc thù, phẩm chất. Chạm các nút <b>Sổ tổng hợp / Tiếng Việt / Toán…</b> để xem từng sheet của biểu mẫu.</li>
-            <li>Đọc lại, <b>sửa trực tiếp</b> trong ô (app tự lưu khi chạm ra ngoài). Sửa nhầm: bấm <b>↺ Bản app ghép</b>.</li>
-            <li>Tích <b>"Chỉ em cần xem"</b> để lọc em chưa có ghi nhận trong tháng hoặc ô vượt giới hạn (số ký tự màu đỏ, quá 250 hệ thống không nhận).</li>
-            <li>Tải <b>file mẫu đánh giá thường xuyên</b> ("filemau_danhgia_thuongxuyen…") của lớp từ hệ thống của trường → ở mục <b>Xuất file nộp hệ thống</b>, chọn file đó → app điền vào đúng ô (ghép theo mã định danh, giữ nguyên định dạng).</li>
-            <li>Bấm <b>⬇ Tải file đã điền về máy</b> rồi nộp lên hệ thống. App cũng lưu 1 bản sao trong Google Drive (thư mục "App Sổ theo dõi / Biểu mẫu đã xuất").</li>
+            <li>Từ ngày 25, Trang chủ nhắc. Vào <b>Đánh giá</b> → <b>Thường xuyên (hằng tháng)</b> → chọn <b>tháng</b> → <b>Mở</b>.</li>
+            <li><b>Tiếng Việt, Toán</b>: mỗi em chọn 2 mức – <b>Kiến thức</b> (hiểu kiến thức) và <b>Kỹ năng</b> (kỹ năng môn học): HTXS / HTT / HT / CCG.
+              Làm nhanh: bấm <b>Chọn nhanh</b> (VD HTT) cho cả lớp, rồi chỉ chạm sửa các em khác mức. App ghép nhận xét từ thư viện tháng
+              và thêm 1 câu về <b>nộp vở</b> trong tháng.</li>
+            <li><b>HĐTN, Đạo đức</b>: chạm mức để có câu gợi ý, rồi cô sửa / tự viết.</li>
+            <li><b>Năng lực – phẩm chất</b>: chọn mức Tốt / Đạt / CCG cho <b>năng lực chung</b> và <b>phẩm chất</b> (có chọn nhanh cả lớp);
+              <b>năng lực đặc thù</b> app tự suy từ mức Tiếng Việt (ngôn ngữ) và Toán (tính toán).</li>
+            <li>Mọi ô nhận xét cô <b>sửa trực tiếp</b> được (app tự lưu); bấm <b>↺ Bản app ghép</b> để bỏ phần đã sửa. Tích <b>"Chỉ em cần xem"</b> để lọc em còn thiếu mức hoặc ô quá 250 ký tự.</li>
+            <li>Tải <b>file mẫu đánh giá thường xuyên</b> ("filemau_danhgia_thuongxuyen…") của tháng từ hệ thống → chọn ở mục <b>Xuất file nộp hệ thống</b>
+              → app điền đúng ô (Sổ tổng hợp các môn và từng môn) → <b>⬇ Tải file đã điền về máy</b> → nộp. Bản sao lưu trong Google Drive.</li>
           </ol>
-          <div class="nho">Em nào ít được ghi nhận trong tháng thì nhận xét sẽ ngắn hoặc trống – cô ghi Sổ theo dõi đều đặn thì bản ghép sẽ đầy đủ hơn. Môn cô không dạy (VD Âm nhạc) được để nguyên, không điền.</div>
+          <div class="nho">Thư viện tháng tải ở Cài đặt → Kho thư viện (file "Thư viện nhận xét THÁNG…"); mỗi học kì 1 file, các năm sau dùng lại. Môn cô không dạy (VD Âm nhạc) được để nguyên.</div>
         </details>
       </div>
 
@@ -819,6 +845,32 @@ var Parsers = (function () {
 
   // ---------------------------------------------------------------- Thư viện nhận xét
   // sheets: { tenSheet: aoa } ; trả về {thongTin, mon: [{ten, dong: [...]}], chung: [...]}
+  // Loại file thư viện theo sheet ThongTin: 'ThuVienNhanXet' (theo bài) hoặc 'ThuVienThang' (theo tháng)
+  function loaiThuVien(sheets) {
+    var loai = ''; (sheets['ThongTin'] || []).forEach(function (r) { if (r && String(r[0]).trim() === 'Loai') loai = String(r[1] || '').trim(); });
+    return loai;
+  }
+  // Thư viện THEO THÁNG: mỗi sheet môn có cột Tháng – Tiêu chí – Mức độ ("HTXS – Hoàn thành xuất sắc") – Mẫu – Nội dung nhận xét
+  function parseThuVienThang(sheets) {
+    var tt = {};
+    (sheets['ThongTin'] || []).forEach(function (r) { if (r && r[0]) tt[String(r[0]).trim()] = r[1] == null ? '' : String(r[1]).trim(); });
+    if (tt.Loai !== 'ThuVienThang') throw new Error('File không phải thư viện nhận xét THEO THÁNG (sheet ThongTin, Loai = ThuVienThang).');
+    var out = { thongTin: tt, mon: [] };
+    Object.keys(sheets).forEach(function (name) {
+      var aoa = sheets[name]; if (!aoa || !aoa.length) return;
+      var H = aoa[0].map(function (v) { return String(v || '').trim(); }), ix = function (t) { return H.indexOf(t); };
+      if (ix('Tháng') < 0 || ix('Tiêu chí') < 0 || ix('Mức độ') < 0 || ix('Nội dung nhận xét') < 0) return;
+      var dong = [];
+      for (var k = 1; k < aoa.length; k++) {
+        var x = aoa[k]; if (!x || !x[ix('Nội dung nhận xét')]) continue;
+        dong.push({ thang: s(x[ix('Tháng')]), tieuChi: s(x[ix('Tiêu chí')]), mucDo: s(x[ix('Mức độ')]).split(/\s+[–-]\s+/)[0].trim(),
+                    mau: s(x[ix('Mẫu')]), noiDung: s(x[ix('Nội dung nhận xét')]) });
+      }
+      if (dong.length) out.mon.push({ ten: name.split('–')[0].trim(), dong: dong });
+    });
+    if (!out.mon.length) throw new Error('Không thấy sheet môn nào có các cột Tháng – Tiêu chí – Mức độ – Nội dung nhận xét.');
+    return out;
+  }
   function parseThuVien(sheets) {
     var tt = {};
     (sheets['ThongTin'] || []).forEach(function (r) { if (r && r[0]) tt[String(r[0]).trim()] = r[1] == null ? '' : String(r[1]).trim(); });
@@ -853,7 +905,7 @@ var Parsers = (function () {
   function s(v) { return v == null ? '' : String(v).trim(); }
 
   return { parseSoBaoGiangXml: parseSoBaoGiangXml, parseDanhSachHocSinh: parseDanhSachHocSinh,
-           parseThuVien: parseThuVien, laChuyenDi: laChuyenDi, key: key };
+           parseThuVien: parseThuVien, parseThuVienThang: parseThuVienThang, loaiThuVien: loaiThuVien, laChuyenDi: laChuyenDi, key: key };
 })();
 
 // ============================================================================
@@ -1141,8 +1193,9 @@ function apDung(tt) {
   if (t === 'danhgia') moDanhGia();
   if (t === 'sotheodoi') {
     if (tt.ngay) $('stNgay').value = tt.ngay;
-    $('stPT').classList.add('an'); $('stChePT').classList.remove('on');
+    $('stPT').classList.add('an'); $('stChePT').classList.remove('on'); $('stVo').classList.add('an'); $('stCheVo').classList.remove('on');
     if (tt.buoc === 'pt') moPhongTrao(tt.maPT);
+    else if (tt.buoc === 'vo' || (!tt.buoc && !cnBat('theoBai'))) moNopVo();
     else if (tt.buoc === 'nhap') moBaiThat(tt.mon, tt.bai, tt.tiet, tt.ten);
     else if (tt.buoc === 'chung') moNhanXetChungThat();
     else hienChonBai();
@@ -1154,6 +1207,7 @@ function chuaLuu() {
   if (hienTai.tab === 'sotheodoi' && (hienTai.buoc === 'nhap' || hienTai.buoc === 'chung') &&
       (Object.keys(st.chon).length || Object.keys(st.cau).length || $('stGhiChu').value.trim())) return 'nhận xét đang chọn';
   if (hienTai.tab === 'caidat' && ghData && ghData.doi && Object.keys(ghData.doi).length) return 'ghép tiết với bài';
+  if (hienTai.tab === 'sotheodoi' && typeof vo !== 'undefined' && vo && vo.sua && !$('stVo').classList.contains('an')) return 'nộp vở ngày ' + vo.ngay;
   if (hienTai.tab === 'sotheodoi' && hienTai.buoc === 'pt' && hienTai.maPT && typeof ptCT !== 'undefined' && ptCT && ptCT.sua) return 'phong trào / cuộc thi chưa lưu';
   if (typeof mcTL !== 'undefined' && mcTL && mcTL.trang.length) return mcTL.trang.length + ' trang tài liệu vừa chụp chưa lưu';
   if (hienTai.tab === 'danhgia' && !hienTai.nhapDiem && typeof dkXem !== 'undefined' && Object.keys(dkXem).length) return Object.keys(dkXem).length + ' bản AI chưa chọn (Dùng / Giữ bản cũ)';
@@ -1188,7 +1242,7 @@ function veTrangChu(d) {
     if (!d.siSo || !d.hocKy) d.nhac.unshift({ muc: 'xanh', text: '📖 Lần đầu dùng app? Chạm vào đây để xem Hướng dẫn sử dụng (mục 1: làm theo thứ tự).', toi: 'huongdan' });
     $('tcNhac').innerHTML = d.nhac.map(function (n) { return '<div class="nhac ' + n.muc + '" onclick="' + (n.toi ? "moTab('" + n.toi + "')" : '') + '">' + esc(n.text) + '</div>'; }).join('');
     $('tcLich').innerHTML = d.lich.length ? d.lich.map(function (r) {
-      var co = !!r.mon;
+      var co = !!r.mon && cnBat('theoBai');
       return '<div class="tiet ' + (co ? '' : 'mo') + '" ' + (co ? 'onclick="moTietTuTrangChu(' + r.tiet + ')"' : '') + '><div class="so">' + r.tiet + '</div><div><div class="mon">' + esc(r.monSBG) +
         (r.bai ? ' · <span class="nho">' + esc(r.bai) + '</span>' : '') + '</div><div class="ten">' + esc(r.ten) + '</div></div></div>';
     }).join('') : '<div class="nho">Hôm nay không có tiết dạy trong Sổ báo giảng.</div>';
@@ -1242,6 +1296,7 @@ function luuDiemDanhUI() {
 // ============================================================================ SỔ THEO DÕI
 var st = { tiet: [], mon: '', bai: '', soTiet: '', bo: null, hd: 0, muc: '', cau: {}, hs: [], chon: {} };
 function doiCheDo(c) {
+  if (c === 'vo') { if ($('stVo').classList.contains('an')) diToi({ tab: 'sotheodoi', buoc: 'vo' }); return; }
   if (c === 'pt') { if (hienTai.buoc !== 'pt' || hienTai.maPT) diToi({ tab: 'sotheodoi', buoc: 'pt' }); return; }
   if (c === 'chung') { if (hienTai.buoc !== 'chung') diToi({ tab: 'sotheodoi', buoc: 'chung', ngay: $('stNgay').value }); }
   else if (hienTai.buoc) moChonBai();
@@ -1272,6 +1327,10 @@ function taiTietTrongNgay() {
   });
 }
 function doiNgaySTD() {
+  if (!$('stVo').classList.contains('an')) {          // đang ở Nộp vở
+    if (vo && vo.sua && !confirm('Cô chưa lưu nộp vở ngày ' + vo.ngay + '. Đổi ngày và bỏ thay đổi?')) { $('stNgay').value = dmyToIso(vo.ngay); return; }
+    return taiNopVo();
+  }
   if (hienTai.buoc && chuaLuu() && !confirm('Cô chưa lưu nhận xét đang chọn. Đổi ngày và bỏ thay đổi?')) return;
   st.chon = {}; st.cau = {}; $('stGhiChu').value = '';
   if (hienTai.buoc === 'nhap') diToi({ tab: 'sotheodoi', ngay: $('stNgay').value }); else if (hienTai.buoc === 'chung') moNhanXetChungThat(); else taiTietTrongNgay();
@@ -1521,7 +1580,7 @@ function veKho() {
       var co = d.kho.some(function (k) { return k.Khoi === c.Khoi && k.BoSach === c.BoSach && k.HocKy === h && k.Mon === m; });
       return '<span class="tag ' + (co ? 'xanh' : 'do') + '">' + esc(m) + (co ? ' ✓' : ' ✗') + '</span>';
     }).join(' ') + '</div>';
-  }).join('');
+  }).join('') + veKhoThang(d);
   $('khoDs').innerHTML = d.kho.length ? '<table class="bang"><tr><th>Khối</th><th>HK</th><th>Môn</th><th>Số bài</th><th>Số câu</th><th>Ngày tải</th></tr>' + d.kho.map(function (k) {
     return '<tr><td>' + esc(k.Khoi) + '</td><td>' + esc(k.HocKy) + '</td><td>' + esc(k.Mon) + '</td><td>' + esc(k.SoBai) + '</td><td>' + esc(k.SoCau) + '</td><td>' + esc(k.NgayTai) + '</td></tr>';
   }).join('') + '</table>' : '<div class="nho">Kho trống.</div>';
@@ -1553,7 +1612,9 @@ function nhapSBGUI() {
 function docFileThuVien(input) {
   docFile(input).then(function (f) {
     try {
-      var kq = Parsers.parseThuVien(docExcel(f.data).sheets); tvFileData = { ten: f.ten, kq: kq }; var t = kq.thongTin;
+      var sheets = docExcel(f.data).sheets;
+      if (Parsers.loaiThuVien(sheets) === 'ThuVienThang') return xemTVThang(f.ten, sheets);
+      var kq = Parsers.parseThuVien(sheets); tvFileData = { ten: f.ten, kq: kq }; var t = kq.thongTin;
       $('tvXem').innerHTML = '<div class="the" style="background:#f7f9fc;margin-top:10px"><b>Lớp ' + esc(t.Khoi) + ' · ' + esc(t.BoSach) + ' · HK ' + esc(t.HocKy) + '</b>' +
         '<div style="margin:6px 0">' + kq.mon.map(function (m) { return esc(m.ten) + ': ' + m.dong.length + ' câu'; }).join(' · ') + (kq.chung.length ? ' · Nhận xét chung: ' + kq.chung.length + ' câu' : '') + '</div>' +
         (cdData && cdData.caiDat.Khoi && String(t.Khoi) !== String(cdData.caiDat.Khoi) ? '<div class="nhac vang">Thư viện của lớp ' + esc(t.Khoi) + ', lớp đang dạy là ' + esc(cdData.caiDat.Khoi) + '. Vẫn đưa vào kho để dùng sau.</div>' : '') +
@@ -2661,10 +2722,11 @@ function ptXuat() {
 
 // ============================================================================ GIAO DIỆN GỌN: chức năng bật/tắt + hiện theo thời điểm
 // GD lấy cùng Trang chủ (máy chủ tính), nhớ trên máy để lần mở sau áp dụng ngay.
-var GD = { chucNang: { tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' }, kyHien: [], kyNhac: [], hienGVCN: false, hienNamHoc: true };
+var GD = { chucNang: { theoBai: false, tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' }, kyHien: [], kyNhac: [], hienGVCN: false, hienNamHoc: true };
 try { var _gd = JSON.parse(localStorage.getItem('giaoDien') || 'null'); if (_gd && _gd.chucNang) GD = _gd; } catch (e) {}
 function cnBat(k) { return !!(GD.chucNang && GD.chucNang[k]); }
 var DS_CN = [
+  ['theoBai', '📝 Ghi nhận xét theo từng bài học (cách cũ)', 'Ghi mức, câu nhận xét cho từng em sau mỗi tiết. Cô đã chuyển sang đánh giá theo tháng nên tắt sẵn.'],
   ['tongHopDD', '📊 Tổng hợp điểm danh', 'Xem, xuất Excel số ngày vắng theo tuần, tháng, học kì, năm (trong màn Điểm danh).'],
   ['phongTrao', '🏆 Phong trào – Cuộc thi', 'Ghi các em tham gia, đạt giải; đưa vào hồ sơ và nhận xét GVCN (trong Sổ theo dõi).'],
   ['minhChung', '📎 Minh chứng', 'Chụp tài liệu, bài làm, giấy khen vào hồ sơ từng em; gộp thành PDF.'],
@@ -2676,7 +2738,7 @@ function apDungGiaoDien(gd) {
   var an = function (id, a) { var e = $(id); if (e) e.classList.toggle('an', !!a); };
   an('ddCheRow', !cnBat('tongHopDD'));
   if (!cnBat('tongHopDD') && !$('ddVungTH').classList.contains('an')) ddCheDo('ngay');
-  an('stChePT', !cnBat('phongTrao'));
+  an('stChePT', !cnBat('phongTrao')); an('stCheBai', !cnBat('theoBai')); an('stCheChung', !cnBat('theoBai'));
   var coKy = GD.kyHien.length > 0 || GD.hienGVCN;          // Đánh giá: phần Định kỳ chỉ hiện khi đến kì
   an('dgChonThe', !coKy);
   if (!coKy && !$('dgKy').classList.contains('an')) dgChonLoai('thang');
@@ -2709,13 +2771,243 @@ var TT = { ngay: '', bai: {}, dd: null, luc: 0 }, stLuuCho = 0;
 function taiTruocHomNay(lich) {
   var ngay = isoToDmy(homNayIso()), co = {}, ds = [];
   if (TT.ngay === ngay && Date.now() - TT.luc < 5 * 60000) return;      // vừa tải trong 5 phút: thôi
-  (lich || []).forEach(function (r) {
+  (cnBat('theoBai') ? lich || [] : []).forEach(function (r) {
     if (!r.mon) return;
     var x = { mon: r.mon, bai: r.bai || '', baiHS: r.bai || r.ten || '' }, k = x.mon + '|' + x.bai + '|' + x.baiHS;
     if (!co[k]) { co[k] = 1; ds.push(x); }
   });
   TT.luc = Date.now();
   goi('layTaiTruoc', ngay, ds).then(function (kq) { kq.luc = TT.luc; TT = kq; }, function () { TT.luc = 0; });
+}
+
+// ============================================================================ ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới, theo quyết định của cô)
+// Toán, TV: 2 tiêu chí × 4 mức → câu từ thư viện tháng + câu nộp vở. HĐTN, Đạo đức: cô nhận xét (có câu gợi ý theo mức).
+// NL đặc thù tự suy từ mức Toán, TV; NL chung, phẩm chất cô chọn mức. Mọi ô cô sửa được (lưu phần sửa, bấm ↺ để lấy lại bản app ghép).
+var tg = null, tgPhan = 'Tiếng Việt', tgCho = {}, tgHen = null;
+var TC_KT = 'Hiểu kiến thức', TC_KN = 'Kỹ năng môn học';
+var MUC_T = ['HTXS', 'HTT', 'HT', 'CCG'], MUC_NL3 = ['Tốt', 'Đạt', 'Cần cố gắng'];
+var TEN_MUC_T = { HTXS: 'Hoàn thành xuất sắc', HTT: 'Hoàn thành tốt', HT: 'Hoàn thành', CCG: 'Cần cố gắng', 'Tốt': 'Tốt', 'Đạt': 'Đạt', 'Cần cố gắng': 'Cần cố gắng' };
+var MON_CO_VO = ['Tiếng Việt', 'Toán'];
+var GOI_Y_MON = {      // câu gợi ý cho môn cô tự nhận xét – chạm mức để có câu, rồi sửa tuỳ ý
+  'Hoạt động trải nghiệm': {
+    HTXS: ['Tích cực, sáng tạo trong các hoạt động trải nghiệm.', 'Tham gia hoạt động rất hào hứng, biết chia sẻ cảm nghĩ.', 'Vận dụng tốt điều đã học vào cuộc sống hằng ngày.', 'Chủ động, hợp tác tốt với bạn trong hoạt động.'],
+    HTT: ['Tham gia tích cực các hoạt động trải nghiệm.', 'Biết chia sẻ, hợp tác với bạn khi hoạt động.', 'Thực hiện tốt các nhiệm vụ được giao.', 'Biết vận dụng điều đã học vào cuộc sống.'],
+    HT: ['Tham gia đầy đủ các hoạt động trải nghiệm.', 'Thực hiện được nhiệm vụ khi có hướng dẫn.', 'Đôi khi còn rụt rè khi tham gia hoạt động.', 'Hoàn thành các hoạt động theo yêu cầu.'],
+    CCG: ['Cần tích cực hơn khi tham gia hoạt động.', 'Cần mạnh dạn chia sẻ với thầy cô, bạn bè.', 'Cần hợp tác với bạn tốt hơn.', 'Cần chú ý thực hiện nhiệm vụ được giao.'] },
+  'Đạo đức': {
+    HTXS: ['Hiểu rõ và thực hiện rất tốt các chuẩn mực đã học.', 'Biết nhắc nhở bạn cùng thực hiện hành vi đúng.', 'Luôn lễ phép, kính trọng thầy cô, yêu quý bạn bè.', 'Vận dụng tốt bài học vào việc làm hằng ngày.'],
+    HTT: ['Hiểu và thực hiện tốt các hành vi đã học.', 'Lễ phép, biết kính trọng thầy cô.', 'Biết yêu quý, giúp đỡ bạn bè.', 'Biết làm những việc phù hợp với bài học.'],
+    HT: ['Biết các hành vi đạo đức đã học.', 'Thực hiện được hành vi đúng khi được nhắc nhở.', 'Biết lễ phép với thầy cô, bạn bè.', 'Hoàn thành các bài học theo yêu cầu.'],
+    CCG: ['Cần thực hiện tốt hơn các hành vi đã học.', 'Cần lễ phép hơn với thầy cô, bạn bè.', 'Cần chú ý lắng nghe và làm theo bài học.', 'Cần cố gắng tự giác làm việc tốt.'] }
+};
+var CAU_NLD = {         // năng lực đặc thù – tự suy từ mức Tiếng Việt (ngôn ngữ), Toán (tính toán)
+  'Ngôn ngữ': { 'Tốt': ['Năng lực ngôn ngữ tốt: đọc, viết, nói rõ ràng.', 'Đọc, viết, diễn đạt tốt.'], 'Đạt': ['Năng lực ngôn ngữ đạt yêu cầu.', 'Đọc, viết đạt yêu cầu.'],
+                'Cần cố gắng': ['Cần rèn thêm kĩ năng đọc, viết.', 'Cần luyện đọc, viết nhiều hơn.'] },
+  'Tính toán': { 'Tốt': ['Năng lực tính toán tốt: tính nhanh, chính xác.', 'Tính toán nhanh, cẩn thận.'], 'Đạt': ['Năng lực tính toán đạt yêu cầu.', 'Tính toán đạt yêu cầu.'],
+                 'Cần cố gắng': ['Cần rèn thêm kĩ năng tính toán.', 'Cần luyện tính toán cẩn thận hơn.'] }
+};
+function noiCauJS(ds, n) { var out = ''; ds.forEach(function (c) { if (!c) return; var t = out ? out + ' ' + c : c; if (t.length <= n) out = t; }); return out; }
+function noiDsJS(ds) { return ds.length < 2 ? ds.join('') : ds.slice(0, -1).join(', ') + ' và ' + ds[ds.length - 1]; }
+function chon4(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }   // mỗi em 1 mẫu câu, cố định
+function tgO(ma, phan) { var d = tg.du[ma] = tg.du[ma] || {}; return d[phan] = d[phan] || { mucKT: '', mucKN: '', muc: '', nx: '' }; }
+function tgMon(ten) { return tg.mon.filter(function (m) { return m.ten === ten; })[0]; }
+function cauVo(ma, mon) {
+  if (!tg.soNgayVo || MON_CO_VO.indexOf(mon) < 0) return '';
+  var v = (tg.vo[ma] || {})[mon], bad = v ? v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn'] : 0;
+  if (!bad) return 'Nộp vở đầy đủ, đúng hạn.';
+  var loai = []; if (v['Chưa nộp']) loai.push('chưa nộp vở'); if (v['Chưa làm xong']) loai.push('chưa làm xong bài'); if (v['Nộp muộn']) loai.push('nộp vở muộn');
+  return bad <= 2 ? 'Đôi khi còn ' + noiDsJS(loai) + '.' : 'Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn.';
+}
+function mucNLD(ma, mon) {
+  var o = tgO(ma, mon), m = [o.mucKT, o.mucKN].filter(Boolean);
+  if (!m.length) return '';
+  if (m.indexOf('CCG') >= 0) return 'Cần cố gắng';
+  return m.every(function (x) { return x === 'HTXS' || x === 'HTT'; }) ? 'Tốt' : 'Đạt';
+}
+function banApp(ma, phan) {        // nhận xét app ghép (khi cô chưa sửa)
+  if (phan === 'NLD') { var a = mucNLD(ma, 'Tiếng Việt'), b = mucNLD(ma, 'Toán');
+    return noiCauJS([a ? chon4(CAU_NLD['Ngôn ngữ'][a], ma, 0) : '', b ? chon4(CAU_NLD['Tính toán'][b], ma, 1) : ''], tg.gioiHan); }
+  if (phan === 'NLC' || phan === 'PC') { var o = tgO(ma, phan); if (!o.muc) return '';
+    var ds = (phan === 'NLC' ? tg.nxChung.nlc : tg.nxChung.pc)[o.muc] || [], c1 = chon4(ds, ma, 0), c2 = chon4(ds, ma, 2);
+    return noiCauJS([c1, c2 !== c1 ? c2 : ''], tg.gioiHan); }
+  var m = tgMon(phan), x = tgO(ma, phan);
+  if (m && m.tieuChi) {
+    if (!x.mucKT && !x.mucKN) return '';
+    var lib = tg.lib[phan] || {};
+    return noiCauJS([x.mucKT ? chon4((lib[TC_KT] || {})[x.mucKT], ma, 0) : '', x.mucKN ? chon4((lib[TC_KN] || {})[x.mucKN], ma, 1) : '', cauVo(ma, phan)], tg.gioiHan);
+  }
+  return x.muc ? noiCauJS([chon4((GOI_Y_MON[phan] || {})[x.muc], ma, 0), cauVo(ma, phan)], tg.gioiHan) : '';
+}
+function nxCua(ma, phan) { var o = tgO(ma, phan); return o.nx || banApp(ma, phan); }
+function ghepTongHop(ma) {         // ô "Môn học" của sheet Sổ tổng hợp: câu đầu của từng môn
+  return noiCauJS(tg.mon.map(function (m) { var t = nxCua(ma, m.ten); return t ? m.ten + ': ' + t.split('. ')[0].replace(/\.?$/, '.') : ''; }), tg.gioiHan);
+}
+function taiThang() {
+  chay('layDanhGiaThang', +$('bmThang').value).then(function (d) {
+    tg = d; if (tgPhan !== 'NLPC' && !tgMon(tgPhan)) tgPhan = d.mon.length ? d.mon[0].ten : 'NLPC';
+    $('bmKetQua').innerHTML = ''; $('bmFile').value = ''; $('tgNoiDung').classList.remove('an'); veThang();
+  });
+}
+function tgChonPhan(p) { tgPhan = p; veThang(); window.scrollTo(0, 0); }
+function tgCanXem(h) {
+  var vuot = function (p) { return nxCua(h.ma, p).length > tg.gioiHan; };
+  if (tgPhan === 'NLPC') return !tgO(h.ma, 'NLC').muc || !tgO(h.ma, 'PC').muc || ['NLC', 'NLD', 'PC'].some(vuot);
+  var m = tgMon(tgPhan), o = tgO(h.ma, tgPhan);
+  return (m && m.tieuChi ? (!o.mucKT || !o.mucKN) : !nxCua(h.ma, tgPhan)) || vuot(tgPhan);
+}
+function tgSeg(ma, phan, truong, gt, ds) {
+  return '<span class="seg">' + ds.map(function (m) {
+    var cls = m === gt ? 'on ' + (m === 'HTXS' || m === 'HTT' || m === 'Tốt' ? 'co' : m === 'CCG' || m === 'Cần cố gắng' ? 'kp' : 'p') : '';
+    return '<button class="' + cls + '" title="' + esc(TEN_MUC_T[m]) + '" data-ma="' + ma + '" data-phan="' + esc(phan) + '" data-tr="' + truong + '" data-m="' + esc(m) + '" onclick="tgDatMuc(this)">' +
+      (m === 'Cần cố gắng' ? 'CCG' : m) + '</button>';
+  }).join('') + '</span>';
+}
+function tgONX(ma, phan, nhan) {
+  var o = tgO(ma, phan), v = nxCua(ma, phan), vuot = v.length > tg.gioiHan;
+  return '<div class="bm-o"><label><span>' + nhan + (o.nx ? ' <span class="tag vang">cô đã sửa</span>' : '') + '</span><span>' +
+    (o.nx ? '<button class="nut phu nut-nho" data-ma="' + ma + '" data-phan="' + esc(phan) + '" onclick="tgLayLai(this)">↺ Bản app ghép</button> ' : '') +
+    '<span class="dem' + (vuot ? ' vuot' : '') + '">' + v.length + '/' + tg.gioiHan + '</span></span></label>' +
+    '<textarea data-ma="' + ma + '" data-phan="' + esc(phan) + '" oninput="tgDem(this)" onblur="tgLuuNX(this)" placeholder="(chọn mức để app ghép câu, hoặc cô tự viết)">' + esc(v) + '</textarea></div>';
+}
+function tgTheVo(ma, mon) {
+  if (MON_CO_VO.indexOf(mon) < 0 || !tg.soNgayVo) return '';
+  var v = (tg.vo[ma] || {})[mon], bad = v ? v['Chưa nộp'] + v['Chưa làm xong'] + v['Nộp muộn'] : 0;
+  return bad ? '<span class="tag vang">Vở: ' + ['Chưa nộp', 'Chưa làm xong', 'Nộp muộn'].filter(function (k) { return v[k]; }).map(function (k) { return k.toLowerCase() + ' ' + v[k]; }).join(', ') + '</span>'
+    : '<span class="tag xanh">Vở: đủ</span>';
+}
+function veThang() {
+  if (!tg) return;
+  var n = tg.hs.length, coTV = tg.mon.filter(function (m) { return m.tieuChi; });
+  $('tgTomTat').innerHTML = 'Tháng ' + tg.thang + '/' + tg.nam + ' · ' + n + ' học sinh · ' + tg.mon.map(function (m) {
+    var du = tg.hs.filter(function (h) { var o = tgO(h.ma, m.ten); return m.tieuChi ? o.mucKT && o.mucKN : nxCua(h.ma, m.ten); }).length;
+    return '<span class="tag ' + (du === n ? 'xanh' : 'vang') + '">' + esc(m.ten) + ' ' + du + '/' + n + '</span>';
+  }).join(' ') + ' · nộp vở đã ghi ' + tg.soNgayVo + ' ngày' +
+    (MON_CO_VO.some(function (m) { return tgMon(m) && !tgMon(m).tieuChi; }) ? '<div class="nhac vang" style="cursor:default;margin-top:6px">Chưa có thư viện tháng ' + tg.thang + ' (học kì ' + tg.hocKy +
+      ') cho Toán / Tiếng Việt – tải file "Thư viện nhận xét THÁNG…" ở Cài đặt → Kho thư viện. Tạm thời cô tự viết nhận xét.</div>' : '');
+  $('tgPhan').innerHTML = tg.mon.map(function (m) { return '<span class="chip' + (m.ten === tgPhan ? ' on' : '') + '" data-p="' + esc(m.ten) + '" onclick="tgChonPhan(this.dataset.p)">' + esc(m.ten) + '</span>'; }).join('') +
+    '<span class="chip' + (tgPhan === 'NLPC' ? ' on' : '') + '" onclick="tgChonPhan(\'NLPC\')">Năng lực – phẩm chất</span>';
+  var m = tgMon(tgPhan), nut = function (phan, tr, ds, nhan) {
+    return '<div class="tg-hang"><span class="tg-nhan">' + nhan + '</span>' + ds.map(function (x) {
+      return '<button class="nut phu nut-nho" data-phan="' + esc(phan) + '" data-tr="' + tr + '" data-m="' + esc(x) + '" onclick="tgCaLop(this)">' + (x === 'Cần cố gắng' ? 'CCG' : x) + '</button>'; }).join(' ') + '</div>';
+  };
+  $('tgNhanh').innerHTML = '<div class="nho"><b>Chọn nhanh cho các em chưa có mức</b> (rồi chạm sửa từng em khác mức):</div>' +
+    (tgPhan === 'NLPC' ? nut('NLC', 'muc', MUC_NL3, 'NL chung') + nut('PC', 'muc', MUC_NL3, 'Phẩm chất')
+      : m && m.tieuChi ? nut(tgPhan, 'mucKT', MUC_T, 'Kiến thức') + nut(tgPhan, 'mucKN', MUC_T, 'Kỹ năng') : nut(tgPhan, 'muc', MUC_T, 'Mức'));
+  var q = ($('tgTim').value || '').toLowerCase(), chi = $('tgChiCanXem').checked;
+  var ds = tg.hs.filter(function (h) { return (!q || h.ten.toLowerCase().indexOf(q) >= 0) && (!chi || tgCanXem(h)); });
+  $('tgDs').innerHTML = ds.length ? ds.map(function (h) {
+    var dau = '<div class="the bm-hs' + (tgCanXem(h) ? ' trong' : '') + '"><div><span class="nho">' + h.stt + '.</span> <b>' + esc(h.ten) + '</b> ' + (tgPhan !== 'NLPC' ? tgTheVo(h.ma, tgPhan) : '') + '</div>';
+    if (tgPhan === 'NLPC') {
+      var a = mucNLD(h.ma, 'Tiếng Việt'), b = mucNLD(h.ma, 'Toán');
+      return dau + '<div class="tg-hang"><span class="tg-nhan">NL chung</span>' + tgSeg(h.ma, 'NLC', 'muc', tgO(h.ma, 'NLC').muc, MUC_NL3) + '</div>' +
+        '<div class="tg-hang"><span class="tg-nhan">Phẩm chất</span>' + tgSeg(h.ma, 'PC', 'muc', tgO(h.ma, 'PC').muc, MUC_NL3) + '</div>' +
+        '<div class="nho" style="margin-top:4px">NL đặc thù (app tự suy): ngôn ngữ <b>' + (a || '–') + '</b> (từ Tiếng Việt) · tính toán <b>' + (b || '–') + '</b> (từ Toán)</div>' +
+        tgONX(h.ma, 'NLC', 'Năng lực chung') + tgONX(h.ma, 'NLD', 'Năng lực đặc thù') + tgONX(h.ma, 'PC', 'Phẩm chất chủ yếu') + '</div>';
+    }
+    var o = tgO(h.ma, tgPhan);
+    return dau + (m && m.tieuChi
+      ? '<div class="tg-hang"><span class="tg-nhan">Kiến thức</span>' + tgSeg(h.ma, tgPhan, 'mucKT', o.mucKT, MUC_T) + '</div>' +
+        '<div class="tg-hang"><span class="tg-nhan">Kỹ năng</span>' + tgSeg(h.ma, tgPhan, 'mucKN', o.mucKN, MUC_T) + '</div>'
+      : '<div class="tg-hang"><span class="tg-nhan">Mức</span>' + tgSeg(h.ma, tgPhan, 'muc', o.muc, MUC_T) + '<span class="nho">chạm để có câu gợi ý</span></div>') +
+      tgONX(h.ma, tgPhan, 'Nhận xét môn ' + esc(tgPhan)) + '</div>';
+  }).join('') : '<div class="the nho">Không có học sinh phù hợp.</div>';
+}
+// Lưu ngầm, gom các thay đổi gần nhau thành 1 lần gọi máy chủ
+function tgGhi(ma, phan) {
+  tgCho[ma + '|' + phan] = 1; clearTimeout(tgHen);
+  tgHen = setTimeout(function () {
+    var ds = Object.keys(tgCho).map(function (k) { var p = k.split('|'), o = tgO(p[0], p[1]); return { ma: p[0], phan: p[1], mucKT: o.mucKT, mucKN: o.mucKN, muc: o.muc, nx: o.nx }; });
+    tgCho = {};
+    goi('luuDanhGiaThang', tg.thang, ds).then(function () { bao('Đã lưu.', 1200); }, function (e) { bao('Chưa lưu được: ' + ((e && e.message) || e) + ' – thao tác lại giúp cô.', 8000); });
+  }, 600);
+}
+function tgDatMuc(el) {
+  var d = el.dataset, o = tgO(d.ma, d.phan); o[d.tr] = o[d.tr] === d.m ? '' : d.m;
+  tgGhi(d.ma, d.phan); if (d.phan === 'Tiếng Việt' || d.phan === 'Toán') tgGhi(d.ma, 'NLD');
+  veThang();
+}
+function tgCaLop(el) {
+  var d = el.dataset, n = 0;
+  tg.hs.forEach(function (h) { var o = tgO(h.ma, d.phan); if (!o[d.tr]) { o[d.tr] = d.m; tgGhi(h.ma, d.phan); n++; } });
+  veThang(); bao(n ? 'Đã đặt mức ' + d.m + ' cho ' + n + ' em chưa có mức.' : 'Các em đều đã có mức.');
+}
+function tgDem(el) { var n = el.value.length, d = el.parentNode.querySelector('.dem'); d.textContent = n + '/' + tg.gioiHan; d.classList.toggle('vuot', n > tg.gioiHan); }
+function tgLuuNX(el) {
+  var ma = el.dataset.ma, phan = el.dataset.phan, v = el.value.trim(), o = tgO(ma, phan), app = banApp(ma, phan);
+  var moi = v === app ? '' : v;
+  if (moi === (o.nx || '')) return;
+  o.nx = moi; tgGhi(ma, phan); veThang();
+}
+function tgLayLai(el) { var o = tgO(el.dataset.ma, el.dataset.phan); o.nx = ''; tgGhi(el.dataset.ma, el.dataset.phan); veThang(); }
+// Xuất: dựng dữ liệu theo đúng các sheet của file mẫu tháng rồi dùng lại phần điền file đã có
+function dungBM() {
+  var du = {};
+  tg.hs.forEach(function (h) {
+    var nlc = nxCua(h.ma, 'NLC'), nld = nxCua(h.ma, 'NLD'), pc = nxCua(h.ma, 'PC'); du[h.ma] = {};
+    tg.sheets.forEach(function (s) { du[h.ma][s.ten] = { mon: s.mon ? nxCua(h.ma, s.mon) : ghepTongHop(h.ma), nlc: nlc, nld: nld, pc: pc }; });
+  });
+  bm = { thang: tg.thang, nam: tg.nam, gioiHan: tg.gioiHan, hs: tg.hs, sheets: tg.sheets, du: du };
+}
+function xuatThang(input) {
+  if (!tg) { input.value = ''; return bao('Cô bấm "Mở" tháng cần xuất trước.'); }
+  document.activeElement && document.activeElement.blur && document.activeElement.blur();
+  var thieu = tg.hs.filter(function (h) { return tg.mon.some(function (m) { var o = tgO(h.ma, m.ten); return m.tieuChi ? !o.mucKT || !o.mucKN : !nxCua(h.ma, m.ten); }); }).length;
+  if (thieu && !confirm(thieu + ' em còn thiếu mức / nhận xét ở một số môn (ô đó sẽ để trống). Vẫn xuất?')) { input.value = ''; return; }
+  dungBM(); xuatBieuMauThang(input);
+}
+
+// ============================================================================ NỘP VỞ HẰNG NGÀY (Sổ theo dõi → 📒 Nộp vở)
+var vo = null, voMon = 'Tiếng Việt';
+var VO_NUT = [['Đã nộp', 'Nộp', 'co'], ['Chưa nộp', 'Chưa nộp', 'kp'], ['Chưa làm xong', 'Chưa xong', 'p'], ['Nộp muộn', 'Muộn', 'p']];
+function moNopVo() {
+  $('stChonBai').classList.add('an'); $('stNhap').classList.add('an'); $('stPT').classList.add('an'); $('stVo').classList.remove('an');
+  ['stCheBai', 'stCheChung', 'stChePT'].forEach(function (id) { $(id).classList.remove('on'); }); $('stCheVo').classList.add('on');
+  taiNopVo();
+}
+function taiNopVo() {
+  if (!$('stNgay').value) $('stNgay').value = homNayIso();
+  chay('layNopVo', isoToDmy($('stNgay').value)).then(function (d) { vo = d; vo.sua = false; veNopVo(); });
+}
+function veNopVo() {
+  if (!vo) return;
+  $('voMonChip').innerHTML = vo.mon.map(function (m) { return '<span class="chip' + (m === voMon ? ' on' : '') + '" data-m="' + esc(m) + '" onclick="voChonMon(this.dataset.m)">' + esc(m) + '</span>'; }).join('');
+  $('voTomTat').innerHTML = vo.ngay + ' · ' + vo.mon.map(function (m) { var k = vo.hs.filter(function (h) { return h.tt[m] !== 'Đã nộp'; }).length; return m + ': ' + (k ? k + ' em chưa đủ' : 'đủ'); }).join(' · ') + ' · ' +
+    (vo.sua ? '<span class="tag vang">chưa lưu</span>' : vo.daLuu ? '<span class="tag xanh">đã lưu</span>' : '<span class="tag">chưa ghi</span>');
+  $('voDs').innerHTML = vo.hs.length ? vo.hs.map(function (h, i) {
+    return '<div class="dd-hang"><div><span class="nho">' + (i + 1) + '.</span> ' + esc(h.ten) + '</div><span class="seg">' + VO_NUT.map(function (b) {
+      return '<button class="' + (h.tt[voMon] === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + VO_NUT.indexOf(b) + ')">' + b[1] + '</button>';
+    }).join('') + '</span></div>';
+  }).join('') : '<div class="nho">Chưa có danh sách học sinh.</div>';
+}
+function voChonMon(m) { voMon = m; veNopVo(); }
+function voDat(i, k) { var tt = VO_NUT[k][0]; if (vo.hs[i].tt[voMon] !== tt) { vo.hs[i].tt[voMon] = tt; vo.sua = true; } veNopVo(); }
+function voBoThayDoi() { if (!vo || !vo.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại?')) taiNopVo(); }
+function voLuu() {
+  if (!vo || !vo.hs.length) return bao('Chưa có danh sách học sinh.');
+  var ngay = vo.ngay, cu = vo;                   // lưu ngầm như điểm danh
+  vo.daLuu = true; vo.sua = false; veNopVo(); bao('Đang lưu nộp vở…', 20000);
+  goi('luuNopVo', ngay, vo.hs.map(function (h) { return { ma: h.ma, tt: h.tt }; })).then(function (m) { bao(m, 5000); },
+    function (e) { if (vo === cu) { vo.sua = true; veNopVo(); } bao('Chưa lưu được nộp vở ' + ngay + ': ' + ((e && e.message) || e) + ' – bấm Lưu lần nữa.', 9000); });
+}
+
+// ============================================================================ KHO THƯ VIỆN THÁNG (Cài đặt)
+function xemTVThang(ten, sheets) {
+  var kq = Parsers.parseThuVienThang(sheets), t = kq.thongTin, thang = {};
+  tvFileData = { ten: ten, kq: kq, thang: true };
+  kq.mon.forEach(function (m) { m.dong.forEach(function (d) { thang[d.thang] = 1; }); });
+  $('tvXem').innerHTML = '<div class="the" style="background:#f7f9fc;margin-top:10px"><b>Thư viện THEO THÁNG · Lớp ' + esc(t.Khoi) + ' · ' + esc(t.BoSach) + ' · HK ' + esc(t.HocKy) + '</b>' +
+    '<div style="margin:6px 0">' + kq.mon.map(function (m) { return esc(m.ten) + ': ' + m.dong.length + ' câu'; }).join(' · ') + ' · tháng ' + Object.keys(thang).join(', ') + '</div>' +
+    '<div class="nho">Môn trùng (cùng học kì) sẽ được thay bằng bản mới; mức cô đã chọn cho học sinh vẫn giữ.</div>' +
+    '<div class="hang" style="margin-top:8px"><button class="nut" onclick="nhapTVThangUI()">Đưa vào Kho thư viện</button><button class="nut phu" onclick="huyXem(\'tvXem\',\'tvFile\')">Huỷ</button></div></div>';
+}
+function nhapTVThangUI() {
+  chay('nhapThuVienThang', tvFileData.ten, tvFileData.kq).then(function (m) { bao(m, 9000); $('tvXem').innerHTML = '<div class="nhac xanh">' + esc(m) + '</div>'; $('tvFile').value = ''; taiCaiDat(); });
+}
+function veKhoThang(d) {
+  var ds = d.khoThang || [];
+  return '<div style="margin:6px 0"><b>Thư viện tháng:</b> ' + (ds.length ? ds.map(function (k) {
+    return '<span class="tag xanh">HK ' + esc(k.hocKy) + ' · ' + esc(k.mon) + ' (' + k.soCau + ' câu, tháng ' + esc(k.thang.join(', ')) + ')</span>';
+  }).join(' ') : '<span class="tag do">chưa có – tải file "Thư viện nhận xét THÁNG…"</span>') + '</div>';
 }
 
 // ============================================================================ KHỞI ĐỘNG

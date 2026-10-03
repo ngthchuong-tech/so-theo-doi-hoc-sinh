@@ -32,7 +32,7 @@
       <div class="the">
         <div class="luoi-nut">
           <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
-          <button class="nut" onclick="moTab('sotheodoi')">📝<br>Sổ theo dõi</button>
+          <button class="nut" onclick="moTab('sotheodoi')">📒<br>Nộp vở</button>
           <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
         </div>
       </div>
@@ -87,6 +87,7 @@
           <input type="date" id="stNgay" onchange="doiNgaySTD()">
         </div>
         <div class="hang" style="margin-top:8px">
+          <span class="chip" id="stCheVo" onclick="doiCheDo('vo')">📒 Nộp vở</span>
           <span class="chip on" id="stCheBai" onclick="doiCheDo('bai')">Theo bài học</span>
           <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
           <span class="chip" id="stChePT" onclick="doiCheDo('pt')">🏆 Phong trào – Cuộc thi</span>
@@ -129,6 +130,16 @@
             <div class="cuon" id="stVuaGhi"></div></details>
         </div>
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="boChonHet()">Bỏ chọn</button><button class="nut lon" id="stLuu" onclick="luuNhanXetUI()">Lưu nhận xét</button></div></div>
+      </div>
+
+      <div id="stVo" class="an">
+        <div class="the">
+          <div class="hang gian"><b>Nộp vở hằng ngày</b><span id="voTomTat" class="nho"></span></div>
+          <div class="hang" style="margin-top:6px" id="voMonChip"></div>
+          <div class="nho" style="margin-top:4px">Mặc định cả lớp đã nộp. Chỉ cần chạm em <b>chưa nộp</b>, <b>chưa làm xong</b> hoặc <b>nộp muộn</b>, rồi bấm Lưu. Đổi ngày ở ô ngày phía trên.</div>
+        </div>
+        <div class="the" id="voDs"></div>
+        <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
       </div>
 
       <div id="stPT" class="an">

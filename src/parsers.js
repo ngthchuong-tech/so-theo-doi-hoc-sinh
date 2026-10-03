@@ -118,6 +118,32 @@ var Parsers = (function () {
 
   // ---------------------------------------------------------------- Thư viện nhận xét
   // sheets: { tenSheet: aoa } ; trả về {thongTin, mon: [{ten, dong: [...]}], chung: [...]}
+  // Loại file thư viện theo sheet ThongTin: 'ThuVienNhanXet' (theo bài) hoặc 'ThuVienThang' (theo tháng)
+  function loaiThuVien(sheets) {
+    var loai = ''; (sheets['ThongTin'] || []).forEach(function (r) { if (r && String(r[0]).trim() === 'Loai') loai = String(r[1] || '').trim(); });
+    return loai;
+  }
+  // Thư viện THEO THÁNG: mỗi sheet môn có cột Tháng – Tiêu chí – Mức độ ("HTXS – Hoàn thành xuất sắc") – Mẫu – Nội dung nhận xét
+  function parseThuVienThang(sheets) {
+    var tt = {};
+    (sheets['ThongTin'] || []).forEach(function (r) { if (r && r[0]) tt[String(r[0]).trim()] = r[1] == null ? '' : String(r[1]).trim(); });
+    if (tt.Loai !== 'ThuVienThang') throw new Error('File không phải thư viện nhận xét THEO THÁNG (sheet ThongTin, Loai = ThuVienThang).');
+    var out = { thongTin: tt, mon: [] };
+    Object.keys(sheets).forEach(function (name) {
+      var aoa = sheets[name]; if (!aoa || !aoa.length) return;
+      var H = aoa[0].map(function (v) { return String(v || '').trim(); }), ix = function (t) { return H.indexOf(t); };
+      if (ix('Tháng') < 0 || ix('Tiêu chí') < 0 || ix('Mức độ') < 0 || ix('Nội dung nhận xét') < 0) return;
+      var dong = [];
+      for (var k = 1; k < aoa.length; k++) {
+        var x = aoa[k]; if (!x || !x[ix('Nội dung nhận xét')]) continue;
+        dong.push({ thang: s(x[ix('Tháng')]), tieuChi: s(x[ix('Tiêu chí')]), mucDo: s(x[ix('Mức độ')]).split(/\s+[–-]\s+/)[0].trim(),
+                    mau: s(x[ix('Mẫu')]), noiDung: s(x[ix('Nội dung nhận xét')]) });
+      }
+      if (dong.length) out.mon.push({ ten: name.split('–')[0].trim(), dong: dong });
+    });
+    if (!out.mon.length) throw new Error('Không thấy sheet môn nào có các cột Tháng – Tiêu chí – Mức độ – Nội dung nhận xét.');
+    return out;
+  }
   function parseThuVien(sheets) {
     var tt = {};
     (sheets['ThongTin'] || []).forEach(function (r) { if (r && r[0]) tt[String(r[0]).trim()] = r[1] == null ? '' : String(r[1]).trim(); });
@@ -152,7 +178,7 @@ var Parsers = (function () {
   function s(v) { return v == null ? '' : String(v).trim(); }
 
   return { parseSoBaoGiangXml: parseSoBaoGiangXml, parseDanhSachHocSinh: parseDanhSachHocSinh,
-           parseThuVien: parseThuVien, laChuyenDi: laChuyenDi, key: key };
+           parseThuVien: parseThuVien, parseThuVienThang: parseThuVienThang, loaiThuVien: loaiThuVien, laChuyenDi: laChuyenDi, key: key };
 })();
 
 // ============================================================================

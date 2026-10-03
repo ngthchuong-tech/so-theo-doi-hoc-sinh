@@ -1,0 +1,40 @@
+CẬP NHẬT – ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (CÁCH MỚI) + NỘP VỞ HẰNG NGÀY – ĐỢT 1
+Theo "Ý kiến Cô giáo.docx": bỏ ghi nhận xét theo từng bài; mỗi tháng nhận xét 1 lần Toán, Tiếng Việt theo 2 tiêu chí × 4 mức;
+thêm theo dõi nộp vở hằng ngày.
+
+Câu trả lời của cô và cách làm
+1. 3 ô năng lực, phẩm chất (file tháng): (b) app tự suy, cô sửa được → NL đặc thù tự suy từ mức Tiếng Việt (ngôn ngữ), Toán (tính toán);
+   NL chung, phẩm chất cô chọn mức Tốt / Đạt / CCG (có chọn nhanh cả lớp), câu lấy từ "Nhận xét chung" của thư viện.
+2. HĐTN, Đạo đức: cô nhận xét trên app → mỗi em 1 ô nhận xét; chạm mức để có câu gợi ý rồi sửa (app không tự đánh giá).
+3. Mức thứ 4: CCG – Cần cố gắng.
+4. Nộp vở: thêm trạng thái, đưa vào nhận xét tháng → Đã nộp / Chưa nộp / Chưa làm xong / Nộp muộn;
+   cuối tháng thêm 1 câu vào nhận xét môn: "Nộp vở đầy đủ, đúng hạn." / "Đôi khi còn chưa nộp vở." / "Cần chú ý nộp vở đầy đủ, làm xong bài đúng hạn."
+
+Có gì mới
+A. Sổ theo dõi → "📒 Nộp vở" (mở Sổ theo dõi là vào ngay; nút "Nộp vở" trên Trang chủ):
+   chọn môn TV / Toán, mặc định cả lớp đã nộp, chạm em chưa đủ → Lưu (lưu ngầm như điểm danh).
+B. Đánh giá → "Thường xuyên (hằng tháng)" làm lại hoàn toàn:
+   - Tiếng Việt, Toán: mỗi em 2 hàng mức Kiến thức / Kỹ năng; "Chọn nhanh" cho các em chưa có mức rồi chạm sửa em khác mức.
+     App ghép: 1 câu kiến thức + 1 câu kỹ năng (thư viện tháng, mỗi em 1 mẫu câu khác nhau) + 1 câu nộp vở.
+   - HĐTN, Đạo đức: mức (gợi ý câu) + ô cô tự viết.
+   - Năng lực – phẩm chất: chọn mức NL chung, phẩm chất; NL đặc thù tự suy; 3 ô nhận xét.
+   - Mọi ô sửa tay được ("cô đã sửa", nút ↺ Bản app ghép); lưu ngầm; "Chỉ em cần xem".
+   - Xuất: chọn file mẫu tháng của Bộ → điền Sổ tổng hợp các môn + từng môn (cột tháng, môn, NL chung, NL đặc thù, phẩm chất).
+     Ô "Môn học" của Sổ tổng hợp: câu đầu của từng môn ("Tiếng Việt: … Toán: …").
+C. Cài đặt → Kho thư viện nhận cả file "Thư viện nhận xét THÁNG…" (tự nhận ra loại file) và hiện dòng "Thư viện tháng: …".
+D. Ghi nhận xét theo từng bài học (cách cũ) chuyển thành chức năng TẮT SẴN (Cài đặt → Chức năng). Tiết trên Trang chủ không còn mở Sổ theo dõi theo bài.
+   Dữ liệu cũ vẫn giữ.
+
+Cách cập nhật
+1. Dán lại Code.gs và Index.html → Triển khai → Quản lý → bút chì → Phiên bản mới → Triển khai.
+2. Cài đặt → Kho thư viện → chọn file "Thư viện nhận xét THÁNG - Lớp 2 - HK I (bản nháp 1).xlsx" → Đưa vào Kho thư viện.
+   (Bảng mới ThuVienThang, DanhGiaThang, NopVo được tự tạo.)
+
+Đã thử trên máy (file mẫu tháng 9 thật): nạp thư viện tháng (TV 160 câu, Toán 160 câu); ghi nộp vở 2 ngày (chỉ lưu 6 dòng);
+đánh giá tháng 9: chọn nhanh cả lớp, sửa 1 em, HĐTN, năng lực – phẩm chất; sửa tay rồi tải lại – còn nguyên;
+xuất file: 5 sheet × 35 em, đúng cột, sheet môn không dạy giữ nguyên. Giao diện điện thoại hiển thị tốt.
+
+Đợt sau
+- Đợt 2: gợi ý mức giữa kì / cuối kì (T/H/C, 15 mục năng lực – phẩm chất) và nhận xét GVCN lấy từ dữ liệu các tháng
+  (hiện vẫn lấy từ Sổ theo dõi theo bài – sẽ trống nếu không ghi theo bài).
+- Đợt 3: Nhóm học sinh cần quan tâm (khi cô gửi chi tiết).
