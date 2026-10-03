@@ -269,7 +269,7 @@ function layTrangChu() {
   else if (conLai === 0) out.nhac.push({ muc: 'do', text: 'Hôm nay là ngày dạy cuối HK ' + hk.HocKy + '. Cô hoàn thành đánh giá cuối kì và chuẩn bị ' + chuanBi + '.', toi: 'caidat' });
   else if (conLai <= soNgayNhac) out.nhac.push({ muc: 'vang', text: 'Còn ' + conLai + ' ngày nữa kết thúc HK ' + hk.HocKy + ' (ngày dạy cuối ' + hk.NgayDayCuoi + '). Cô chuẩn bị ' + chuanBi + '.', toi: 'caidat' });
   // Nhắc: nhận xét tháng
-  if (d.getDate() >= +(cd.NgayNhacThang || 25)) out.nhac.push({ muc: 'xanh', text: 'Đến kì nhận xét tháng ' + (d.getMonth() + 1) + ': vào Đánh giá → Tổng hợp → xem, sửa → xuất file mẫu tháng.', toi: 'danhgia' });
+  if (d.getDate() >= +(cd.NgayNhacThang || 25)) out.nhac.push({ muc: 'xanh', text: 'Đến kì đánh giá thường xuyên tháng ' + (d.getMonth() + 1) + ': vào Đánh giá → Thường xuyên (hằng tháng) → Tổng hợp → xem, sửa → xuất file mẫu đánh giá thường xuyên.', toi: 'danhgia' });
   return out;
 }
 
