@@ -131,7 +131,7 @@
           <textarea id="stGhiChu" placeholder="Ghi thêm (không bắt buộc)…"></textarea>
           <div class="an" id="stMauDong" style="margin-top:4px"><button class="nut phu" onclick="luuMauUI()">★ Lưu câu đang viết thành mẫu của cô</button></div>
           <h3 class="hang gian"><span>4. Học sinh</span>
-            <span><button class="nut phu an" id="stCaLopHTT" onclick="caLopHTT()">Cả lớp: HTT</button> <button class="nut phu" onclick="chonCaLop(true)">Cả lớp</button> <button class="nut phu" onclick="chonCaLop(false)">Bỏ chọn</button></span></h3>
+            <span><button class="nut phu an" id="stCaLopHTT" onclick="caLopHTT()">Cả lớp: HTT</button> <select id="stChonNhom" class="an" onchange="chonNhomST(this)"></select> <button class="nut phu" onclick="chonCaLop(true)">Cả lớp</button> <button class="nut phu" onclick="chonCaLop(false)">Bỏ chọn</button></span></h3>
           <div class="nho" id="stDauGhi" style="margin-bottom:6px">Chấm màu góc phải: mức đã ghi cho hoạt động đang chọn.</div>
           <div class="hs-luoi" id="stHocSinh"></div>
         </div>
@@ -172,16 +172,18 @@
     <!-- ======================= HỌC SINH ======================= -->
     <section id="v-hocsinh" class="an">
       <div class="the">
+        <h2>Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
+        <div class="hang" id="hsNhomLoc" style="margin-bottom:6px"></div>
+        <div id="hsGoiY"></div>
+        <input id="hsTim" placeholder="Tìm tên…" oninput="veHocSinh()" style="width:100%;margin-bottom:8px">
+        <div id="hsDs"></div>
+        <details style="margin-top:10px"><summary>Học sinh đã chuyển đi</summary><div id="hsChuyenDi"></div></details>
+      </div>
+      <div class="the">
         <h2>Tải danh sách học sinh</h2>
         <div class="nho">Dùng file "Danh sách học sinh" xuất từ hệ thống của trường (.xlsx). Tải lại khi có học sinh chuyển đến/chuyển đi.</div>
         <input type="file" id="hsFile" accept=".xlsx,.xls" onchange="docFileHocSinh(this)" style="margin-top:8px">
         <div id="hsXem"></div>
-      </div>
-      <div class="the">
-        <h2>Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
-        <input id="hsTim" placeholder="Tìm tên…" oninput="veHocSinh()" style="width:100%;margin-bottom:8px">
-        <div id="hsDs"></div>
-        <details style="margin-top:10px"><summary>Học sinh đã chuyển đi</summary><div id="hsChuyenDi"></div></details>
       </div>
     </section>
 

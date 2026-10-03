@@ -41,7 +41,9 @@ var BANG = {
   NopVo:        ['Ngay', 'MaDinhDanh', 'Mon', 'TrangThai', 'GhiChu', 'CapNhat'],
   // Thư viện tháng bản 2 (theo ý cô): mỗi tháng 2 nội dung Kiến thức / Kỹ năng, mỗi nội dung các yêu cầu cần đạt × 4 mức × 3 câu
   ThuVienYeuCau: ['Khoi', 'BoSach', 'HocKy', 'Thang', 'Mon', 'NoiDung', 'MaYC', 'YeuCau', 'CanCu', 'MucDo', 'Mau', 'CauNX'],
-  MauCuaCo:     ['Mon', 'NoiDung', 'YeuCau', 'MucDo', 'CauNX', 'CapNhat']
+  MauCuaCo:     ['Mon', 'NoiDung', 'YeuCau', 'MucDo', 'CauNX', 'CapNhat'],
+  // Nhóm học sinh cần quan tâm: Nhom = các nhóm cách nhau ';', GhiChu 1 dòng, BoGoiY = gợi ý cô đã bỏ qua ("nhóm|yyyy-mm")
+  NhomHS:       ['MaDinhDanh', 'Nhom', 'GhiChu', 'BoGoiY', 'CapNhat']
 };
 var MUC4 = ['Hoàn thành xuất sắc', 'Hoàn thành tốt', 'Hoàn thành', 'Chưa hoàn thành'];
 var MUC_PC = ['Tốt', 'Đạt', 'Cần cố gắng'];
@@ -136,7 +138,7 @@ function sh_(ten) {
 // 2) Bảng lớn, ít đổi (BANG_DEM): nhớ thêm 6 giờ trong CacheService của Google; mỗi lần app ghi bảng đó thì tăng "phiên bản"
 //    nên bản nhớ cũ không bao giờ được dùng lại. Sửa TRỰC TIẾP trên Trang tính thì dùng menu "📒 Sổ theo dõi → Làm mới dữ liệu".
 var _NHO = {}, _SHEET = {};
-var BANG_DEM = { CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1, ThuVienThang: 1, ThuVienYeuCau: 1, MauCuaCo: 1 };
+var BANG_DEM = { CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1, ThuVienThang: 1, ThuVienYeuCau: 1, MauCuaCo: 1, NhomHS: 1 };
 function sheetNho_(ten) { return _SHEET[ten] || (_SHEET[ten] = sh_(ten)); }
 function docTrangTinh_(ten) {     // mảng các dòng (mảng giá trị), không kể dòng tiêu đề
   var sh = sheetNho_(ten), n = sh.getLastRow();
@@ -635,6 +637,77 @@ function xoaNhieuNhanXet(ids) {
     return 'Đã xoá ' + n + ' nhận xét.';
   });
 }
+// ============================================================================ NHÓM HỌC SINH CẦN QUAN TÂM (theo ý cô: gọn, 3 nhóm sẵn)
+var NHOM_HS = ['Bồi dưỡng', 'Cần rèn thêm', 'Cần chú ý'];
+function layNhomHS() {
+  var ds = {};
+  doc_('NhomHS').forEach(function (r) {
+    var n = String(r.Nhom || '').split(';').filter(function (x) { return x; });
+    if (n.length || r.GhiChu) ds[r.MaDinhDanh] = { nhom: n, gc: r.GhiChu };
+  });
+  return { nhom: NHOM_HS, ds: ds };
+}
+function suaNhomHS_(ma, fn) {
+  var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+  var cu = doc_('NhomHS').filter(function (r) { return r.MaDinhDanh === ma; })[0] || { MaDinhDanh: ma, Nhom: '', GhiChu: '', BoGoiY: '' };
+  fn(cu); cu.CapNhat = luc;
+  thayTheTheo_('NhomHS', function (r) { return r.MaDinhDanh !== ma; }, [hang_('NhomHS', cu)]);
+}
+function luuNhomHS(ma, nhom, gc) {
+  return voiKhoa_(function () {
+    suaNhomHS_(ma, function (r) { r.Nhom = (nhom || []).filter(function (x) { return NHOM_HS.indexOf(x) >= 0; }).join(';'); r.GhiChu = String(gc || '').trim().slice(0, 150); });
+    return layNhomHS();
+  });
+}
+function thangKhoa_() { var p = homNay_().split('/'); return p[2] + '-' + p[1]; }
+function boQuaGoiYNhom(ma, nhom) {
+  return voiKhoa_(function () {
+    suaNhomHS_(ma, function (r) { var b = String(r.BoGoiY || '').split(' ').filter(function (x) { return x && x.split('|')[1] === thangKhoa_(); });
+      b.push(nhom.replace(/ /g, '_') + '|' + thangKhoa_()); r.BoGoiY = b.join(' '); });
+    return 'Đã bỏ qua gợi ý (tháng sau app xem lại).';
+  });
+}
+// App gợi ý – cô xác nhận mới thêm vào nhóm. Căn cứ: đánh giá tháng gần nhất, vắng 30 ngày qua, nộp vở 30 ngày qua.
+function layGoiYNhom() {
+  var hn = homNay_(), k = key_(hn), th = +hn.split('/')[1], truoc = th === 1 ? 12 : th - 1, t = null;
+  [th, truoc].some(function (x) {
+    var d = duLieuThang_(x);
+    var co = Object.keys(d.du).some(function (ma) { return ['Tiếng Việt', 'Toán'].some(function (m) { var o = d.du[ma][m]; return o && (o.mucKT || o.mucKN); }); });
+    if (co) t = d; return co;
+  });
+  var tu = toDate_(hn); tu.setDate(tu.getDate() - 30); var k30 = key_(Utilities.formatDate(tu, TZ, 'dd/MM/yyyy'));
+  var vang = {};
+  doc_('DiemDanh').forEach(function (r) {
+    if (r.TrangThai === 'Có mặt' || key_(r.Ngay) < k30 || key_(r.Ngay) > k) return;
+    vang[r.MaDinhDanh] = (vang[r.MaDinhDanh] || 0) + (r.Buoi === 'Sáng' || r.Buoi === 'Chiều' ? 0.5 : 1);
+  });
+  var vo = demVo_(function (ngay) { var x = key_(ngay); return x >= k30 && x <= k; }).vo;
+  var nhom = layNhomHS().ds, bo = {}, kh = thangKhoa_();
+  doc_('NhomHS').forEach(function (r) { String(r.BoGoiY || '').split(' ').forEach(function (x) { var p = x.split('|'); if (p[1] === kh) bo[r.MaDinhDanh + '|' + p[0].replace(/_/g, ' ')] = 1; }); });
+  var THAP = { CHT: 1, CCG: 1 }, ten = { kt: 'kiến thức', kn: 'kỹ năng' }, out = [];
+  hocSinhDangHoc_(hn).forEach(function (h) {
+    var ma = h.MaDinhDanh, ly = { 'Bồi dưỡng': [], 'Cần rèn thêm': [], 'Cần chú ý': [] };
+    if (t) ['Tiếng Việt', 'Toán'].forEach(function (m) {
+      var o = (t.du[ma] || {})[m]; if (!o) return;
+      if (o.mucKT === 'HTXS' && o.mucKN === 'HTXS') ly['Bồi dưỡng'].push(m + ' tháng ' + t.thang + ': HTXS cả kiến thức và kỹ năng');
+      var yeu = [['kt', o.mucKT], ['kn', o.mucKN]].filter(function (x) { return THAP[x[1]]; });
+      if (yeu.length) ly['Cần rèn thêm'].push(m + ' tháng ' + t.thang + ': ' + yeu.map(function (x) { return ten[x[0]] + ' ' + x[1]; }).join(', '));
+    });
+    if (t) [['NLC', 'năng lực chung'], ['PC', 'phẩm chất']].forEach(function (p) { var o = (t.du[ma] || {})[p[0]]; if (o && o.muc === 'Cần cố gắng') ly['Cần chú ý'].push('Tháng ' + t.thang + ': ' + p[1] + ' cần cố gắng'); });
+    MON_VO.forEach(function (m) {
+      var v = (vo[ma] || {})[m]; if (!v) return;
+      if (v.E >= 3) ly['Cần rèn thêm'].push('Vở ' + m + ': chưa đúng – chưa đẹp ' + v.E + ' lần (30 ngày qua)');
+      if (v.N + v.cu >= 3) ly['Cần chú ý'].push('Chưa nộp vở ' + m + ' ' + (v.N + v.cu) + ' lần (30 ngày qua)');
+    });
+    if ((vang[ma] || 0) >= 3) ly['Cần chú ý'].push('Vắng ' + vang[ma] + ' buổi trong 30 ngày qua');
+    NHOM_HS.forEach(function (n) {
+      if (!ly[n].length || bo[ma + '|' + n] || ((nhom[ma] || {}).nhom || []).indexOf(n) >= 0) return;
+      out.push({ ma: ma, ten: h.HoTen, nhom: n, lyDo: ly[n] });
+    });
+  });
+  return { goiY: out, thang: t ? t.thang : '' };
+}
+
 function layHoSo(ma) {
   var h = doc_('HocSinh').filter(function (x) { return x.MaDinhDanh === ma; })[0];
   var nx = doc_('SoTheoDoi').filter(function (r) { return r.MaDinhDanh === ma; })
@@ -1333,7 +1406,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';
