@@ -2,7 +2,27 @@
     <section id="v-danhgia" class="an">
       <div class="the" id="dgChonThe">
         <span class="chip on" id="dgChonThang" onclick="dgChonLoai('thang')">Thường xuyên (hằng tháng)</span>
+        <span class="chip" id="dgChonKT" onclick="dgChonLoai('kt')">📝 Bài kiểm tra</span>
         <span class="chip" id="dgChonKy" onclick="dgChonLoai('ky')">Định kỳ (giữa kì, cuối kì)</span>
+      </div>
+
+      <!-- ---------- BÀI KIỂM TRA (luôn hiện) ---------- -->
+      <div id="dgKT" class="an">
+        <div class="the">
+          <h2>📝 Bài kiểm tra</h2>
+          <div class="nho">Lớp 2: Tiếng Việt, Toán kiểm tra định kì <b>cuối học kì I</b> và <b>cuối năm</b> (bắt buộc – điểm tự chuyển sang Định kỳ và file nộp Bộ).
+            Bài <b>giữa kì</b> do trường cho thêm – app lưu để cô theo dõi. Thang điểm 10, số nguyên.</div>
+          <div class="hang" style="margin-top:8px">
+            <select id="ktKy" onchange="veKT()"><option value="GK1">Giữa học kì I</option><option value="CK1">Cuối học kì I</option>
+              <option value="GK2">Giữa học kì II</option><option value="CK2">Cuối năm</option></select>
+            <span id="ktMon"></span>
+          </div>
+          <div id="ktTomTat" style="margin-top:8px"></div>
+          <div class="hang" style="margin-top:10px"><button class="nut" onclick="ktNhap()">✍ Nhập điểm lần lượt cả lớp</button>
+            <button class="nut phu" onclick="ktXuat()">⬇ Xuất Excel bảng điểm</button></div>
+          <div id="ktKetQua"></div>
+        </div>
+        <div class="the" id="ktDs"></div>
       </div>
 
       <!-- ---------- ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới) ---------- -->

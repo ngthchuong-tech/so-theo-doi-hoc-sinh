@@ -1,0 +1,21 @@
+CẬP NHẬT – MỤC 📝 BÀI KIỂM TRA (Đánh giá → 📝 Bài kiểm tra)
+
+Vì sao: trước đây chỉ nhập điểm được ở Đánh giá → Định kỳ → CK1 / CK2, mà mục Định kỳ chỉ hiện gần cuối kì → cô không tìm thấy.
+Quy định (Thông tư 27/2020, Điều 7): lớp 1–3 kiểm tra định kì Tiếng Việt, Toán cuối học kì I và cuối năm (bắt buộc, vào file Bộ);
+lớp 4–5 mới có thêm giữa kì. Trường thường cho thêm bài giữa kì → mỗi học kì 1–2 bài.
+
+Cách dùng
+- Đánh giá → 📝 Bài kiểm tra (LUÔN HIỆN) → chọn bài: Giữa học kì I / Cuối học kì I / Giữa học kì II / Cuối năm → chọn môn.
+- ✍ Nhập điểm lần lượt cả lớp: chạm 1–10 cho từng em, app tự chuyển em sau; chạm ô điểm 1 em để sửa riêng.
+  Bật 📷 Chụp bài kiểm tra (Cài đặt → Chức năng) thì có nút chụp bài, lưu ảnh vào Drive; có khoá AI thì app đọc điểm giúp.
+- Thống kê: đã có điểm, trung bình, số em 9–10 / 7–8 / 5–6 / dưới 5; điểm tô màu theo mức.
+- Điểm CUỐI KÌ tự chuyển sang Định kỳ (ô Điểm KTĐK) và file nộp Bộ; sửa ở Định kỳ thì bảng điểm đổi theo (2 nơi luôn khớp).
+- Điểm GIỮA KÌ: lưu để theo dõi, hiện kèm ở màn Định kỳ giữa kì ("📝 Bài kiểm tra giữa kì: 8").
+- ⬇ Xuất Excel bảng điểm cả năm (mỗi môn 4 cột); điểm hiện trong hồ sơ học sinh;
+  💡 App gợi ý nhóm: dưới 5 điểm → Cần rèn thêm; 10 điểm cả Tiếng Việt và Toán → Bồi dưỡng (cô xác nhận).
+
+Kỹ thuật: bảng mới DiemKiemTra (theo năm học); cửa sổ nhập điểm (chạm số, chụp bài, khung vàng, AI) tách ra dùng chung cho Định kỳ và Bài kiểm tra.
+Đã thử trên máy giả lập: nhập GK1 Tiếng Việt, CK1 Toán; Định kỳ CK1 nhận đúng điểm, sửa ở Định kỳ chuyển ngược lại; GK1 hiện điểm tham khảo;
+hồ sơ, gợi ý nhóm, xuất Excel; màn điện thoại; không lỗi.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

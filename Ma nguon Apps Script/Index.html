@@ -243,6 +243,17 @@
   .bm-o textarea { font-size: 15.5px; line-height: 1.45; border-color: #d0d5dd; background: #fcfcfd; }
   .the h3 { color: var(--chinh); font-weight: 700; }
   .tg-hang .tag { font-size: 13px; padding: 3px 9px; }
+  /* Bài kiểm tra */
+  .kt-hang { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px dashed var(--vien); cursor: pointer; }
+  .kt-hang:last-child { border-bottom: 0; }
+  .kt-hang .ten { flex: 1; min-width: 0; font-weight: 600; }
+  .kt-hang .ten .nho { font-weight: 400; display: block; }
+  .kt-stt { min-width: 26px; height: 26px; border-radius: 13px; background: var(--chinh-nhat); color: var(--chinh); font-weight: 700; font-size: 12.5px; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+  .kt-diem { min-width: 46px; height: 40px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 800; flex: none; background: #f2f4f7; color: #98a2b3; }
+  .kt-diem.d9 { background: #dcfce7; color: #15803d; } .kt-diem.d7 { background: #e0ecff; color: #1d4ed8; }
+  .kt-diem.d5 { background: #fff1d6; color: #b45309; } .kt-diem.d0 { background: #fee2e2; color: #b91c1c; }
+  .kt-thong { display: flex; gap: 6px; flex-wrap: wrap; }
+  .kt-thong span { border-radius: 10px; padding: 6px 10px; font-size: 13px; font-weight: 600; background: #f2f4f7; }
 </style>
 
 </head>
@@ -410,7 +421,27 @@
     <section id="v-danhgia" class="an">
       <div class="the" id="dgChonThe">
         <span class="chip on" id="dgChonThang" onclick="dgChonLoai('thang')">Thường xuyên (hằng tháng)</span>
+        <span class="chip" id="dgChonKT" onclick="dgChonLoai('kt')">📝 Bài kiểm tra</span>
         <span class="chip" id="dgChonKy" onclick="dgChonLoai('ky')">Định kỳ (giữa kì, cuối kì)</span>
+      </div>
+
+      <!-- ---------- BÀI KIỂM TRA (luôn hiện) ---------- -->
+      <div id="dgKT" class="an">
+        <div class="the">
+          <h2>📝 Bài kiểm tra</h2>
+          <div class="nho">Lớp 2: Tiếng Việt, Toán kiểm tra định kì <b>cuối học kì I</b> và <b>cuối năm</b> (bắt buộc – điểm tự chuyển sang Định kỳ và file nộp Bộ).
+            Bài <b>giữa kì</b> do trường cho thêm – app lưu để cô theo dõi. Thang điểm 10, số nguyên.</div>
+          <div class="hang" style="margin-top:8px">
+            <select id="ktKy" onchange="veKT()"><option value="GK1">Giữa học kì I</option><option value="CK1">Cuối học kì I</option>
+              <option value="GK2">Giữa học kì II</option><option value="CK2">Cuối năm</option></select>
+            <span id="ktMon"></span>
+          </div>
+          <div id="ktTomTat" style="margin-top:8px"></div>
+          <div class="hang" style="margin-top:10px"><button class="nut" onclick="ktNhap()">✍ Nhập điểm lần lượt cả lớp</button>
+            <button class="nut phu" onclick="ktXuat()">⬇ Xuất Excel bảng điểm</button></div>
+          <div id="ktKetQua"></div>
+        </div>
+        <div class="the" id="ktDs"></div>
       </div>
 
       <!-- ---------- ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới) ---------- -->
@@ -656,12 +687,30 @@
       </div>
 
       <div class="the">
+        <details><summary>6a. 📝 Bài kiểm tra – nhập điểm (luôn dùng được)</summary>
+          <div class="nho">Thông tư 27: lớp 2 kiểm tra định kì Tiếng Việt, Toán <b>cuối học kì I</b> và <b>cuối năm</b> (bắt buộc, điểm vào file nộp Bộ).
+            Bài <b>giữa kì</b> do trường cho thêm – app lưu để cô theo dõi. Thang điểm 10, số nguyên.</div>
+          <ol>
+            <li>Vào <b>Đánh giá</b> → chạm <b>📝 Bài kiểm tra</b> → chọn bài (Giữa học kì I / Cuối học kì I / Giữa học kì II / Cuối năm) → chọn môn.</li>
+            <li>Bấm <b>✍ Nhập điểm lần lượt cả lớp</b> → mỗi em chạm 1 số từ 1 đến 10, app tự chuyển sang em sau (máy tính: phím 1–9, phím 0 = 10).
+              Sửa điểm 1 em: chạm vào ô điểm của em đó.</li>
+            <li>Nếu bật <b>📷 Chụp bài kiểm tra</b> (Cài đặt → Chức năng): trong cửa sổ nhập điểm có nút <b>📷 Chụp bài</b> để lưu ảnh bài vào Google Drive; có khoá AI thì app đọc điểm giúp (xem mục 6b).</li>
+            <li>Đầu màn có thống kê: số em đã có điểm, điểm trung bình, số em 9–10 / 7–8 / 5–6 / dưới 5. Điểm tô màu: xanh lá 9–10, xanh dương 7–8, vàng 5–6, đỏ dưới 5.</li>
+            <li><b>Điểm cuối kì tự chuyển sang Định kỳ</b> (ô Điểm KTĐK) và file nộp Bộ – không phải nhập lại; sửa ở Định kỳ thì bảng điểm cũng đổi theo.
+              Điểm giữa kì hiện kèm ở màn Định kỳ giữa kì để cô tham khảo khi nhận xét.</li>
+            <li><b>⬇ Xuất Excel bảng điểm</b>: cả năm, mỗi môn 4 cột (giữa kì I, cuối kì I, giữa kì II, cuối năm). Điểm cũng hiện trong hồ sơ từng em;
+              em dưới 5 điểm được 💡 App gợi ý đưa vào nhóm "Cần rèn thêm" (cô xác nhận).</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="the">
         <details><summary>6b. Đánh giá định kỳ – giữa kì, cuối kì (GK1, CK1, GK2, CK2)</summary>
           <div class="nho">Phần này chỉ hiện từ khoảng 2 tuần trước khi hết giữa kì / cuối kì (Trang chủ sẽ nhắc). Muốn xem lúc khác: Cài đặt → Chức năng → "Luôn hiện".</div>
           <ol>
             <li>Vào <b>Đánh giá</b> → chạm <b>Định kỳ (giữa kì, cuối kì)</b> → chọn kì → <b>Tổng hợp</b>. Giữa kì tính từ đầu học kì đến hết tuần ôn tập giữa kì; cuối kì tính cả học kì.</li>
             <li>Chạm từng môn (Tiếng Việt, Toán…): app <b>gợi ý mức T/H/C</b> và nhận xét từ <b>đánh giá các tháng</b> trong kì (HTXS, HTT → T; HT → H; CHT → C, tính trung bình các tháng); nhận xét ghép từ nhận xét các tháng gần nhất + 1 câu nộp vở cả kì. Cô chạm T / H / C để chốt mức, sửa nhận xét trong ô (tự lưu khi chạm ra ngoài, tối đa 500 ký tự).</li>
-            <li><b>Cuối kì</b>: có thêm ô <b>Điểm KTĐK</b> ở môn có bài kiểm tra (số nguyên 1–10). Nhập nhanh: bấm <b>✍ Nhập điểm lần lượt cả lớp</b> → mỗi em chạm 1 số từ 1 đến 10, app tự chuyển sang em sau (trên máy tính gõ phím 1–9, phím 0 = 10).</li>
+            <li><b>Cuối kì</b>: có thêm ô <b>Điểm KTĐK</b> ở môn có bài kiểm tra (số nguyên 1–10) – lấy sẵn từ <b>📝 Bài kiểm tra</b> (mục 6a); nhập ở đây cũng được. Nhập nhanh: bấm <b>✍ Nhập điểm lần lượt cả lớp</b> → mỗi em chạm 1 số từ 1 đến 10, app tự chuyển sang em sau (trên máy tính gõ phím 1–9, phím 0 = 10).</li>
             <li><b>Chụp bài để AI đọc điểm</b> (cần cài khoá AI ở Cài đặt): trong cửa sổ nhập điểm bấm <b>📷 Chụp bài</b> (chụp cả trang đầu bài kiểm tra) → kéo khung vàng vào đúng ô <b>Điểm</b> → <b>Đọc điểm bằng AI</b>. Số AI đọc được có viền vàng: <b>đúng thì chạm số đó</b>, sai thì chạm số đúng – điểm chỉ được lưu khi cô chạm. Lần sau app nhớ vị trí khung và đọc ngay khi chụp xong. Ảnh bài được lưu vào Google Drive (App Sổ theo dõi / Bài kiểm tra); chụp lại thì ảnh cũ vào Thùng rác. Không có khoá AI thì vẫn chụp để lưu ảnh, cô tự chạm điểm.</li>
             <li>Chạm <b>Năng lực – phẩm chất</b>: 15 mục (3 năng lực chung, 7 năng lực đặc thù, 5 phẩm chất) theo mức <b>Tốt / Đạt / Cần cố gắng</b>, cùng 3 ô nhận xét. Mức gợi ý = trung bình mức app suy ra ở các tháng trong kì (Tốt 3, Đạt 2, Cần cố gắng 1). Mục <b>viền đỏ</b> là chưa đủ căn cứ (VD em chưa có mức HĐTN, Đạo đức) – cô chọn; có nút <b>Điền "Đ" cho mọi mục còn trống</b>. Khoa học, Thể chất… mặc định Đ: cô hỏi giáo viên bộ môn để sửa em Tốt / Cần cố gắng.</li>
             <li><b>Viết lại bằng AI</b> (chỉ cuối kì CK1, CK2; cần khoá AI): bấm <b>✨ Viết lại bằng AI</b> ở 1 ô, hoặc <b>✨ Viết lại bằng AI cả lớp</b> cho phần đang xem. Bản AI hiện trong <b>khung tím</b> dưới ô, chưa thay gì cả. Cô chọn: <b>Dùng bản AI</b> / <b>Giữ bản cũ</b> / <b>Viết lại lần nữa</b>; hoặc <b>Dùng tất cả</b> / <b>Giữ bản cũ tất cả</b>.</li>
@@ -1497,9 +1546,10 @@ function moTab(t) { if (t === hienTai.tab && !hienTai.buoc && !hienTai.hoSo) { a
 function apDung(tt) {
   var cu = hienTai; hienTai = tt; var t = tt.tab;
   document.body.setAttribute('data-tab', t);          // màu chủ đạo theo khu vực (Styles: body[data-tab])
+  var veSauND = nd && nd.nguon && nd.nguon.dong;
   if (nd) { $('ndModal').style.display = 'none'; nd = null; }
   if (mcTL || mcXemTT) { $('mcModal').style.display = 'none'; $('mcXem').style.display = 'none'; mcTL = null; mcXemTT = null; }
-  if (cu.nhapDiem && t === 'danhgia' && cu.tab === t) { $('nutLui').classList.toggle('an', !(nganXep.length > 0)); veDanhGiaKy(); return; }   // chỉ đóng cửa sổ nhập điểm
+  if (cu.nhapDiem && t === 'danhgia' && cu.tab === t) { $('nutLui').classList.toggle('an', !(nganXep.length > 0)); (veSauND || veDanhGiaKy)(); return; }   // chỉ đóng cửa sổ nhập điểm
   ['trangchu', 'diemdanh', 'sotheodoi', 'danhgia', 'hocsinh', 'caidat', 'huongdan'].forEach(function (x) { $('v-' + x).classList.toggle('an', x !== t); });
   document.querySelectorAll('nav button, header .nut-dau[data-t]').forEach(function (b) { b.classList.toggle('on', b.dataset.t === t); });
   $('nutLui').classList.toggle('an', !(nganXep.length > 0 || t !== 'trangchu'));
@@ -1946,6 +1996,9 @@ function hienHoSo(ma) {
     $('hoSoNoiDung').innerHTML = '<div class="hang gian"><h2 style="margin:0">' + esc(h.HoTen) + '</h2><button class="nut phu" onclick="dongHoSo()">← Đóng</button></div>' +
       '<div class="nho">Mã định danh ' + esc(h.MaDinhDanh) + ' · ' + esc(h.NgaySinh) + ' · ' + esc(h.GioiTinh) + ' · ' + esc(h.TrangThai) + ' · SĐT ' + esc(h.SDT) + '</div>' +
       '<div id="hoSoNhom" class="the" style="background:#f7f9fc;margin:8px 0"></div>' +
+      (d.diemKT && d.diemKT.length ? '<h3>📝 Bài kiểm tra</h3><div class="hang">' + d.diemKT.map(function (x) {
+        return '<span class="tag ' + ktLop(x.diem).replace('d9', 'xanh').replace('d0', 'do').replace('d5', 'vang').replace('d7', '') + '">' + esc(x.mon) + ' ' + esc(TEN_KT[x.ky] || x.ky) + ': <b>' + esc(x.diem) + '</b></span>';
+      }).join(' ') + '</div>' : '') +
       '<h3>Vắng: ' + d.vang.length + ' buổi</h3>' + (d.vang.length ? '<div class="nho">' + d.vang.map(function (v) { return esc(v.Ngay) + ' (' + esc(v.TrangThai) + ')'; }).join(', ') + '</div>' : '') +
       (!cnBat('minhChung') ? '' : '<h3>📎 Minh chứng</h3><div class="hang"><button class="nut" onclick="mcMoi(\'' + ma + '\')">📷 Chụp tài liệu</button>' +
       '<button class="nut phu" onclick="mcMoi(\'' + ma + '\', true)">🖼 Chọn ảnh có sẵn</button></div><div id="mcDs" class="nho" style="margin-top:6px">Đang tải…</div>') +
@@ -2261,14 +2314,75 @@ function xuatBieuMauThang(input) {
 
 // ============================================================================ ĐÁNH GIÁ ĐỊNH KỲ
 function dgChonLoai(loai) {
-  $('dgChonThang').classList.toggle('on', loai === 'thang'); $('dgChonKy').classList.toggle('on', loai === 'ky');
-  $('dgThang').classList.toggle('an', loai !== 'thang'); $('dgKy').classList.toggle('an', loai !== 'ky');
+  $('dgChonThang').classList.toggle('on', loai === 'thang'); $('dgChonKy').classList.toggle('on', loai === 'ky'); $('dgChonKT').classList.toggle('on', loai === 'kt');
+  $('dgThang').classList.toggle('an', loai !== 'thang'); $('dgKy').classList.toggle('an', loai !== 'ky'); $('dgKT').classList.toggle('an', loai !== 'kt');
+  if (loai === 'kt') taiKT();
   if (loai === 'ky' && !$('kyChon').dataset.daChon) {      // gợi ý kì theo thời điểm trong năm
     var m = new Date().getMonth() + 1;
     $('kyChon').value = (m >= 8 && m <= 11) ? 'GK1' : (m === 12 || m === 1) ? 'CK1' : (m >= 2 && m <= 3) ? 'GK2' : 'CK2';
     $('kyChon').dataset.daChon = '1';
   }
 }
+// ---------------------------------------------------------------- BÀI KIỂM TRA (Đánh giá → 📝 Bài kiểm tra)
+var kt = null, ktMon = '';
+var TEN_KT = { GK1: 'giữa kì I', CK1: 'cuối kì I', GK2: 'giữa kì II', CK2: 'cuối năm' };
+function ktLop(d) { d = +d; return !d ? '' : d >= 9 ? 'd9' : d >= 7 ? 'd7' : d >= 5 ? 'd5' : 'd0'; }
+function taiKT() {
+  if (!$('ktKy').dataset.daChon) {                 // gợi ý bài theo thời điểm trong năm
+    var m = new Date().getMonth() + 1;
+    $('ktKy').value = (m >= 8 && m <= 11) ? 'GK1' : (m === 12 || m === 1) ? 'CK1' : (m >= 2 && m <= 3) ? 'GK2' : 'CK2'; $('ktKy').dataset.daChon = '1';
+  }
+  $('ktKetQua').innerHTML = '';                      // bỏ kết quả xuất lần trước (điểm có thể đã đổi)
+  chay('layDiemKiemTra').then(function (d) { kt = d; if (d.mon.indexOf(ktMon) < 0) ktMon = d.mon[0] || ''; veKT(); });
+}
+function ktDiem(ky, ma, mon) { return ((kt.diem[ky] || {})[ma + '|' + mon]) || ''; }
+function veKT() {
+  if (!kt) return;
+  if (!kt.mon.length) { $('ktMon').innerHTML = ''; $('ktTomTat').innerHTML = '<div class="nhac vang" style="cursor:default">Chưa có môn nào có bài kiểm tra – vào Cài đặt → Môn học, chọn "Có" ở cột Điểm KTĐK cho Tiếng Việt, Toán.</div>'; $('ktDs').innerHTML = ''; return; }
+  var ky = $('ktKy').value;
+  $('ktMon').innerHTML = kt.mon.map(function (m) { return '<span class="chip' + (m === ktMon ? ' on' : '') + '" data-m="' + esc(m) + '" onclick="ktMon=this.dataset.m;veKT()">' + esc(m) + '</span>'; }).join('');
+  var co = kt.hs.map(function (h) { return +ktDiem(ky, h.ma, ktMon); }).filter(Boolean), n = kt.hs.length;
+  var dem = function (a, b) { return co.filter(function (d) { return d >= a && d <= b; }).length; };
+  var tb = co.length ? (co.reduce(function (a, b) { return a + b; }, 0) / co.length).toFixed(1).replace('.', ',') : '–';
+  $('ktTomTat').innerHTML = '<div class="kt-thong"><span>Đã có điểm ' + co.length + '/' + n + '</span><span>Trung bình ' + tb + '</span>' +
+    '<span style="background:#dcfce7;color:#15803d">9–10: ' + dem(9, 10) + '</span><span style="background:#e0ecff;color:#1d4ed8">7–8: ' + dem(7, 8) + '</span>' +
+    '<span style="background:#fff1d6;color:#b45309">5–6: ' + dem(5, 6) + '</span><span style="background:#fee2e2;color:#b91c1c">Dưới 5: ' + dem(1, 4) + '</span></div>' +
+    (/^CK/.test(ky) ? '<div class="nho" style="margin-top:6px">Điểm bài cuối kì tự chuyển sang <b>Định kỳ ' + ky + '</b> (ô Điểm KTĐK) và file nộp Bộ.</div>'
+      : '<div class="nho" style="margin-top:6px">Bài giữa kì: lưu để cô theo dõi, hiện kèm ở màn Định kỳ ' + ky + ' (file Bộ lớp 2 không có điểm giữa kì).</div>');
+  $('ktDs').innerHTML = kt.hs.map(function (h) {
+    var d = ktDiem(ky, h.ma, ktMon), khac = kt.ky.filter(function (k) { return k !== ky && ktDiem(k, h.ma, ktMon); })
+      .map(function (k) { return TEN_KT[k] + ' ' + ktDiem(k, h.ma, ktMon); }).join(' · ');
+    return '<div class="kt-hang" data-ma="' + h.ma + '" onclick="ktNhap(this.dataset.ma)"><span class="kt-stt">' + h.stt + '</span><span class="ten">' + esc(h.ten) + dauNhom(h.ma) +
+      (khac ? '<span class="nho">' + esc(khac) + '</span>' : '') + '</span>' + (kt.anh[ky + '|' + h.ma + '|' + ktMon] ? '<span title="Đã lưu ảnh bài">📷</span>' : '') +
+      '<span class="kt-diem ' + ktLop(d) + '">' + (d || '–') + '</span></div>';
+  }).join('') || '<div class="nho">Chưa có học sinh.</div>';
+}
+function ktNhap(ma) {
+  if (!kt || !ktMon) return;
+  var ky = $('ktKy').value, mon = ktMon, k = function (m) { return m + '|' + mon; };
+  moND({ tieuDe: 'Điểm bài kiểm tra ' + TEN_KT[ky] + ' – ' + mon, ky: ky, hs: kt.hs,
+         lay: function (m) { return ktDiem(ky, m, mon); }, anh: function (m) { return kt.anh[ky + '|' + m + '|' + mon] || ''; },
+         luu: function (m, n) {
+           var cu = ktDiem(ky, m, mon); (kt.diem[ky] = kt.diem[ky] || {})[k(m)] = String(n);
+           goi('luuDiemKiemTra', ky, mon, m, n).then(function () { bao('Đã lưu điểm.', 1000); },
+             function (e) { kt.diem[ky][k(m)] = cu; bao('Chưa lưu được điểm: ' + ((e && e.message) || e) + ' – nhập lại giúp cô.', 7000); });
+         },
+         datAnh: function (m, url) { kt.anh[ky + '|' + m + '|' + mon] = url; }, dong: veKT }, mon, ma);
+}
+function ktXuat() {
+  if (!kt || !kt.mon.length) return bao('Chưa có dữ liệu.');
+  var dau = ['STT', 'Họ và tên'], phu = ['', ''];
+  kt.mon.forEach(function (m) { kt.ky.forEach(function (k, i) { dau.push(i ? '' : m); phu.push(TEN_KT[k].replace(/^./, function (c) { return c.toUpperCase(); })); }); });
+  var ds = [['BẢNG ĐIỂM BÀI KIỂM TRA – Năm học ' + kt.namHoc], [], dau, phu];
+  kt.hs.forEach(function (h) { var r = [h.stt, h.ten]; kt.mon.forEach(function (m) { kt.ky.forEach(function (k) { var d = ktDiem(k, h.ma, m); r.push(d ? +d : ''); }); }); ds.push(r); });
+  var sh = XLSX.utils.aoa_to_sheet(ds), wb = XLSX.utils.book_new();
+  sh['!cols'] = [5, 26].concat(kt.mon.map(function () { return [12, 12, 12, 12]; }).reduce(function (a, b) { return a.concat(b); }, [])).map(function (w) { return { wch: w }; });
+  sh['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 1 + kt.mon.length * 4 } }].concat(kt.mon.map(function (m, j) { return { s: { r: 2, c: 2 + j * 4 }, e: { r: 2, c: 5 + j * 4 } }; }));
+  XLSX.utils.book_append_sheet(wb, sh, 'Bảng điểm');
+  hienKetQuaXuat($('ktKetQua'), 'Bang diem bai kiem tra ' + kt.namHoc + '.xlsx', XLSX.write(wb, { bookType: 'xlsx', type: 'base64' }),
+    '<div class="nho">' + kt.hs.length + ' học sinh · ' + kt.mon.join(', ') + ' · giữa kì I, cuối kì I, giữa kì II, cuối năm.</div>', false);
+}
+
 var dk = null, dkPhan = '';
 var COT_NLPC = 'EFGHIJKLMNOPQRS';
 var MUC_MON = ['T', 'H', 'C'], MUC_NL = ['T', 'Đ', 'C'];
@@ -2334,6 +2448,7 @@ function dau(h, o, phan) {
   return '<div class="hang gian"><div><span class="nho">' + h.stt + '.</span> <b>' + esc(h.ten) + '</b> ' +
     (dk.nguon === 'thang' ? (o.soGhi ? '<span class="tag">đánh giá ' + o.soGhi + ' tháng</span>' : '<span class="tag do">chưa có đánh giá tháng</span>')
       : o.soGhi ? '<span class="tag">' + o.soGhi + ' ghi nhận</span>' : '<span class="tag do">chưa có ghi nhận trong kì</span>') +
+    (o.diemGK ? ' <span class="tag xanh">📝 Bài kiểm tra giữa kì: <b>' + esc(o.diemGK) + '</b></span>' : '') +
     (o.sua ? ' <span class="tag xanh">cô đã chốt/sửa</span>' : '') + '</div>' +
     (o.sua ? '<button class="nut phu" onclick="dkLayLai(\'' + h.ma + '\',\'' + esc(phan) + '\')">↺ Bản app gợi ý</button>' : '') + '</div>';
 }
@@ -2550,20 +2665,27 @@ var nd = null;   // { mon, ds:[mã], i, chiThieu, anh:{src}, khung:{x,y,w,h}, ai
 var KHUNG_MAC_DINH = { x: 0.04, y: 0.12, w: 0.30, h: 0.16 };   // ô Điểm: góc trên bên trái giấy kiểm tra, cạnh ô Lời phê
 function khungDaLuu() { try { var k = JSON.parse(localStorage.getItem('khungDiem') || 'null'); if (k && k.w > 0.03 && k.h > 0.03) return k; } catch (e) {} return null; }
 function luuKhung(k) { try { localStorage.setItem('khungDiem', JSON.stringify(k)); } catch (e) {} }
-function coDiem(ma, mon) { return !!dk.du[ma].mon[mon].diem; }
-function moNhapDiem(ma) {
-  var ds = dk.hs.map(function (h) { return h.ma; }), mon = dkPhan, i = ma ? ds.indexOf(ma) : -1;
-  if (!ma) { i = ds.findIndex(function (m) { return !coDiem(m, mon); }); if (i < 0) { bao('Cả lớp đã có điểm môn này – mở từ em đầu tiên để xem lại.'); i = 0; } }
+// Cửa sổ nhập điểm dùng chung cho Định kỳ và Bài kiểm tra: nguon = {tieuDe, ky, hs, lay(ma), anh(ma), luu(ma, n), datAnh(ma, url), dong()}
+function coDiem(ma) { return !!nd.nguon.lay(ma); }
+function moND(nguon, mon, ma) {
+  var ds = nguon.hs.map(function (h) { return h.ma; }), i = ma ? ds.indexOf(ma) : -1;
+  if (!ma) { i = ds.findIndex(function (m) { return !nguon.lay(m); }); if (i < 0) { bao('Cả lớp đã có điểm – mở từ em đầu tiên để xem lại.'); i = 0; } }
   if (!roiDiDuoc()) return;
   nganXep.push(hienTai); hienTai = { tab: 'danhgia', nhapDiem: 1 }; ghiLichSu(hienTai);   // nút Back / ← chỉ đóng cửa sổ này
-  nd = { mon: mon, ds: ds, i: i, chiThieu: !ma, anh: null, ai: null, khung: null, khongLuu: !cnBat('chupBai') };
+  nd = { mon: mon, ds: ds, i: i, chiThieu: !ma, anh: null, ai: null, khung: null, khongLuu: !cnBat('chupBai'), nguon: nguon };
   $('ndModal').style.display = 'block'; $('ndModal').scrollTop = 0; veNhapDiem();
 }
-function dongNhapDiem() { if (hienTai.nhapDiem) return quayLai(); $('ndModal').style.display = 'none'; nd = null; veDanhGiaKy(); }
+function moNhapDiem(ma) {          // từ màn Định kỳ (cuối kì)
+  var mon = dkPhan;
+  moND({ tieuDe: 'Điểm KTĐK ' + mon + ' – ' + dk.ky, ky: dk.ky, hs: dk.hs, lay: function (m) { return dk.du[m].mon[mon].diem; },
+         anh: function (m) { return dk.du[m].mon[mon].anh; }, luu: function (m, n) { dk.du[m].mon[mon].diem = String(n); dkGui(m, mon); },
+         datAnh: function (m, url) { dk.du[m].mon[mon].anh = url; }, dong: veDanhGiaKy }, mon, ma);
+}
+function dongNhapDiem() { if (hienTai.nhapDiem) return quayLai(); var ve = nd && nd.nguon.dong; $('ndModal').style.display = 'none'; nd = null; if (ve) ve(); }
 function veNhapDiem() {
-  var ma = nd.ds[nd.i], h = dk.hs[nd.i], x = dk.du[ma].mon[nd.mon], tong = dk.hs.length;
-  var soCo = dk.hs.filter(function (y) { return coDiem(y.ma, nd.mon); }).length;
-  var html = '<div class="hang gian"><b>Điểm KTĐK ' + esc(nd.mon) + ' – ' + esc(dk.ky) + '</b><button class="nut phu" onclick="dongNhapDiem()">✕ Xong</button></div>' +
+  var ng = nd.nguon, ma = nd.ds[nd.i], h = ng.hs[nd.i], x = { diem: ng.lay(ma), anh: ng.anh(ma) }, tong = ng.hs.length;
+  var soCo = ng.hs.filter(function (y) { return ng.lay(y.ma); }).length;
+  var html = '<div class="hang gian"><b>' + esc(ng.tieuDe) + '</b><button class="nut phu" onclick="dongNhapDiem()">✕ Xong</button></div>' +
     '<div class="nho">Đã có điểm ' + soCo + '/' + tong + ' em · đang nhập em thứ ' + (nd.i + 1) + '/' + tong + '</div>' +
     '<div class="nd-ten">' + h.stt + '. ' + esc(h.ten) + '</div>' +
     '<div class="nho">Điểm đang lưu: <b>' + (x.diem || 'chưa có') + '</b>' + (x.anh ? ' · <a href="' + esc(x.anh) + '" target="_blank">xem ảnh bài đã lưu</a>' : '') + '</div>';
@@ -2593,17 +2715,17 @@ function veNhapDiem() {
 }
 function ndDi(buoc) {
   var i = nd.i + buoc;
-  if (buoc > 0 && nd.chiThieu) while (i < nd.ds.length && coDiem(nd.ds[i], nd.mon)) i++;
+  if (buoc > 0 && nd.chiThieu) while (i < nd.ds.length && coDiem(nd.ds[i])) i++;
   if (i < 0) return;
   if (i >= nd.ds.length) { bao(nd.chiThieu ? 'Đã hết em chưa có điểm.' : 'Đã đến em cuối danh sách.'); return dongNhapDiem(); }
   nd.i = i; nd.anh = null; nd.ai = null; $('ndModal').scrollTop = 0; veNhapDiem();
 }
 function ndChon(n) {
-  var ma = nd.ds[nd.i], mon = nd.mon, x = dk.du[ma].mon[mon], anh = nd.anh, ai = nd.ai, ten = dk.hs[nd.i].ten;
-  x.diem = String(n); dkGui(ma, mon);
+  var ng = nd.nguon, ma = nd.ds[nd.i], mon = nd.mon, anh = nd.anh, ai = nd.ai, ten = ng.hs[nd.i].ten;
+  ng.luu(ma, n);
   if (anh && !nd.khongLuu) {
-    goi('luuAnhBaiKT', dk.ky, ma, mon, anh.src.split(',')[1], ai ? ai.diem : null)
-      .then(function (r) { x.anh = r.url; }, function (e) { bao('Chưa lưu được ảnh bài của ' + ten + ': ' + (e && e.message || e), 6000); });
+    goi('luuAnhBaiKT', ng.ky, ma, mon, anh.src.split(',')[1], ai ? ai.diem : null)
+      .then(function (r) { ng.datAnh(ma, r.url); }, function (e) { bao('Chưa lưu được ảnh bài của ' + ten + ': ' + (e && e.message || e), 6000); });
   }
   ndDi(1);
 }
@@ -3192,7 +3314,7 @@ function apDungGiaoDien(gd) {
   if (!cnBat('tongHopDD') && !$('ddVungTH').classList.contains('an')) ddCheDo('ngay');
   an('stChePT', !cnBat('phongTrao')); an('stCheBai', !cnBat('theoBai')); an('stCheChung', !cnBat('theoBai'));
   var coKy = GD.kyHien.length > 0 || GD.hienGVCN;          // Đánh giá: phần Định kỳ chỉ hiện khi đến kì
-  an('dgChonThe', !coKy);
+  an('dgChonKy', !coKy);                                  // Bài kiểm tra luôn hiện; Định kỳ chỉ hiện khi đến kì
   if (!coKy && !$('dgKy').classList.contains('an')) dgChonLoai('thang');
   [].forEach.call($('kyChon').options, function (o) { o.hidden = o.disabled = o.value === 'GVCN' ? !GD.hienGVCN : GD.kyHien.indexOf(o.value) < 0; });
   an('theAI', !cnBat('ai')); an('theNamHoc', !GD.hienNamHoc); an('theDungLuong', !(cnBat('minhChung') || cnBat('chupBai')));

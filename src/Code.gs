@@ -43,7 +43,9 @@ var BANG = {
   ThuVienYeuCau: ['Khoi', 'BoSach', 'HocKy', 'Thang', 'Mon', 'NoiDung', 'MaYC', 'YeuCau', 'CanCu', 'MucDo', 'Mau', 'CauNX'],
   MauCuaCo:     ['Mon', 'NoiDung', 'YeuCau', 'MucDo', 'CauNX', 'CapNhat'],
   // Nhóm học sinh cần quan tâm: Nhom = các nhóm cách nhau ';', GhiChu 1 dòng, BoGoiY = gợi ý cô đã bỏ qua ("nhóm|yyyy-mm")
-  NhomHS:       ['MaDinhDanh', 'Nhom', 'GhiChu', 'BoGoiY', 'CapNhat']
+  NhomHS:       ['MaDinhDanh', 'Nhom', 'GhiChu', 'BoGoiY', 'CapNhat'],
+  // Điểm bài kiểm tra (Tiếng Việt, Toán): Ky = GK1 / CK1 / GK2 / CK2. Điểm cuối kì (CK) cũng là "Điểm KTĐK" của màn Định kỳ.
+  DiemKiemTra:  ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'Diem', 'CapNhat']
 };
 var MUC4 = ['Hoàn thành xuất sắc', 'Hoàn thành tốt', 'Hoàn thành', 'Chưa hoàn thành'];
 var MUC_PC = ['Tốt', 'Đạt', 'Cần cố gắng'];
@@ -700,6 +702,8 @@ function layGoiYNhom() {
   var nhom = layNhomHS().ds, bo = {}, kh = thangKhoa_();
   doc_('NhomHS').forEach(function (r) { String(r.BoGoiY || '').split(' ').forEach(function (x) { var p = x.split('|'); if (p[1] === kh) bo[r.MaDinhDanh + '|' + p[0].replace(/_/g, ' ')] = 1; }); });
   var THAP = { CHT: 1, CCG: 1 }, ten = { kt: 'kiến thức', kn: 'kỹ năng' }, out = [];
+  var diemKTNam = diemKiemTra_(caiDat_().NamHoc || ''), kyKT = KY_KT.filter(function (k) { return diemKTNam[k]; }).pop();
+  var TEN_KY_KT = { GK1: 'giữa kì I', CK1: 'cuối kì I', GK2: 'giữa kì II', CK2: 'cuối năm' };
   hocSinhDangHoc_(hn).forEach(function (h) {
     var ma = h.MaDinhDanh, ly = { 'Bồi dưỡng': [], 'Cần rèn thêm': [], 'Cần chú ý': [] };
     if (t) ['Tiếng Việt', 'Toán'].forEach(function (m) {
@@ -715,6 +719,12 @@ function layGoiYNhom() {
       if (v.N + v.cu >= 3) ly['Cần chú ý'].push('Chưa nộp vở ' + m + ' ' + (v.N + v.cu) + ' lần (30 ngày qua)');
     });
     if ((vang[ma] || 0) >= 3) ly['Cần chú ý'].push('Vắng ' + vang[ma] + ' buổi trong 30 ngày qua');
+    if (kyKT) {                                      // bài kiểm tra gần nhất có điểm
+      var dKT = diemKTNam[kyKT], mon10 = 0, monCo = 0;
+      MON_VO.forEach(function (m) { var d = +(dKT[ma + '|' + m] || 0); if (!d) return; monCo++; if (d === 10) mon10++;
+        if (d < 5) ly['Cần rèn thêm'].push('Bài kiểm tra ' + TEN_KY_KT[kyKT] + ' môn ' + m + ': ' + d + ' điểm'); });
+      if (monCo >= 2 && mon10 === monCo) ly['Bồi dưỡng'].push('Bài kiểm tra ' + TEN_KY_KT[kyKT] + ': 10 điểm cả Tiếng Việt và Toán');
+    }
     NHOM_HS.forEach(function (n) {
       if (!ly[n].length || bo[ma + '|' + n] || ((nhom[ma] || {}).nhom || []).indexOf(n) >= 0) return;
       out.push({ ma: ma, ten: h.HoTen, nhom: n, lyDo: ly[n] });
@@ -728,7 +738,10 @@ function layHoSo(ma) {
   var nx = doc_('SoTheoDoi').filter(function (r) { return r.MaDinhDanh === ma; })
     .sort(function (a, b) { return key_(b.Ngay) - key_(a.Ngay) || (a.ThoiGian < b.ThoiGian ? 1 : -1); });
   var dd = doc_('DiemDanh').filter(function (r) { return r.MaDinhDanh === ma && r.TrangThai !== 'Có mặt'; });
-  return { hs: h, nhanXet: nx, vang: dd, phongTrao: phongTraoCuaHS_(caiDat_().NamHoc || '')[ma] || [] };
+  var namHoc = caiDat_().NamHoc || '', diemKT = [];
+  doc_('DiemKiemTra').forEach(function (r) { if (r.NamHoc === namHoc && r.MaDinhDanh === ma && r.Diem) diemKT.push({ ky: r.Ky, mon: r.Mon, diem: r.Diem }); });
+  diemKT.sort(function (a, b) { return a.mon < b.mon ? -1 : a.mon > b.mon ? 1 : KY_KT.indexOf(a.ky) - KY_KT.indexOf(b.ky); });
+  return { hs: h, nhanXet: nx, vang: dd, phongTrao: phongTraoCuaHS_(namHoc)[ma] || [], diemKT: diemKT };
 }
 
 // ============================================================================ NHẬN XÉT THÁNG (biểu mẫu đánh giá thường xuyên)
@@ -865,6 +878,38 @@ function ghepNhanXetKy_(ghi, gioiHan) {
   var ds = c.tb >= 2.5 ? c.tot.slice(0, 3).concat(can.slice(0, 1)) : c.can.map(function (x) { return x.cau; }).slice(0, 2).concat(c.tot.slice(0, 2));
   return noiCau_(ds, gioiHan);
 }
+// ============================================================================ BÀI KIỂM TRA (Đánh giá → 📝 Bài kiểm tra)
+// Thông tư 27: lớp 1–3 kiểm tra định kì Tiếng Việt, Toán cuối HK I và cuối năm (bắt buộc, vào file Bộ); trường có thể cho thêm bài giữa kì.
+var KY_KT = ['GK1', 'CK1', 'GK2', 'CK2'];
+function diemKiemTra_(namHoc) {        // {ky: {'ma|môn': điểm}}
+  var o = {};
+  doc_('DiemKiemTra').forEach(function (r) { if (r.NamHoc === namHoc && r.Diem) (o[r.Ky] = o[r.Ky] || {})[r.MaDinhDanh + '|' + r.Mon] = r.Diem; });
+  return o;
+}
+function ghiDiemKT_(namHoc, ky, mon, ma, diem) {
+  var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+  thayTheTheo_('DiemKiemTra', function (r) { return !(r.NamHoc === namHoc && r.Ky === ky && r.Mon === mon && r.MaDinhDanh === ma); },
+    diem ? [hang_('DiemKiemTra', { NamHoc: namHoc, Ky: ky, Mon: mon, MaDinhDanh: ma, Diem: String(diem), CapNhat: luc })] : []);
+}
+function layDiemKiemTra() {
+  var cd = caiDat_(), namHoc = cd.NamHoc || '';
+  var mon = monDangDay_().filter(function (m) { return m.CoDiemKTDK === 'Có'; }).map(function (m) { return m.TenMon; });
+  var anh = {};
+  doc_('BaiKiemTra').forEach(function (r) { if (r.NamHoc === namHoc) anh[r.Ky + '|' + r.MaDinhDanh + '|' + r.Mon] = r.Url; });
+  var hs = doc_('HocSinh').filter(function (h) { return h.TrangThai !== 'Đã chuyển đi'; }).sort(function (a, b) { return +a.ThuTu - +b.ThuTu; });
+  return { namHoc: namHoc, ky: KY_KT, mon: mon, diem: diemKiemTra_(namHoc), anh: anh,
+           hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; }) };
+}
+// diem: 1..10 hoặc '' (xoá)
+function luuDiemKiemTra(ky, mon, ma, diem) {
+  return voiKhoa_(function () {
+    if (KY_KT.indexOf(ky) < 0) throw new Error('Bài kiểm tra không hợp lệ.');
+    if (diem !== '' && diem != null && !/^(10|[1-9])$/.test(String(diem))) throw new Error('Điểm phải là số nguyên từ 1 đến 10.');
+    ghiDiemKT_(caiDat_().NamHoc || '', ky, mon, ma, diem || '');
+    return 'Đã lưu.';
+  });
+}
+
 function layDanhGiaKy(ky) {
   if (ky === 'GVCN') return layNhanXetGVCN_();
   var pv = phamViKy_(ky), cd = caiDat_(), mon = monDangDay_();
@@ -888,6 +933,7 @@ function layDanhGiaKy(ky) {
   });
   var anhBai = {};
   doc_('BaiKiemTra').forEach(function (r) { if (r.NamHoc === pv.namHoc && r.Ky === ky) anhBai[r.MaDinhDanh + '|' + r.Mon] = r.Url; });
+  var diemKT = diemKiemTra_(pv.namHoc);              // điểm nhập ở Đánh giá → Bài kiểm tra
   var daSua = {};
   doc_('DanhGiaKy').forEach(function (r) { if (r.NamHoc === pv.namHoc && r.Ky === ky) daSua[r.MaDinhDanh + '|' + r.Phan] = r; });
   var du = {};
@@ -902,6 +948,9 @@ function layDanhGiaKy(ky) {
       x.muc = x.mucGoiY; x.goc = { muc: x.muc, nx: x.nx, diem: '' };
       var s = daSua[h.MaDinhDanh + '|' + m.TenMon];
       if (s) { x.muc = s.Muc; x.diem = s.Diem; x.nx = s.NhanXet; x.sua = true; }
+      var dKT = (diemKT[ky] || {})[h.MaDinhDanh + '|' + m.TenMon];
+      if (dKT) x.diem = dKT;                          // cuối kì: điểm bài kiểm tra là điểm KTĐK
+      if (!pv.cuoiKy && dKT) x.diemGK = dKT;          // giữa kì: chỉ hiện để tham khảo (file Bộ lớp 2 không có điểm giữa kì)
       o.mon[m.TenMon] = x;
     });
     // 15 mức năng lực – phẩm chất + 3 nhận xét
@@ -933,6 +982,7 @@ function luuDanhGiaKy(ky, x) {
     thayTheTheo_('DanhGiaKy', function (r) { return !cung(r); }, [hang_('DanhGiaKy', {
       NamHoc: namHoc, Ky: ky, MaDinhDanh: x.ma, Phan: x.phan, Muc: x.muc || '', Diem: x.diem || '', NhanXet: x.nx || '',
       MucNLPC: x.mucNLPC ? JSON.stringify(x.mucNLPC) : '', NXNLChung: x.nlc || '', NXNLDacThu: x.nld || '', NXPhamChat: x.pc || '', CapNhat: luc })]);
+    if (/^CK/.test(ky) && x.phan !== 'NLPC' && x.diem !== undefined) ghiDiemKT_(namHoc, ky, x.phan, x.ma, x.diem || '');   // 2 màn luôn khớp
     return luc;
   });
 }
@@ -1349,7 +1399,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';
