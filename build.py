@@ -13,6 +13,13 @@ XEM = os.path.join(GOC, 'xem-thu')
 def doc(p):
     return open(os.path.join(SRC, p), encoding='utf8').read()
 
+# Chung.js: hàm dùng chung máy chủ + trình duyệt (suy năng lực – phẩm chất) – ghép vào cuối Code.gs và vào trang
+CHUNG = doc('Chung.js')
+CODE = doc('Code.gs') + '\n' + CHUNG
+import time
+PB = str(int(time.time()))      # số phiên bản gắn vào đường dẫn script của trang xem thử – tránh trình duyệt dùng bản cũ
+THE_CHUNG = '<script>\n' + CHUNG + '\n</script>\n'
+
 def ghi(thu_muc, ten, nd):
     os.makedirs(thu_muc, exist_ok=True)
     open(os.path.join(thu_muc, ten), 'w', encoding='utf8', newline='\n').write(nd)
@@ -27,9 +34,9 @@ mot_file = mot_file.replace("<?!= include('Styles'); ?>", doc('Styles.html'))
 mot_file = mot_file.replace("<?!= include('HuongDan'); ?>", doc('HuongDan.html'))
 mot_file = mot_file.replace("<?!= include('DanhGia'); ?>", doc('DanhGia.html'))
 mot_file = mot_file.replace("<?!= include('Parsers'); ?>", '<script>\n' + doc('parsers.js') + '\n</script>')
-mot_file = mot_file.replace("<?!= include('Client'); ?>", doc('Client.html'))
+mot_file = mot_file.replace("<?!= include('Client'); ?>", THE_CHUNG + doc('Client.html'))
 assert '<?' not in mot_file, 'Index.html sau khi gộp vẫn còn lệnh include'
-ghi(DIST, 'Code.gs', doc('Code.gs'))
+ghi(DIST, 'Code.gs', CODE)
 ghi(DIST, 'Index.html', mot_file)
 ghi(DIST, 'appsscript.json', doc('appsscript.json'))
 
@@ -38,12 +45,12 @@ html = doc('Index.html')
 html = html.replace("<?!= include('Styles'); ?>", doc('Styles.html'))
 html = html.replace("<?!= include('HuongDan'); ?>", doc('HuongDan.html'))
 html = html.replace("<?!= include('DanhGia'); ?>", doc('DanhGia.html'))
-gia_lap = '<script src="mock_gas.js"></script>\n<script src="Code.gs.js"></script>\n<script>\n' + doc('parsers.js') + '\n</script>\n'
+gia_lap = '<script src="mock_gas.js?v=' + PB + '"></script>\n<script src="Code.gs.js?v=' + PB + '"></script>\n<script>\n' + doc('parsers.js') + '\n</script>\n'
 html = html.replace("<?!= include('Parsers'); ?>", gia_lap)
-html = html.replace("<?!= include('Client'); ?>", doc('Client.html'))
+html = html.replace("<?!= include('Client'); ?>", THE_CHUNG + doc('Client.html'))
 ghi(XEM, 'index.html', html)
-ghi(XEM, 'Code.gs.js', doc('Code.gs'))
+ghi(XEM, 'Code.gs.js', CODE)
 shutil.copy(os.path.join(GOC, 'dev', 'mock_gas.js'), os.path.join(XEM, 'mock_gas.js'))
 # 3) Chạy thử CHÍNH file Index.html sẽ dán lên Google (chỉ chèn thêm bộ giả lập vào đầu trang)
-ghi(XEM, 'ban-phat-hanh.html', mot_file.replace('<head>', '<head>\n<script src="mock_gas.js"></script>\n<script src="Code.gs.js"></script>', 1))
+ghi(XEM, 'ban-phat-hanh.html', mot_file.replace('<head>', '<head>\n<script src="mock_gas.js?v=' + PB + '"></script>\n<script src="Code.gs.js?v=' + PB + '"></script>', 1))
 print('Đã tạo:', DIST, 'và', XEM)

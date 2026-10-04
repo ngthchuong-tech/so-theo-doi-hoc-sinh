@@ -1,0 +1,43 @@
+CẬP NHẬT – MÀN ĐÁNH GIÁ LÀ NƠI THỐNG NHẤT KẾT QUẢ; NĂNG LỰC – PHẨM CHẤT TỰ SUY TỪ KẾT QUẢ CÁC MÔN
+
+Theo ý cô: màn Đánh giá là chỗ thống nhất mọi đánh giá (tháng, giữa kì, cuối kì, cuối năm) để tải file nộp hệ thống của Bộ.
+
+Đánh giá → Thường xuyên (hằng tháng)
+1. Tiếng Việt, Toán: CHỈ HIỆN KẾT QUẢ từ Sổ theo dõi → 📋 Đánh giá tháng (mức Kiến thức / Kỹ năng tự tính, mức từng yêu cầu,
+   nhận xét ghép sẵn – cô sửa thẳng được). Không còn nút chọn mức kiểu cũ.
+   Tháng chưa có thư viện / chưa ghi: hiện "chưa ghi" và nhắc tải thư viện, sang Sổ theo dõi ghi.
+   (Trước đây khi app chưa có thư viện tháng bản mới, app quay về cách chọn mức cũ – đó là phần cô thấy "theo cách cũ".)
+2. HĐTN, Đạo đức: cô chọn mức HTXS / HTT / HT / CHT (đổi CCG → CHT cho đúng: "Cần cố gắng" chỉ dùng cho năng lực, phẩm chất).
+   Mức CCG đã chọn trước đây tự hiểu là CHT.
+3. Năng lực – phẩm chất: APP TỰ SUY 15 mục, cô không phải chọn mức.
+   Căn cứ Thông tư 27/2020 (Điều 6, 7): giáo viên căn cứ biểu hiện của học sinh trong quá trình học tập, rèn luyện;
+   phẩm chất, năng lực chung hình thành qua mọi môn và hoạt động; năng lực đặc thù chủ yếu qua môn tương ứng.
+     Tự chủ và tự học        ← chất lượng vở, nộp vở, kỹ năng Tiếng Việt / Toán, HĐTN
+     Giao tiếp và hợp tác    ← yêu cầu "Kể chuyện, nói và nghe" (Tiếng Việt), HĐTN
+     Giải quyết vấn đề, sáng tạo ← "Giải toán có lời văn" (Toán), "Viết đoạn văn" (Tiếng Việt), HĐTN
+     Ngôn ngữ / Tính toán    ← Tiếng Việt / Toán (kiến thức, kỹ năng)
+     Khoa học, Công nghệ, Tin học, Thẩm mĩ, Thể chất ← mặc định Đạt (môn do giáo viên khác dạy; lớp 2 chưa có Tin học, Công nghệ)
+     Yêu nước                ← Đạo đức, HĐTN, phong trào – cuộc thi
+     Nhân ái                 ← Đạo đức, HĐTN
+     Chăm chỉ                ← nộp vở, chuyên cần, chất lượng vở, kết quả học tập chung
+     Trung thực              ← Đạo đức
+     Trách nhiệm             ← nộp vở, chuyên cần (vắng không phép), HĐTN, phong trào
+   Mức (bám định nghĩa của Thông tư):
+     Tốt = mọi căn cứ đều tốt, có ít nhất 2 căn cứ ("biểu hiện rõ và thường xuyên");
+     Cần cố gắng = căn cứ cần cố gắng nhiều hơn căn cứ tốt; còn lại Đạt.
+   Chạm vào từng mục để xem căn cứ (VD "Chăm chỉ: Đạt – Chưa nộp vở 3 lần; + Đi học đều; + Vở thường đẹp, đúng …").
+   3 ô nhận xét (năng lực chung, năng lực đặc thù, phẩm chất) ghép điều tốt trước, điều cần cố gắng sau; phẩm chất yếu vì vở /
+   chuyên cần thì câu nói đúng điều đó ("Cần nộp vở đầy đủ, đúng hạn.", "Cần đi học đều, đúng giờ."). Cô sửa thẳng được.
+
+Đánh giá → Định kỳ (GK1, CK1, GK2, CK2): 15 mức gợi ý = trung bình mức app suy ra ở các tháng trong kì (Tốt 3, Đạt 2, CCG 1);
+nhận xét ghép từ các tháng như trước. Tiếng Việt, Toán giữ nguyên (mức T/H/C, điểm KTĐK theo yêu cầu của Bộ).
+
+Kỹ thuật: phần suy năng lực – phẩm chất viết MỘT LẦN trong file mới src/Chung.js, build.py ghép vào cả Code.gs và Index.html
+→ màn hình và máy chủ (khi xuất file, gợi ý định kỳ) cho kết quả giống hệt (đã đối chiếu 210 ô: 35 em × 6 phần, khớp hoàn toàn).
+Trang xem thử gắn số phiên bản vào đường dẫn script để trình duyệt không dùng bản cũ.
+
+Đã thử trên máy giả lập: tháng chưa có thư viện (Tiếng Việt, Toán chỉ hiện "chưa ghi", HĐTN dùng CHT); tháng có đủ dữ liệu
+(em giỏi → Tốt cả, em nhiều CHT + chưa nộp vở → Cần cố gắng đúng chỗ, em vắng không phép → Chăm chỉ / Trách nhiệm Đạt, mức CCG cũ → CHT);
+GK1 lấy đủ 15 mục; màn điện thoại; mọi màn hình không lỗi.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

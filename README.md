@@ -25,7 +25,7 @@ Web app trên **Google Apps Script + Google Trang tính + Google Drive** cho 1 g
 ## Cấu trúc thư mục
 | Thư mục / file | Nội dung |
 |---|---|
-| `src/` | Mã nguồn: `Code.gs` (máy chủ), `Index.html`, `Client.html`, `Styles.html`, `DanhGia.html`, `HuongDan.html`, `parsers.js` |
+| `src/` | Mã nguồn: `Code.gs` (máy chủ), `Index.html`, `Client.html`, `Styles.html`, `DanhGia.html`, `HuongDan.html`, `parsers.js`, `Chung.js` (hàm dùng chung máy chủ + trình duyệt: suy năng lực – phẩm chất) |
 | `build.py` | Gộp mã nguồn → `Ma nguon Apps Script/` (2 file để dán vào Apps Script) và `xem-thu/` (chạy thử trên máy) |
 | `Ma nguon Apps Script/` | Bản để cài: `Code.gs`, `Index.html`, `appsscript.json` |
 | `dev/mock_gas.js` | Giả lập Google (Trang tính, Drive, Gemini…) để chạy thử trên máy, dữ liệu lưu trong trình duyệt |
