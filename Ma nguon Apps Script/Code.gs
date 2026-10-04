@@ -1628,7 +1628,8 @@ function khoThang_() {          // tóm tắt kho thư viện tháng để hiệ
     var x = o[k] = o[k] || { khoi: r.Khoi, boSach: r.BoSach, hocKy: r.HocKy, mon: r.Mon, soCau: 0, thang: {}, yc: {}, v2: true };
     x.soCau++; x.thang[r.Thang] = 1; x.yc[r.Thang + r.MaYC] = 1;
   });
-  return Object.keys(o).map(function (k) { var x = o[k]; x.thang = Object.keys(x.thang); if (x.yc) x.soYC = Object.keys(x.yc).length; delete x.yc; return x; });
+  var thuTu = function (t) { t = +t; return t < 8 ? t + 12 : t; };          // xếp theo năm học: 9 … 12, 1 … 5
+  return Object.keys(o).map(function (k) { var x = o[k]; x.thang = Object.keys(x.thang).sort(function (a, b) { return thuTu(a) - thuTu(b); }); if (x.yc) x.soYC = Object.keys(x.yc).length; delete x.yc; return x; });
 }
 
 // ---------------------------------------------------------------------------- GHI ĐÁNH GIÁ THÁNG theo yêu cầu cần đạt (giống màn ghi theo bài)
