@@ -12,3 +12,9 @@ CẬP NHẬT – GIAO DIỆN MỚI (sinh động hơn, theo ý cô: nhiều màu
 Chỉ thay phần trình bày, không đổi chức năng; đã thử mọi màn hình trên điện thoại giả lập, không lỗi.
 
 Cách cập nhật: dán lại Index.html (và Code.gs) → Triển khai → Phiên bản mới.
+
+Bổ sung (theo góp ý): màn Đánh giá (tháng, định kỳ, GVCN)
+- Tên học sinh to, đậm, màu chủ đạo, số thứ tự trong vòng tròn màu, có đường ngăn với phần dưới.
+- Nhãn (Kiến thức, Kỹ năng, NL chung, NL đặc thù, Phẩm chất) in đậm có màu; tiêu đề ô nhận xét (Nhận xét môn…, Năng lực chung…)
+  in đậm, có chấm màu; ô mức (Tự chủ, tự học T…) to hơn.
+- Ô nhận xét dùng cùng phông chữ với app (trước đây là phông "máy đánh chữ").

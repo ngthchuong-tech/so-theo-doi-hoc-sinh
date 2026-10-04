@@ -228,6 +228,21 @@
   .vo-nut button { border-radius: 10px; }
   #toast { border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
   .modal .the { border-radius: 18px; }
+  /* Tên học sinh, nhãn, tiêu đề ô: đậm, có màu cho dễ nhận (04/10/2026) */
+  input, select, textarea, button { font-family: inherit; }
+  .bm-hs > div:first-child { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px dashed var(--vien); }
+  .bm-hs > div:first-child > b, .bm-hs > div:first-child > div > b { font-size: 18px; font-weight: 800; color: var(--chinh); letter-spacing: .1px; }
+  .bm-hs > div:first-child > .nho:first-child, .bm-hs > div:first-child > div > .nho:first-child {
+    display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 6px; margin-right: 4px;
+    border-radius: 13px; background: linear-gradient(135deg, var(--chinh), var(--chinh2)); color: #fff; font-weight: 700; font-size: 13px; vertical-align: 2px; }
+  .tg-nhan { font-weight: 700; color: var(--chinh); font-size: 13.5px; min-width: 82px; }
+  .bm-o { margin-top: 12px; }
+  .bm-o label { color: #344054; }
+  .bm-o label > span:first-child { font-weight: 700; font-size: 14.5px; color: #1d2433; display: inline-flex; align-items: center; gap: 6px; }
+  .bm-o label > span:first-child::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--chinh2); flex: none; }
+  .bm-o textarea { font-size: 15.5px; line-height: 1.45; border-color: #d0d5dd; background: #fcfcfd; }
+  .the h3 { color: var(--chinh); font-weight: 700; }
+  .tg-hang .tag { font-size: 13px; padding: 3px 9px; }
 </style>
 
 </head>
