@@ -968,6 +968,10 @@ function luuTuanCN(tuan, x) {
     return luc;
   });
 }
+var TEN_KY_KT_ = { GK1: 'giữa kì I', CK1: 'cuối kì I', GK2: 'giữa kì II', CK2: 'cuối năm' };
+function kyKetThucTrongThang_(namHoc, thang) {
+  return KY_KT.filter(function (ky) { try { var p = String(phamViKy_(ky).den).split('/'); return +p[1] === +thang && +p[2] === namCuaThang_(namHoc, thang); } catch (e) { return false; } });
+}
 // Gợi ý khối KẾ HOẠCH THÁNG: kế hoạch chung của tháng; kết quả theo Ưu điểm – Tồn tại – Biện pháp khắc phục (như sổ của trường)
 function goiYThangCN(thang) {
   thang = +thang;
@@ -1000,6 +1004,28 @@ function goiYThangCN(thang) {
   var tg = doc_('ThamGia'), giai = [];
   pt.forEach(function (p) { tg.filter(function (r) { return r.MaPT === p.MaPT && r.KetQua && r.KetQua !== 'Tham gia'; }).forEach(function (r) { giai.push((ten[r.MaDinhDanh] || '') + ' – ' + r.KetQua + ' ' + p.Ten); }); });
   if (giai.length) uu.push('đạt giải: ' + giai.join('; '));
+  try {
+    var t0 = duLieuThang_(thang), n0 = Object.keys(ten).length;
+    MON_VO.forEach(function (m) {
+      var tot = Object.keys(ten).filter(function (ma) { var o = (t0.du[ma] || {})[m]; return o && /^HT(XS|T)$/.test(o.mucKT) && /^HT(XS|T)$/.test(o.mucKN); }).length;
+      if (tot && t0.yc && t0.yc[m] && t0.yc[m].coGhi) uu.push(m + ': ' + tot + '/' + n0 + ' em hoàn thành tốt trở lên');
+    });
+    var nhacThang = {};                       // em bị nhắc từ 2 lần trong tháng (ghi chú riêng)
+    Object.keys(t0.gcHS || {}).forEach(function (ma) { if (!ten[ma]) return; var d = {};
+      t0.gcHS[ma].forEach(function (nd) { phanLoaiGhiChu(nd).forEach(function (x) { if (x.tot < 0) d[x.nhan] = (d[x.nhan] || 0) + 1; }); });
+      Object.keys(d).forEach(function (n) { if (d[n] >= 2) (nhacThang[n] = nhacThang[n] || []).push(ten[ma]); }); });
+    Object.keys(nhacThang).forEach(function (n) { ton.push('còn ' + n + ' nhiều lần: ' + nhacThang[n].join(', ')); });
+  } catch (e) {}
+  kyKetThucTrongThang_(namHoc, thang).forEach(function (ky) {      // bài kiểm tra của kì kết thúc trong tháng
+    var dk = diemKiemTra_(namHoc)[ky]; if (!dk) return;
+    MON_VO.forEach(function (m) {
+      var ds = Object.keys(ten).map(function (ma) { return +(dk[ma + '|' + m] || 0); }).filter(Boolean); if (!ds.length) return;
+      var dem = function (a, b) { return ds.filter(function (d) { return d >= a && d <= b; }).length; };
+      uu.push('kiểm tra ' + TEN_KY_KT_[ky] + ' môn ' + m + ': 9–10: ' + dem(9, 10) + ' em, 7–8: ' + dem(7, 8) + ' em, 5–6: ' + dem(5, 6) + ' em' + (dem(1, 4) ? ', dưới 5: ' + dem(1, 4) + ' em' : ''));
+      var duoi5 = Object.keys(ten).filter(function (ma) { var d = +(dk[ma + '|' + m] || 0); return d && d < 5; }).map(function (ma) { return ten[ma]; });
+      if (duoi5.length) ton.push(m + ' ' + TEN_KY_KT_[ky] + ' dưới 5 điểm: ' + duoi5.join(', '));
+    });
+  });
   try {
     var t = duLieuThang_(thang), cht = {};
     MON_VO.forEach(function (m) { Object.keys(t.du).forEach(function (ma) { var o = t.du[ma][m]; if (o && (o.mucKT === 'CHT' || o.mucKN === 'CHT') && ten[ma]) (cht[m] = cht[m] || []).push(ten[ma]); }); });
@@ -1064,6 +1090,19 @@ function goiYTuanCN(tuan, tu, den) {
       var s = 0; MON_VO.forEach(function (m) { var x = dv.vo[ma][m]; if (x) s += x.N + x.cu; }); return s ? ten[ma] + ' (' + s + ' lần)' : ''; }).filter(Boolean);
     kq.push(chua.length ? '- Nộp vở: chưa đầy đủ – ' + chua.join(', ') + '.' : '- Nộp vở: cả lớp nộp đầy đủ.');
   }
+  // ghi chú khác trong tuần (họp, việc cần làm…) → đưa vào kế hoạch tuần
+  var gcTuan = doc_('GhiChuNgay').filter(function (r) { return r.NoiDung && trongKhoang_(r.Ngay, tu, den); }).sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); });
+  gcTuan.filter(function (r) { return r.Loai === 'khac'; }).forEach(function (r) { nd.push('- ' + String(r.NoiDung).replace(/\s*\n\s*/g, '; ').replace(/^-\s*/, '') + ' (' + ngayNgan_(r.Ngay) + ')'); });
+  // ghi chú riêng từng em trong tuần → HS tích cực / cần nhắc nhở
+  var tichCuc = [], nhac = {};
+  gcTuan.filter(function (r) { return r.Loai === 'hs' && ten[r.MaDinhDanh]; }).forEach(function (r) {
+    phanLoaiGhiChu(r.NoiDung).forEach(function (x) {
+      if (x.tot > 0) { if (tichCuc.indexOf(ten[r.MaDinhDanh]) < 0) tichCuc.push(ten[r.MaDinhDanh]); }
+      else { var a = nhac[ten[r.MaDinhDanh]] = nhac[ten[r.MaDinhDanh]] || []; if (a.indexOf(x.nhan) < 0) a.push(x.nhan); }
+    });
+  });
+  if (tichCuc.length) kq.push('- HS tích cực: ' + tichCuc.join(', ') + '.');
+  if (Object.keys(nhac).length) kq.push('- Nhắc nhở: ' + Object.keys(nhac).map(function (t) { return t + ' (' + nhac[t].join(', ') + ')'; }).join('; ') + ' – GV đã nhắc nhở, trao đổi với phụ huynh.');
   // ghi chú chung cả lớp trong tuần (Sổ theo dõi → 🗒️ Ghi chú)
   doc_('GhiChuNgay').filter(function (r) { return r.Loai === 'lop' && r.NoiDung && trongKhoang_(r.Ngay, tu, den); })
     .sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); })
@@ -1131,6 +1170,15 @@ function goiYTheoDoiHS(ma, thang) {
   var v = 0; MON_VO.forEach(function (m) { var x = ((t.vo || {})[ma] || {})[m]; if (x) v += x.N + x.cu; });
   var kp = 0; doc_('DiemDanh').forEach(function (r) { var p = String(r.Ngay).split('/'); if (r.MaDinhDanh === ma && +p[1] === thang && r.TrangThai === 'Vắng không phép') kp += (r.Buoi === 'Sáng' || r.Buoi === 'Chiều' ? 0.5 : 1); });
   var nd = han.map(function (c) { c = c.replace(/\.$/, ''); return c.charAt(0).toLowerCase() + c.slice(1); });   // nối bằng ";" → chữ thường
+  var namHocTD = caiDat_().NamHoc || '', dKT = diemKiemTra_(namHocTD), cKT = diemCau_(namHocTD), deK = deKT_(namHocTD);
+  kyKetThucTrongThang_(namHocTD, thang).forEach(function (ky) {      // bài kiểm tra kì kết thúc trong tháng: điểm + câu còn yếu
+    MON_VO.forEach(function (m) {
+      var d = (dKT[ky] || {})[ma + '|' + m]; if (!d) return;
+      var cau = cKT[ky + '|' + m + '|' + ma], yeu = [];
+      (deK[ky + '|' + m] || []).forEach(function (c) { var td = +c.toiDa, x = cau && cau[c.cau]; if (td && x !== undefined && +x / td < 0.5 && c.kiNang) yeu.push(String(c.kiNang).toLowerCase()); });
+      if (+d < 7 || yeu.length) nd.push('bài kiểm tra ' + TEN_KY_KT_[ky] + ' môn ' + m + ' ' + d + ' điểm' + (yeu.length ? ' (cần rèn: ' + yeu.slice(0, 3).join(', ') + ')' : ''));
+    });
+  });
   ghiChuCuaHS_(ma).filter(function (g) { return +String(g.ngay).split('/')[1] === thang; }).slice(0, 2)
     .forEach(function (g) { nd.push(String(g.nd).replace(/\.$/, '').replace(/^./, function (c) { return c.toLowerCase(); }) + ' (' + ngayNgan_(g.ngay) + ')'); });
   if (v >= 2) nd.push('chưa nộp vở ' + v + ' lần');
@@ -1232,7 +1280,7 @@ function layDanhGiaKy(ky) {
   var hs = doc_('HocSinh').filter(function (h) {
     return h.TrangThai !== 'Đã chuyển đi' || (h.NgayChuyenDi && key_(h.NgayChuyenDi) > key_(pv.den));
   }).sort(function (a, b) { return +a.ThuTu - +b.ThuTu; });
-  var gy = goiYTuThang_(pv, hs, mon);           // có đánh giá tháng trong kì → gợi ý từ các tháng; không thì dùng sổ theo dõi theo bài
+  var gy = goiYTuThang_(pv, hs, mon), ptHSKy = phongTraoCuaHS_(pv.namHoc);           // có đánh giá tháng trong kì → gợi ý từ các tháng; không thì dùng sổ theo dõi theo bài
   var ghiTheoHS = {};
   if (!gy) doc_('SoTheoDoi').forEach(function (r) {
     if (r.MaHK !== pv.maHK || key_(r.Ngay) < key_(pv.tu) || key_(r.Ngay) > key_(pv.den)) return;
@@ -1269,7 +1317,10 @@ function layDanhGiaKy(ky) {
     var gp = gy && gy.du[h.MaDinhDanh].nlpc;
     var mucGoiY = {}; DS_NLPC.forEach(function (t) { mucGoiY[t] = gp ? gp.mucGoiY[t] : mucNLPC_(tbDiem_(theo[t] || [])); });
     var nl = gp ? gp : nhanXetNangLuc_(ghi, GIOI_HAN_KY);
-    var p = { mucGoiY: mucGoiY, muc: JSON.parse(JSON.stringify(mucGoiY)), nlc: nl.nlc, nld: nl.nld, pc: nl.pc, soGhi: gp ? gp.soGhi : ghi.length };
+    var pcKy = nl.pc || '', ptKy = (ptHSKy[h.MaDinhDanh] || []).filter(function (x) { return key_(x.ngay) >= key_(pv.tu) && key_(x.ngay) <= key_(pv.den); });
+    var thanhTich = cauThanhTich_(ptKy).map(function (c) { return c.replace(/^Em\s+/, '').replace(/^./, function (x) { return x.toUpperCase(); }); });
+    if (thanhTich.length) pcKy = noiCau_(tachCau_(pcKy).concat(thanhTich), GIOI_HAN_KY);   // phong trào, cuộc thi, giải thưởng trong kì
+    var p = { mucGoiY: mucGoiY, muc: JSON.parse(JSON.stringify(mucGoiY)), nlc: nl.nlc, nld: nl.nld, pc: pcKy, soGhi: gp ? gp.soGhi : ghi.length };
     p.goc = { muc: JSON.parse(JSON.stringify(mucGoiY)), nlc: p.nlc, nld: p.nld, pc: p.pc };
     var sp = daSua[h.MaDinhDanh + '|NLPC'];
     if (sp) { try { p.muc = JSON.parse(sp.MucNLPC || '{}'); } catch (e) {} p.nlc = sp.NXNLChung; p.nld = sp.NXNLDacThu; p.pc = sp.NXPhamChat; p.sua = true; }
@@ -2148,6 +2199,8 @@ function duLieuThang_(thang) {
     if (!trongThang(r.Ngay)) return; coDiemDanh = true;
     if (r.TrangThai === 'Vắng không phép') vangKP[r.MaDinhDanh] = (vangKP[r.MaDinhDanh] || 0) + (r.Buoi === 'Sáng' || r.Buoi === 'Chiều' ? 0.5 : 1);
   });
+  var gcHS = {};                                 // ghi chú riêng từng em trong tháng (căn cứ năng lực, phẩm chất)
+  doc_('GhiChuNgay').forEach(function (r) { if (r.Loai === 'hs' && r.NoiDung && trongThang(r.Ngay)) (gcHS[r.MaDinhDanh] = gcHS[r.MaDinhDanh] || []).push(r.NoiDung); });
   var pt = {}, ptHS = phongTraoCuaHS_(namHoc);  // số phong trào, cuộc thi em tham gia trong tháng
   Object.keys(ptHS).forEach(function (ma) { var n = ptHS[ma].filter(function (x) { return trongThang(x.ngay); }).length; if (n) pt[ma] = n; });
   var dv = demVo_(function (ngay) { var p = String(ngay).split('/'); return +p[1] === thang && +p[2] === nam; }), vo = dv.vo;
@@ -2161,7 +2214,7 @@ function duLieuThang_(thang) {
     });
   });
   return { thang: thang, nam: nam, namHoc: namHoc, hocKy: hk, gioiHan: GIOI_HAN_THANG, lib: lib, du: du, vo: vo, soNgayVo: dv.soNgay, soNgayVoCu: dv.soNgayCu, mucVo: MUC_VO,
-           yc: yc.mon, ghi: yc.ghi, vangKP: vangKP, coDiemDanh: coDiemDanh, pt: pt,
+           yc: yc.mon, ghi: yc.ghi, vangKP: vangKP, coDiemDanh: coDiemDanh, pt: pt, gcHS: gcHS,
            hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; }),
            mon: mon.map(function (m) { return { ten: m.TenMon, sheet: m.TenSheetBieuMau || m.TenMon, tieuChi: !!lib[m.TenMon] || !!yc.mon[m.TenMon], yc: !!yc.mon[m.TenMon] }; }),
            sheets: [{ ten: TEN_SHEET_TONG_HOP, mon: '' }].concat(mon.map(function (m) { return { ten: m.TenSheetBieuMau || m.TenMon, mon: m.TenMon }; })) };

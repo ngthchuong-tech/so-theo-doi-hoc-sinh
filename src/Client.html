@@ -1163,6 +1163,7 @@ function theMon(h) {
     (dk.cuoiKy && m.coDiem ? ' <label class="nho">Điểm KTĐK <input type="number" inputmode="numeric" min="1" max="10" step="1" style="width:70px" value="' + esc(x.diem) + '" onchange="dkDatDiem(\'' + h.ma + '\', this)"></label>' +
       ' <button class="nut phu" style="padding:8px 10px" title="Nhập điểm" onclick="moNhapDiem(\'' + h.ma + '\')">' + (cnBat('chupBai') || cnBat('ai') ? '📷' : '✍') + '</button>' +
       (x.anh ? ' <a class="nho" href="' + esc(x.anh) + '" target="_blank">ảnh bài</a>' : '') : '') + '</div>' +
+    (dk.cuoiKy && m.coDiem && dkLech(x.muc, x.diem) ? '<div class="nho" style="margin-top:4px"><span class="tag vang">⚠ ' + esc(dkLech(x.muc, x.diem)) + '</span></div>' : '') +
     (x.nxBKT ? '<div class="nd-ai">📝 <b>Gợi ý từ bài kiểm tra:</b> ' + esc(x.nxBKT) + ((x.nx || '').indexOf(x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '').slice(0, 25)) >= 0 ? ' <span class="tag xanh">đã chèn</span>'
       : ' <button class="nut phu nut-nho" onclick="dkChenBKT(\'' + h.ma + '\')">＋ Chèn vào nhận xét</button>') + '</div>' : '') +
     oChu(h.ma, dkPhan, 'nx', x.nx, 'Nội dung nhận xét') + '</div>';
@@ -1184,11 +1185,19 @@ function dkGui(ma, phan) {        // lưu toàn bộ phần (môn hoặc NLPC) c
   return goi('luuDanhGiaKy', dk.ky, x).then(function () { var cu = o.sua; o.sua = true; if (!cu) veDanhGiaKy(); bao('Đã lưu.', 1200); },
     function (e) { bao('Chưa lưu được: ' + (e && e.message || e), 6000); });
 }
+// Mức môn và điểm KTĐK lệch nhau nhiều (chỉ nhắc cô xem lại, không chặn – TT27: mức dựa trên cả quá trình)
+function dkLech(muc, diem) {
+  var d = +diem; if (!muc || !d) return '';
+  if (muc === 'T' && d < 7) return 'Mức Hoàn thành tốt nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  if (muc === 'H' && d < 5) return 'Mức Hoàn thành nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  if (muc === 'C' && d >= 7) return 'Mức Chưa hoàn thành nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  return '';
+}
 function dkDatMuc(ma, m) { var x = dk.du[ma].mon[dkPhan]; x.muc = x.muc === m ? '' : m; veDanhGiaKy(); dkGui(ma, dkPhan); }
 function dkDatDiem(ma, el) {
   var v = el.value.trim();
   if (v && !/^(10|[1-9])$/.test(v)) { bao('Điểm phải là số nguyên từ 1 đến 10.'); el.value = dk.du[ma].mon[dkPhan].diem || ''; return; }
-  dk.du[ma].mon[dkPhan].diem = v; dkGui(ma, dkPhan);
+  dk.du[ma].mon[dkPhan].diem = v; dkGui(ma, dkPhan); veDanhGiaKy();
 }
 function dkChenBKT(ma) {            // thêm câu nhận xét từ bài kiểm tra (bỏ câu "Bài kiểm tra … đạt n điểm") vào cuối nhận xét môn
   var x = dk.du[ma].mon[dkPhan], c = x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '');
@@ -1241,6 +1250,7 @@ function dkKiemTra(loai) {
       if (!x.muc) chan.push(h.ten + ' – ' + m.ten + ': chưa chọn mức');
       if ((x.nx || '').length > dk.gioiHan) chan.push(h.ten + ' – ' + m.ten + ': nhận xét quá ' + dk.gioiHan + ' ký tự');
       if (dk.cuoiKy && m.coDiem && !x.diem) canh.push(h.ten + ' – ' + m.ten + ': chưa có điểm KTĐK');
+      if (dk.cuoiKy && m.coDiem && dkLech(x.muc, x.diem)) canh.push(h.ten + ' – ' + m.ten + ': ' + dkLech(x.muc, x.diem));
     });
     else {
       var p = dk.du[h.ma].nlpc, thieu = dk.dsNLPC.filter(function (t) { return !p.muc[t]; });

@@ -658,8 +658,28 @@
               Dấu ✎ là em đã có ghi chú ngày đang chọn.</li>
             <li><b>3. Ghi chú khác</b>: họp, việc cần nhớ, trao đổi với phụ huynh, giáo viên bộ môn…</li>
             <li>Ghi chú của em hiện trong <b>hồ sơ học sinh</b>. <b>Sổ chủ nhiệm</b> dùng ghi chú khi gợi ý: ghi chú cả lớp trong tuần → ô Kết quả của tuần;
-              ghi chú riêng của em trong tháng → ô Nội dung cần lưu ý (theo dõi học sinh chưa tiến bộ).</li>
+              <b>ghi chú khác</b> trong tuần → ô Nội dung (kế hoạch) của tuần; ghi chú riêng từng em → Kết quả tuần ("HS tích cực…", "Nhắc nhở…"),
+              Tồn tại của tháng (em bị nhắc từ 2 lần), và ô Nội dung cần lưu ý (theo dõi học sinh chưa tiến bộ).</li>
+            <li><b>Ghi chú riêng là căn cứ năng lực – phẩm chất</b>: app nhận ra các ý thường gặp (hăng hái phát biểu, giúp đỡ bạn, có tiến bộ, thật thà /
+              quên vở, đồ dùng, chưa làm bài, chưa thuộc bài, mất trật tự, trêu bạn, nói dối) và tính vào mục tương ứng ở Đánh giá tháng.
+              Ghi chú chỉ làm mức lên/xuống giữa Tốt – Đạt; riêng ghi chú thì không hạ em xuống Cần cố gắng.</li>
           </ul>
+        </details>
+      </div>
+
+      <div class="the">
+        <details><summary>4c. 🔗 Thông tin đi đâu – các mục liên kết với Đánh giá và Sổ chủ nhiệm</summary>
+          <table class="bang-hd" style="width:100%;border-collapse:collapse;font-size:13px">
+            <tr><th style="text-align:left">Cô ghi ở</th><th style="text-align:left">Đánh giá (tháng, định kỳ)</th><th style="text-align:left">Sổ chủ nhiệm</th></tr>
+            <tr><td>✅ Điểm danh</td><td>Chuyên cần → Trách nhiệm, Chăm chỉ</td><td>Tuần: chuyên cần · Tháng: vắng không phép · Theo dõi HS</td></tr>
+            <tr><td>📒 Nộp vở</td><td>Nhận xét Tiếng Việt, Toán; Chăm chỉ, Tự chủ, Trách nhiệm</td><td>Tuần: nộp vở · Theo dõi HS</td></tr>
+            <tr><td>📋 Đánh giá tháng (yêu cầu)</td><td>Mức, nhận xét Tiếng Việt, Toán; Ngôn ngữ, Tính toán…; gợi ý định kỳ</td><td>Tháng: Ưu điểm (số em HTT) và Tồn tại (em chưa hoàn thành) · Theo dõi HS</td></tr>
+            <tr><td>🗒️ Ghi chú</td><td>Ghi chú riêng → năng lực – phẩm chất</td><td>Tuần: kế hoạch (ghi chú khác), kết quả (cả lớp, từng em) · Tháng: Tồn tại · Theo dõi HS</td></tr>
+            <tr><td>🏆 Phong trào, cuộc thi</td><td>Yêu nước, Trách nhiệm… · nhận xét phẩm chất định kỳ (giải, tham gia trong kì) · nhận xét GVCN cuối năm</td><td>Tuần, tháng: kế hoạch và kết quả (số em tham gia, đạt giải)</td></tr>
+            <tr><td>📝 Bài kiểm tra</td><td>Điểm KTĐK, gợi ý nhận xét từ bài · nhắc khi mức và điểm lệch nhau</td><td>Tháng kết thúc kì: phân bố điểm, em dưới 5 · Theo dõi HS: điểm, kĩ năng cần rèn</td></tr>
+            <tr><td>👧 Nhóm học sinh</td><td>—</td><td>Kế hoạch tuần, tháng: rèn thêm, bồi dưỡng · Tồn tại tháng</td></tr>
+          </table>
+          <div class="nho" style="margin-top:6px">Mọi gợi ý chỉ điền khi cô bấm <b>Gợi ý</b>; nội dung cô đã sửa và lưu luôn được giữ nguyên.</div>
         </details>
       </div>
 
@@ -1467,6 +1487,20 @@ var NLPC_DAC_THU = ['Ngôn ngữ', 'Tính toán', 'Khoa học', 'Công nghệ', 
 var NLPC_PC = ['Yêu nước', 'Nhân ái', 'Chăm chỉ', 'Trung thực', 'Trách nhiệm'];
 var NLPC_MAC_DINH = { 'Khoa học': 1, 'Công nghệ': 1, 'Tin học': 1, 'Thẩm mĩ': 1, 'Thể chất': 1 };
 var MON_HDTN = 'Hoạt động trải nghiệm', MON_DD = 'Đạo đức';
+// Ghi chú riêng từng em (Sổ theo dõi → 🗒️ Ghi chú) → biểu hiện năng lực, phẩm chất. tot: 1 = biểu hiện tốt, -1 = cần nhắc nhở.
+var GC_LOAI = [
+  { re: /hăng hái|phát biểu|xung phong|tích cực/i, nhan: 'hăng hái phát biểu', tot: 1, muc: ['Giao tiếp và hợp tác', 'Chăm chỉ'] },
+  { re: /giúp đỡ bạn|giúp bạn|nhường bạn|chia sẻ với bạn/i, nhan: 'biết giúp đỡ bạn', tot: 1, muc: ['Nhân ái'] },
+  { re: /tiến bộ/i, nhan: 'có tiến bộ', tot: 1, muc: ['Chăm chỉ', 'Tự chủ và tự học'], tru: /chưa\s+(có\s+)?(sự\s+)?tiến bộ|không tiến bộ/i },
+  { re: /thật thà|trả lại|nhặt được/i, nhan: 'thật thà', tot: 1, muc: ['Trung thực'] },
+  { re: /quên vở|quên đồ dùng|quên sách|thiếu đồ dùng|quên mang/i, nhan: 'quên vở, đồ dùng', tot: -1, muc: ['Trách nhiệm', 'Tự chủ và tự học'] },
+  { re: /chưa làm bài|không làm bài/i, nhan: 'chưa làm bài ở nhà', tot: -1, muc: ['Chăm chỉ', 'Tự chủ và tự học'] },
+  { re: /chưa thuộc bài|không thuộc bài/i, nhan: 'chưa thuộc bài', tot: -1, muc: ['Chăm chỉ'] },
+  { re: /mất trật tự|nói chuyện riêng|làm việc riêng|đùa nghịch|nghịch/i, nhan: 'mất trật tự', tot: -1, muc: ['Trách nhiệm'] },
+  { re: /đánh nhau|đánh bạn|trêu|xô đẩy|nói tục|chửi/i, nhan: 'chưa hòa nhã với bạn', tot: -1, muc: ['Nhân ái'] },
+  { re: /nói dối|gian lận|quay cóp|nhìn bài/i, nhan: 'chưa trung thực', tot: -1, muc: ['Trung thực'] }
+];
+function phanLoaiGhiChu(nd) { nd = String(nd || ''); return GC_LOAI.filter(function (x) { return x.re.test(nd) && !(x.tru && x.tru.test(nd)); }); }
 
 function diemMucNL(m) { return m === 'HTXS' || m === 'HTT' ? 1 : m === 'HT' ? 0 : m === 'CHT' || m === 'CCG' ? -1 : null; }
 function tenMucNgan(m) { return { HTXS: 'HTXS', HTT: 'HTT', HT: 'HT', CHT: 'CHT', CCG: 'CHT' }[m] || m; }
@@ -1516,6 +1550,17 @@ function nlpcTuThang(t, ma) {
     'Trung thực': [DD],
     'Trách nhiệm': [voNop, cc, HD, ptc]
   };
+  // ghi chú riêng của em trong tháng: tốt nhiều hơn cần nhắc → +1; cần nhắc từ 2 lần trở lên (hơn số lần tốt) → -1
+  var gcDem = {};
+  ((t.gcHS || {})[ma] || []).forEach(function (nd) { phanLoaiGhiChu(nd).forEach(function (x) { x.muc.forEach(function (k) {
+    var o = gcDem[k] = gcDem[k] || { d: 0, nhan: {} }; o.d += x.tot; o.nhan[x.nhan] = (o.nhan[x.nhan] || 0) + 1; }); }); });
+  Object.keys(gcDem).forEach(function (k) {
+    var o = gcDem[k], chu = 'Ghi chú: ' + Object.keys(o.nhan).map(function (n) { return n + (o.nhan[n] > 1 ? ' ' + o.nhan[n] + ' lần' : ''); }).join(', ');
+    if (!canCu[k] || !(o.d >= 1 || o.d <= -2)) return;
+    var cc = c(o.d >= 1 ? 1 : -1, chu, 'gc');
+    cc.n = Object.keys(o.nhan).filter(function (n) { return CAU_GC_YEU[n]; }).sort(function (a, b) { return o.nhan[b] - o.nhan[a]; })[0] || '';   // điều cần nhắc nhiều nhất
+    canCu[k].push(cc);
+  });
   var coDuLieu = false, kq = { muc: {}, canCu: {} }, soNguon = {};
   Object.keys(canCu).forEach(function (k) { soNguon[k] = canCu[k].length; canCu[k] = canCu[k].filter(function (x) { return x; }); if (canCu[k].length) coDuLieu = true; });
   NLPC_CHUNG.concat(NLPC_DAC_THU, NLPC_PC).forEach(function (k) {
@@ -1524,7 +1569,7 @@ function nlpcTuThang(t, ma) {
     ds.forEach(function (x) { if (x.d > 0) tot++; else if (x.d < 0) yeu++; });
     kq.canCu[k] = ds;
     // Tốt cần "biểu hiện rõ và thường xuyên": mọi căn cứ đều tốt và có ít nhất 2 căn cứ (mục chỉ có 1 nguồn như Trung thực thì 1 là đủ)
-    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot ? 'Cần cố gắng' : 'Đạt');
+    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot && !ds.every(function (x) { return x.k === 'gc'; }) ? 'Cần cố gắng' : 'Đạt');   // chỉ có ghi chú thì không hạ xuống Cần cố gắng
   });
   return kq;
 }
@@ -1544,6 +1589,8 @@ var CAU_NLPC = {
 };
 // Mục "Cần cố gắng" vì vở / chuyên cần thì nói đúng điều đó
 var CAU_YEU_NL = { nop: 'Cần nộp vở đầy đủ, đúng hạn.', cc: 'Cần đi học đều, đúng giờ.', vo: 'Cần làm bài trong vở cẩn thận, đúng hơn.' };
+var CAU_GC_YEU = { 'quên vở, đồ dùng': 'Cần chuẩn bị đủ vở, đồ dùng học tập.', 'chưa làm bài ở nhà': 'Cần làm bài đầy đủ ở nhà.', 'chưa thuộc bài': 'Cần học thuộc bài trước khi đến lớp.',
+  'mất trật tự': 'Cần giữ trật tự trong giờ học.', 'chưa hòa nhã với bạn': 'Cần hòa nhã, không trêu chọc bạn.', 'chưa trung thực': 'Cần trung thực trong học tập.' };
 function chonCauNL(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }
 // Nhận xét 1 ô (phan: 'NLC' | 'NLD' | 'PC'): điều tốt trước, điều cần cố gắng sau; mục chỉ Đạt thì nêu khi không có gì nổi bật. Không quá n ký tự.
 function cauNLPC(kq, phan, ma, n) {
@@ -1551,8 +1598,8 @@ function cauNLPC(kq, phan, ma, n) {
   var lay = function (muc) {
     return ds.filter(function (k) { return kq.muc[k] === muc; }).map(function (k) {
       if (muc === 'Cần cố gắng' && phan === 'PC') {   // phẩm chất yếu vì vở / chuyên cần → câu nói đúng điều đó
-        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && CAU_YEU_NL[x.k]; })[0];
-        if (y) return CAU_YEU_NL[y.k];
+        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && (CAU_YEU_NL[x.k] || (x.k === 'gc' && CAU_GC_YEU[x.n])); })[0];
+        if (y) return y.k === 'gc' ? CAU_GC_YEU[y.n] : CAU_YEU_NL[y.k];
       }
       return chonCauNL((CAU_NLPC[k] || {})[muc], ma, ds.indexOf(k));
     });
@@ -2761,6 +2808,7 @@ function theMon(h) {
     (dk.cuoiKy && m.coDiem ? ' <label class="nho">Điểm KTĐK <input type="number" inputmode="numeric" min="1" max="10" step="1" style="width:70px" value="' + esc(x.diem) + '" onchange="dkDatDiem(\'' + h.ma + '\', this)"></label>' +
       ' <button class="nut phu" style="padding:8px 10px" title="Nhập điểm" onclick="moNhapDiem(\'' + h.ma + '\')">' + (cnBat('chupBai') || cnBat('ai') ? '📷' : '✍') + '</button>' +
       (x.anh ? ' <a class="nho" href="' + esc(x.anh) + '" target="_blank">ảnh bài</a>' : '') : '') + '</div>' +
+    (dk.cuoiKy && m.coDiem && dkLech(x.muc, x.diem) ? '<div class="nho" style="margin-top:4px"><span class="tag vang">⚠ ' + esc(dkLech(x.muc, x.diem)) + '</span></div>' : '') +
     (x.nxBKT ? '<div class="nd-ai">📝 <b>Gợi ý từ bài kiểm tra:</b> ' + esc(x.nxBKT) + ((x.nx || '').indexOf(x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '').slice(0, 25)) >= 0 ? ' <span class="tag xanh">đã chèn</span>'
       : ' <button class="nut phu nut-nho" onclick="dkChenBKT(\'' + h.ma + '\')">＋ Chèn vào nhận xét</button>') + '</div>' : '') +
     oChu(h.ma, dkPhan, 'nx', x.nx, 'Nội dung nhận xét') + '</div>';
@@ -2782,11 +2830,19 @@ function dkGui(ma, phan) {        // lưu toàn bộ phần (môn hoặc NLPC) c
   return goi('luuDanhGiaKy', dk.ky, x).then(function () { var cu = o.sua; o.sua = true; if (!cu) veDanhGiaKy(); bao('Đã lưu.', 1200); },
     function (e) { bao('Chưa lưu được: ' + (e && e.message || e), 6000); });
 }
+// Mức môn và điểm KTĐK lệch nhau nhiều (chỉ nhắc cô xem lại, không chặn – TT27: mức dựa trên cả quá trình)
+function dkLech(muc, diem) {
+  var d = +diem; if (!muc || !d) return '';
+  if (muc === 'T' && d < 7) return 'Mức Hoàn thành tốt nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  if (muc === 'H' && d < 5) return 'Mức Hoàn thành nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  if (muc === 'C' && d >= 7) return 'Mức Chưa hoàn thành nhưng điểm KTĐK ' + d + ' – cô xem lại';
+  return '';
+}
 function dkDatMuc(ma, m) { var x = dk.du[ma].mon[dkPhan]; x.muc = x.muc === m ? '' : m; veDanhGiaKy(); dkGui(ma, dkPhan); }
 function dkDatDiem(ma, el) {
   var v = el.value.trim();
   if (v && !/^(10|[1-9])$/.test(v)) { bao('Điểm phải là số nguyên từ 1 đến 10.'); el.value = dk.du[ma].mon[dkPhan].diem || ''; return; }
-  dk.du[ma].mon[dkPhan].diem = v; dkGui(ma, dkPhan);
+  dk.du[ma].mon[dkPhan].diem = v; dkGui(ma, dkPhan); veDanhGiaKy();
 }
 function dkChenBKT(ma) {            // thêm câu nhận xét từ bài kiểm tra (bỏ câu "Bài kiểm tra … đạt n điểm") vào cuối nhận xét môn
   var x = dk.du[ma].mon[dkPhan], c = x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '');
@@ -2839,6 +2895,7 @@ function dkKiemTra(loai) {
       if (!x.muc) chan.push(h.ten + ' – ' + m.ten + ': chưa chọn mức');
       if ((x.nx || '').length > dk.gioiHan) chan.push(h.ten + ' – ' + m.ten + ': nhận xét quá ' + dk.gioiHan + ' ký tự');
       if (dk.cuoiKy && m.coDiem && !x.diem) canh.push(h.ten + ' – ' + m.ten + ': chưa có điểm KTĐK');
+      if (dk.cuoiKy && m.coDiem && dkLech(x.muc, x.diem)) canh.push(h.ten + ' – ' + m.ten + ': ' + dkLech(x.muc, x.diem));
     });
     else {
       var p = dk.du[h.ma].nlpc, thieu = dk.dsNLPC.filter(function (t) { return !p.muc[t]; });

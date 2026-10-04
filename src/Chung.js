@@ -12,6 +12,20 @@ var NLPC_DAC_THU = ['Ngôn ngữ', 'Tính toán', 'Khoa học', 'Công nghệ', 
 var NLPC_PC = ['Yêu nước', 'Nhân ái', 'Chăm chỉ', 'Trung thực', 'Trách nhiệm'];
 var NLPC_MAC_DINH = { 'Khoa học': 1, 'Công nghệ': 1, 'Tin học': 1, 'Thẩm mĩ': 1, 'Thể chất': 1 };
 var MON_HDTN = 'Hoạt động trải nghiệm', MON_DD = 'Đạo đức';
+// Ghi chú riêng từng em (Sổ theo dõi → 🗒️ Ghi chú) → biểu hiện năng lực, phẩm chất. tot: 1 = biểu hiện tốt, -1 = cần nhắc nhở.
+var GC_LOAI = [
+  { re: /hăng hái|phát biểu|xung phong|tích cực/i, nhan: 'hăng hái phát biểu', tot: 1, muc: ['Giao tiếp và hợp tác', 'Chăm chỉ'] },
+  { re: /giúp đỡ bạn|giúp bạn|nhường bạn|chia sẻ với bạn/i, nhan: 'biết giúp đỡ bạn', tot: 1, muc: ['Nhân ái'] },
+  { re: /tiến bộ/i, nhan: 'có tiến bộ', tot: 1, muc: ['Chăm chỉ', 'Tự chủ và tự học'], tru: /chưa\s+(có\s+)?(sự\s+)?tiến bộ|không tiến bộ/i },
+  { re: /thật thà|trả lại|nhặt được/i, nhan: 'thật thà', tot: 1, muc: ['Trung thực'] },
+  { re: /quên vở|quên đồ dùng|quên sách|thiếu đồ dùng|quên mang/i, nhan: 'quên vở, đồ dùng', tot: -1, muc: ['Trách nhiệm', 'Tự chủ và tự học'] },
+  { re: /chưa làm bài|không làm bài/i, nhan: 'chưa làm bài ở nhà', tot: -1, muc: ['Chăm chỉ', 'Tự chủ và tự học'] },
+  { re: /chưa thuộc bài|không thuộc bài/i, nhan: 'chưa thuộc bài', tot: -1, muc: ['Chăm chỉ'] },
+  { re: /mất trật tự|nói chuyện riêng|làm việc riêng|đùa nghịch|nghịch/i, nhan: 'mất trật tự', tot: -1, muc: ['Trách nhiệm'] },
+  { re: /đánh nhau|đánh bạn|trêu|xô đẩy|nói tục|chửi/i, nhan: 'chưa hòa nhã với bạn', tot: -1, muc: ['Nhân ái'] },
+  { re: /nói dối|gian lận|quay cóp|nhìn bài/i, nhan: 'chưa trung thực', tot: -1, muc: ['Trung thực'] }
+];
+function phanLoaiGhiChu(nd) { nd = String(nd || ''); return GC_LOAI.filter(function (x) { return x.re.test(nd) && !(x.tru && x.tru.test(nd)); }); }
 
 function diemMucNL(m) { return m === 'HTXS' || m === 'HTT' ? 1 : m === 'HT' ? 0 : m === 'CHT' || m === 'CCG' ? -1 : null; }
 function tenMucNgan(m) { return { HTXS: 'HTXS', HTT: 'HTT', HT: 'HT', CHT: 'CHT', CCG: 'CHT' }[m] || m; }
@@ -61,6 +75,17 @@ function nlpcTuThang(t, ma) {
     'Trung thực': [DD],
     'Trách nhiệm': [voNop, cc, HD, ptc]
   };
+  // ghi chú riêng của em trong tháng: tốt nhiều hơn cần nhắc → +1; cần nhắc từ 2 lần trở lên (hơn số lần tốt) → -1
+  var gcDem = {};
+  ((t.gcHS || {})[ma] || []).forEach(function (nd) { phanLoaiGhiChu(nd).forEach(function (x) { x.muc.forEach(function (k) {
+    var o = gcDem[k] = gcDem[k] || { d: 0, nhan: {} }; o.d += x.tot; o.nhan[x.nhan] = (o.nhan[x.nhan] || 0) + 1; }); }); });
+  Object.keys(gcDem).forEach(function (k) {
+    var o = gcDem[k], chu = 'Ghi chú: ' + Object.keys(o.nhan).map(function (n) { return n + (o.nhan[n] > 1 ? ' ' + o.nhan[n] + ' lần' : ''); }).join(', ');
+    if (!canCu[k] || !(o.d >= 1 || o.d <= -2)) return;
+    var cc = c(o.d >= 1 ? 1 : -1, chu, 'gc');
+    cc.n = Object.keys(o.nhan).filter(function (n) { return CAU_GC_YEU[n]; }).sort(function (a, b) { return o.nhan[b] - o.nhan[a]; })[0] || '';   // điều cần nhắc nhiều nhất
+    canCu[k].push(cc);
+  });
   var coDuLieu = false, kq = { muc: {}, canCu: {} }, soNguon = {};
   Object.keys(canCu).forEach(function (k) { soNguon[k] = canCu[k].length; canCu[k] = canCu[k].filter(function (x) { return x; }); if (canCu[k].length) coDuLieu = true; });
   NLPC_CHUNG.concat(NLPC_DAC_THU, NLPC_PC).forEach(function (k) {
@@ -69,7 +94,7 @@ function nlpcTuThang(t, ma) {
     ds.forEach(function (x) { if (x.d > 0) tot++; else if (x.d < 0) yeu++; });
     kq.canCu[k] = ds;
     // Tốt cần "biểu hiện rõ và thường xuyên": mọi căn cứ đều tốt và có ít nhất 2 căn cứ (mục chỉ có 1 nguồn như Trung thực thì 1 là đủ)
-    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot ? 'Cần cố gắng' : 'Đạt');
+    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot && !ds.every(function (x) { return x.k === 'gc'; }) ? 'Cần cố gắng' : 'Đạt');   // chỉ có ghi chú thì không hạ xuống Cần cố gắng
   });
   return kq;
 }
@@ -89,6 +114,8 @@ var CAU_NLPC = {
 };
 // Mục "Cần cố gắng" vì vở / chuyên cần thì nói đúng điều đó
 var CAU_YEU_NL = { nop: 'Cần nộp vở đầy đủ, đúng hạn.', cc: 'Cần đi học đều, đúng giờ.', vo: 'Cần làm bài trong vở cẩn thận, đúng hơn.' };
+var CAU_GC_YEU = { 'quên vở, đồ dùng': 'Cần chuẩn bị đủ vở, đồ dùng học tập.', 'chưa làm bài ở nhà': 'Cần làm bài đầy đủ ở nhà.', 'chưa thuộc bài': 'Cần học thuộc bài trước khi đến lớp.',
+  'mất trật tự': 'Cần giữ trật tự trong giờ học.', 'chưa hòa nhã với bạn': 'Cần hòa nhã, không trêu chọc bạn.', 'chưa trung thực': 'Cần trung thực trong học tập.' };
 function chonCauNL(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }
 // Nhận xét 1 ô (phan: 'NLC' | 'NLD' | 'PC'): điều tốt trước, điều cần cố gắng sau; mục chỉ Đạt thì nêu khi không có gì nổi bật. Không quá n ký tự.
 function cauNLPC(kq, phan, ma, n) {
@@ -96,8 +123,8 @@ function cauNLPC(kq, phan, ma, n) {
   var lay = function (muc) {
     return ds.filter(function (k) { return kq.muc[k] === muc; }).map(function (k) {
       if (muc === 'Cần cố gắng' && phan === 'PC') {   // phẩm chất yếu vì vở / chuyên cần → câu nói đúng điều đó
-        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && CAU_YEU_NL[x.k]; })[0];
-        if (y) return CAU_YEU_NL[y.k];
+        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && (CAU_YEU_NL[x.k] || (x.k === 'gc' && CAU_GC_YEU[x.n])); })[0];
+        if (y) return y.k === 'gc' ? CAU_GC_YEU[y.n] : CAU_YEU_NL[y.k];
       }
       return chonCauNL((CAU_NLPC[k] || {})[muc], ma, ds.indexOf(k));
     });
