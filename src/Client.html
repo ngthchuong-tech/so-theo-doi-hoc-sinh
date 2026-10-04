@@ -144,6 +144,7 @@ function taiTrangChu() {
           localStorage.setItem(khoa, JSON.stringify(d)); } catch (e) {}
     veTrangChu(d);
     taiTruocHomNay(d.lich);
+    taiViec();
   }, function () {});
 }
 function veTrangChu(d) {
@@ -2354,29 +2355,60 @@ function moGhiChu() {
 }
 function taiGhiChu() {
   if (!$('stNgay').value) $('stNgay').value = homNayIso();
+  ['lop', 'hs', 'khac'].forEach(function (x) { $('gcChon' + x).classList.toggle('on', x === gcPhan); }); nvMo = null;
   gcLuuNgay();
   var ngay = isoToDmy($('stNgay').value); $('gcNgayTen').textContent = 'Ngày ' + ngay;
   chay('layGhiChu', ngay).then(function (d) { gc = d; gcLS = []; if (gcPhan === 'hs' && gcMa) gcTaiLS(); veGC(); });
 }
-function gcChon(p) { gcLuuNgay(); gcPhan = p; ['lop', 'hs', 'khac'].forEach(function (x) { $('gcChon' + x).classList.toggle('on', x === p); }); veGC(); }
-function gcNhanh(loai, ds) {
-  return ds.length ? '<div class="hang" style="margin:6px 0 2px">' + ds.map(function (c, i) {
-    return '<span class="chip" style="font-size:13px;padding:5px 10px" onclick="gcThem(\'' + loai + '\',' + i + ')">+ ' + esc(c.replace(/\.$/, '')) + '</span>'; }).join('') + '</div>' : '';
+function gcChon(p) { gcLuuNgay(); gcPhan = p; nvMo = null; ['lop', 'hs', 'khac'].forEach(function (x) { $('gcChon' + x).classList.toggle('on', x === p); }); veGC(); }
+var gcDsMau = {}, gcSuaMau = false;
+function gcMauCua(loai) {              // mẫu có sẵn (bỏ mẫu cô đã ẩn) + mẫu cô tự lưu (★)
+  var m = (gc && gc.mau) || { them: {}, an: {} }, an = m.an[loai] || [];
+  return GC_NHANH[loai].filter(function (c) { return an.indexOf(c) < 0; }).map(function (c) { return { c: c }; })
+    .concat((m.them[loai] || []).map(function (c) { return { c: c, rieng: 1 }; }));
 }
+function gcNhanh(loai) {
+  var ds = gcDsMau[loai] = gcMauCua(loai), soAn = (((gc && gc.mau) || { an: {} }).an[loai] || []).length;
+  return '<div class="hang" style="margin:6px 0 2px">' + ds.map(function (x, i) {
+    return '<span class="chip' + (x.rieng ? ' mau-co' : '') + '" style="font-size:13px;padding:5px 10px" onclick="' + (gcSuaMau ? 'gcXoaMau' : 'gcThem') + '(\'' + loai + '\',' + i + ')">' +
+      (x.rieng ? '★ ' : '+ ') + esc(x.c.replace(/\.$/, '')) + (gcSuaMau ? '<span class="x-mau">×</span>' : '') + '</span>'; }).join('') +
+    '<span class="chip mau-sua" style="font-size:13px;padding:5px 10px" onclick="gcBatSuaMau()">' + (gcSuaMau ? '✓ Xong' : '✎ Mẫu của cô') + '</span></div>' +
+    (gcSuaMau ? '<div class="nv-o" style="margin-top:4px"><div class="hang" style="flex-wrap:nowrap"><input type="text" id="gcMauMoi" maxlength="120" placeholder="Câu mẫu mới, VD: Chưa mang khăn quàng đỏ." style="flex:1">' +
+      '<button class="nut nut-nho" onclick="gcLuuMau(\'' + loai + '\')">＋ Lưu mẫu</button></div>' +
+      '<div class="nho" style="margin-top:4px">Chạm × trên chip để bỏ mẫu' + (soAn ? ' · <a href="javascript:void 0" onclick="gcKhoiPhucMau(\'' + loai + '\')">hiện lại ' + soAn + ' mẫu có sẵn đã ẩn</a>' : '') +
+      '. Nút ★ là mẫu cô tự lưu.</div></div>' : '');
+}
+function gcBatSuaMau() {
+  gcSuaMau = !gcSuaMau; veGC();
+  var o = $('gcO'), m = $('gcMauMoi');            // gợi ý sẵn: câu cuối cô vừa gõ
+  if (m && o && o.value.trim()) { var c = o.value.trim().split(/(?<=[.!?])\s+/).pop(); if (c.length <= 120) m.value = c; }
+}
+function gcLuuMau(loai) {
+  var v = ($('gcMauMoi').value || '').trim(); if (!v) return bao('Cô gõ câu mẫu trước.');
+  if (!/[.!?]$/.test(v)) v += '.';
+  chay('luuMauGhiChu', loai, v, 'them').then(function (m) { gc.mau = m; veGC(); bao('Đã lưu mẫu "' + v + '".'); });
+}
+function gcXoaMau(loai, i) {
+  var x = gcDsMau[loai][i]; if (!x) return;
+  if (!confirm((x.rieng ? 'Xoá mẫu của cô: "' : 'Ẩn mẫu có sẵn: "') + x.c + '"?\n(Ghi chú đã viết không bị ảnh hưởng.)')) return;
+  chay('luuMauGhiChu', loai, x.c, 'xoa').then(function (m) { gc.mau = m; veGC(); });
+}
+function gcKhoiPhucMau(loai) { chay('luuMauGhiChu', loai, '', 'khoiPhuc').then(function (m) { gc.mau = m; veGC(); }); }
 function veGC() {
   if (!gc) return;
   if (gcPhan !== 'hs') {
     var ten = gcPhan === 'lop' ? 'Ghi chú chung cho cả lớp' : 'Ghi chú khác (họp, việc cần nhớ, trao đổi với phụ huynh, giáo viên…)';
-    $('gcND').innerHTML = '<div class="the gc-o"><b>' + ten + '</b>' + gcNhanh(gcPhan, GC_NHANH[gcPhan]) +
-      '<textarea id="gcO" oninput="gcGhi(\'' + gcPhan + '\', \'\', this.value)" placeholder="Gõ ghi chú…">' + esc(gc[gcPhan] || '') + '</textarea><div class="nho" id="gcTT"></div></div>' +
+    $('gcND').innerHTML = '<div class="the gc-o"><b>' + ten + '</b>' + gcNhanh(gcPhan) +
+      '<textarea id="gcO" oninput="gcGhi(\'' + gcPhan + '\', \'\', this.value)" placeholder="Gõ ghi chú…">' + esc(gc[gcPhan] || '') + '</textarea><div class="nho" id="gcTT"></div>' +
+      nvKhuGhiChu(gcPhan, '') + '</div>' +
       '<div class="the"><b>30 ngày gần đây</b>' + (gc.ganDay[gcPhan].length ? gc.ganDay[gcPhan].map(function (x) {
-        return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b>\n' + esc(x.nd) + '</div>'; }).join('') : '<div class="nho" style="margin-top:6px">Chưa có.</div>') + '</div>';
+        return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b> ' + nvNutCu(x) + '\n' + esc(x.nd) + '</div>'; }).join('') : '<div class="nho" style="margin-top:6px">Chưa có.</div>') + '</div>';
     return;
   }
   var h = gc.dsHS.filter(function (x) { return x.ma === gcMa; })[0];
   $('gcND').innerHTML = (h ? '<div class="the gc-o bm-hs"><div><span class="nho">' + h.stt + '.</span> <b>' + esc(h.ten) + '</b>' + dauNhom(h.ma) + '</div>' +
-      gcNhanh('hs', GC_NHANH.hs) + '<textarea id="gcO" oninput="gcGhi(\'hs\', \'' + h.ma + '\', this.value)" placeholder="Ghi chú về em hôm nay…">' + esc(gc.hs[h.ma] || '') + '</textarea>' +
-      '<div class="nho" id="gcTT"></div><div id="gcLS">' + gcVeLS() + '</div></div>'
+      gcNhanh('hs') + '<textarea id="gcO" oninput="gcGhi(\'hs\', \'' + h.ma + '\', this.value)" placeholder="Ghi chú về em hôm nay…">' + esc(gc.hs[h.ma] || '') + '</textarea>' +
+      '<div class="nho" id="gcTT"></div>' + nvKhuGhiChu('hs', h.ma) + '<div id="gcLS">' + gcVeLS() + '</div></div>'
     : '<div class="the nho">Chạm vào tên em để ghi chú riêng. Dấu ✎ là em đã có ghi chú ngày này; số nhỏ là tổng số ghi chú của em.</div>') +
     '<div class="the"><div class="hs-luoi">' + gc.dsHS.map(function (x) {
       return '<div class="hs' + (x.ma === gcMa ? ' on' : '') + '" onclick="gcChonHS(\'' + x.ma + '\')"><div class="stt">' + x.stt + dauNhom(x.ma) + '</div>' + esc(x.ten) +
@@ -2386,12 +2418,12 @@ function veGC() {
 function gcVeLS() {
   var ds = gcLS.filter(function (x) { return x.ngay !== gc.ngay; });
   return ds.length ? '<div style="margin-top:10px"><b style="font-size:14px">Ghi chú trước của em</b>' + ds.slice(0, 20).map(function (x) {
-    return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b>\n' + esc(x.nd) + '</div>'; }).join('') + '</div>' : '';
+    return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b> ' + nvNutCu(x) + '\n' + esc(x.nd) + '</div>'; }).join('') + '</div>' : '';
 }
-function gcChonHS(ma) { gcLuuNgay(); gcMa = gcMa === ma ? '' : ma; gcLS = []; veGC(); if (gcMa) { gcTaiLS(); window.scrollTo(0, 0); } }
+function gcChonHS(ma) { gcLuuNgay(); nvMo = null; gcMa = gcMa === ma ? '' : ma; gcLS = []; veGC(); if (gcMa) { gcTaiLS(); window.scrollTo(0, 0); } }
 function gcTaiLS() { var ma = gcMa; goi('layGhiChuHS', ma).then(function (ds) { if (gcMa !== ma) return; gcLS = ds; if ($('gcLS')) $('gcLS').innerHTML = gcVeLS(); }, function () {}); }
 function gcThem(loai, i) {
-  var o = $('gcO'), c = GC_NHANH[loai][i]; if (!o) return;
+  var o = $('gcO'), c = (gcDsMau[loai][i] || {}).c; if (!o || !c) return;
   if (o.value.indexOf(c) >= 0) return;
   o.value = (o.value.replace(/\s+$/, '') ? o.value.replace(/\s+$/, '') + ' ' : '') + c; o.oninput();
 }
@@ -2406,6 +2438,109 @@ function gcLuuNgay() {
     if ($('gcTT')) $('gcTT').textContent = 'Đã lưu lúc ' + luc.slice(-5) + '.';
     if (x.loai === 'hs' && gc && gc.ngay === x.ngay) { var co = !!String(x.nd).trim(); var cu = document.querySelector('.hs.on .gc-dau'); if (!co && cu) cu.remove(); }
   }, function (e) { bao('Chưa lưu được ghi chú: ' + ((e && e.message) || e) + ' – gõ thêm 1 ký tự để lưu lại.', 8000); });
+}
+
+// ============================================================================ NHẮC VIỆC (từ ghi chú → Trang chủ, tuỳ chọn Lịch Google trên điện thoại)
+var NV_MUC = { thuong: { ten: 'Bình thường', ic: '🟢', mo: 'hiện ở Trang chủ đúng ngày; điện thoại báo đúng giờ' },
+  quantrong: { ten: 'Quan trọng', ic: '🟠', mo: 'hiện ở Trang chủ từ trước 1 ngày; điện thoại báo trước 30 phút và đúng giờ' },
+  gap: { ten: 'Gấp', ic: '🔴', mo: 'đứng đầu Trang chủ từ trước 2 ngày; điện thoại báo trước 1 ngày, 1 giờ và đúng giờ' } };
+var NV_LAP = { '': 'Không lặp', ngay: 'Hằng ngày (thứ 2–6)', tuan: 'Hằng tuần' };
+var nvMo = null, viec = null, viecHetCa = false;
+function dmyCua(d) { return ('0' + d.getDate()).slice(-2) + '/' + ('0' + (d.getMonth() + 1)).slice(-2) + '/' + d.getFullYear(); }
+function nvMoc() {                      // các mốc thời gian chạm nhanh (tính từ hôm nay thật)
+  var bay = new Date(), gio = bay.getHours() * 60 + bay.getMinutes(), d = function (n) { var x = new Date(); x.setDate(x.getDate() + n); return x; }, ds = [];
+  if (gio < 16 * 60) ds.push({ ten: 'Chiều nay 16:30', d: d(0), g: '16:30' });
+  if (gio < 20 * 60) ds.push({ ten: 'Tối nay 20:00', d: d(0), g: '20:00' });
+  ds.push({ ten: 'Sáng mai 7:00', d: d(1), g: '07:00' });
+  var thu6 = (5 - bay.getDay() + 7) % 7; if (thu6 > 1) ds.push({ ten: 'Thứ Sáu 16:30', d: d(thu6), g: '16:30' });
+  var thu2 = ((8 - bay.getDay()) % 7) || 7; if (thu2 > 1) ds.push({ ten: 'Thứ Hai tuần sau 7:00', d: d(thu2), g: '07:00' });
+  return ds;
+}
+function nvCua(loai, ma) { return ((gc && gc.nhac) || []).filter(function (x) { return x.nguonLoai === loai && (x.maHS || '') === (ma || ''); }); }
+function nvKhuGhiChu(loai, ma) {        // dưới ô ghi chú: các nhắc việc đã đặt + nút đặt nhắc / khung nhắc việc
+  var ds = nvCua(loai, ma);
+  return '<div>' + ds.map(function (x) {
+      return '<span class="nv-tag" onclick="nvSua(\'' + x.ma + '\')">' + NV_MUC[x.muc].ic + ' ⏰ ' + esc(x.gio) + ' ' + esc(x.han.slice(0, 5)) + (x.lap ? ' 🔁' : '') + (x.baoLich ? ' 📱' : '') + ' – ' + esc(x.nd.slice(0, 40)) + (x.nd.length > 40 ? '…' : '') + '</span>';
+    }).join('') + (nvMo ? '' : ' <button class="nut phu nut-nho" style="margin-top:6px" onclick="nvMoi(\'' + loai + '\',\'' + (ma || '') + '\')">⏰ Đặt nhắc việc</button>') + '</div>' +
+    (nvMo ? nvVeKhung() : '');
+}
+function nvNutCu(x) { return '<button class="nut phu nut-nho" title="Đặt nhắc việc từ ghi chú này" onclick="nvTuCu(\'' + esc(x.ngay) + '\')">⏰</button>'; }
+function nvTuCu(ngay) {
+  var ds = gcPhan === 'hs' ? gcLS : gc.ganDay[gcPhan], x = ds.filter(function (y) { return y.ngay === ngay; })[0]; if (!x) return;
+  nvMoi(gcPhan, gcPhan === 'hs' ? gcMa : '', x.nd, ngay); window.scrollTo(0, 0);
+}
+function nvMoi(loai, ma, nd, ngayNguon) {
+  var o = $('gcO'), bc = false; try { bc = localStorage.getItem('nvBaoLich') !== '0'; } catch (e) {}
+  var m = nvMoc()[0];
+  nvMo = { ma: '', loai: loai, maHS: ma, nd: nd || (o ? o.value.trim() : ''), han: dmyCua(m.d), gio: m.g, muc: 'thuong', lap: '', baoLich: bc, nguonNgay: ngayNguon || gc.ngay };
+  veGC();
+}
+function nvSua(ma) { var x = (gc.nhac || []).filter(function (y) { return y.ma === ma; })[0]; if (!x) return; nvMo = JSON.parse(JSON.stringify(x)); nvMo.loai = x.nguonLoai; veGC(); }
+function nvVeKhung() {
+  var x = nvMo, chip = function (on, txt, f) { return '<span class="chip' + (on ? ' on' : '') + '" style="font-size:13px;padding:5px 10px" onclick="' + f + '">' + txt + '</span>'; };
+  return '<div class="nv-o" id="nvKhung"><b>⏰ ' + (x.ma ? 'Sửa nhắc việc' : 'Nhắc việc') + '</b>' +
+    '<div class="dong"><b>Việc cần làm</b><input type="text" id="nvND" maxlength="300" value="' + esc(x.nd) + '" placeholder="VD: Gọi điện cho phụ huynh em … về việc quên vở" oninput="nvMo.nd=this.value"></div>' +
+    '<div class="dong"><b>Khi nào</b><div class="hang">' + nvMoc().map(function (m, i) { return chip(dmyCua(m.d) === x.han && m.g === x.gio, m.ten, 'nvChonMoc(' + i + ')'); }).join('') + '</div>' +
+      '<div class="hang" style="margin-top:4px"><input type="date" value="' + dmyToIso(x.han) + '" onchange="if(this.value){nvMo.han=isoToDmy(this.value);veGC();}"> <input type="time" value="' + esc(x.gio) + '" onchange="if(this.value){nvMo.gio=this.value;veGC();}"></div></div>' +
+    '<div class="dong"><b>Mức độ</b><div class="hang">' + Object.keys(NV_MUC).map(function (k) { return chip(x.muc === k, NV_MUC[k].ic + ' ' + NV_MUC[k].ten, "nvMo.muc='" + k + "';veGC()"); }).join('') + '</div>' +
+      '<div class="nho">' + NV_MUC[x.muc].ten + ': ' + NV_MUC[x.muc].mo + '.</div></div>' +
+    '<div class="dong"><b>Lặp lại</b><div class="hang">' + Object.keys(NV_LAP).map(function (k) { return chip(x.lap === k, NV_LAP[k], "nvMo.lap='" + k + "';veGC()"); }).join('') + '</div></div>' +
+    '<div class="dong"><label><input type="checkbox"' + (x.baoLich ? ' checked' : '') + ' onchange="nvDatBaoLich(this.checked)"> 📱 Báo trên điện thoại (Lịch Google của cô)</label>' +
+      '<div class="nho">Luôn hiện ở <b>Trang chủ</b>. Báo trên điện thoại: app tạo 1 sự kiện trong Lịch Google của cô, điện thoại có ứng dụng Google Calendar sẽ đổ chuông theo mức độ.</div></div>' +
+    '<div class="hang" style="margin-top:10px"><button class="nut" onclick="nvLuu()">Lưu nhắc việc</button><button class="nut phu" onclick="nvMo=null;veGC()">Huỷ</button>' +
+      (x.ma ? '<button class="nut phu" style="color:var(--do)" onclick="nvXoa(\'' + x.ma + '\')">Xoá</button>' : '') + '</div></div>';
+}
+function nvDatBaoLich(c) { nvMo.baoLich = c; try { localStorage.setItem('nvBaoLich', c ? '1' : '0'); } catch (e) {} }
+function nvChonMoc(i) { var m = nvMoc()[i]; nvMo.han = dmyCua(m.d); nvMo.gio = m.g; veGC(); }
+function nvLuu() {
+  var x = nvMo; x.nd = ($('nvND').value || '').trim(); if (!x.nd) return bao('Cô ghi việc cần nhắc.');
+  if (nvLuc(x.han, x.gio) < new Date() && !confirm('Thời điểm nhắc đã qua. Vẫn lưu?')) return;
+  gcLuuNgay();
+  chay('luuNhacViec', { ma: x.ma, han: x.han, gio: x.gio, nd: x.nd, maHS: x.maHS, muc: x.muc, lap: x.lap, baoLich: x.baoLich, nguonNgay: x.nguonNgay, nguonLoai: x.loai }).then(function (kq) {
+    gc.nhac = (gc.nhac || []).filter(function (y) { return y.ma !== kq.viec.ma; }); if (kq.viec.nguonNgay === gc.ngay) gc.nhac.push(kq.viec);
+    nvMo = null; veGC(); bao(kq.canh || ('Đã đặt nhắc việc ' + kq.viec.gio + ' ngày ' + kq.viec.han + (kq.viec.baoLich ? ' (có báo trên điện thoại).' : '.')), kq.canh ? 9000 : 4000);
+  });
+}
+function nvLuc(han, gio) { var p = han.split('/'), g = (gio || '07:00').split(':'); return new Date(+p[2], +p[1] - 1, +p[0], +g[0], +g[1]); }
+function nvXoa(ma) {
+  if (!confirm('Xoá nhắc việc này?')) return;
+  chay('xoaNhacViec', ma).then(function (d) { if (gc) gc.nhac = (gc.nhac || []).filter(function (y) { return y.ma !== ma; }); nvMo = null; viec = d; veViec(); if (gc) veGC(); });
+}
+// ---- Trang chủ
+function taiViec() { goi('layNhacViec').then(function (d) { viec = d; veViec(); }, function () {}); }
+function thoiGianViec(x) {
+  var tg = x.con < 0 ? 'Quá hạn ' + (-x.con) + ' ngày (' + x.han.slice(0, 5) + ')' : x.con === 0 ? 'Hôm nay ' + x.gio : x.con === 1 ? 'Ngày mai ' + x.gio
+    : ['Chủ nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'][nvLuc(x.han, x.gio).getDay()] + ' ' + x.han.slice(0, 5) + ' ' + x.gio;
+  if (x.con === 0 && nvLuc(x.han, x.gio) < new Date()) tg = 'Hôm nay ' + x.gio + ' – đã đến giờ';
+  return tg;
+}
+function veViec() {
+  if (!$('tcViec')) return;
+  if (!viec || !viec.ds.length) { $('tcViec').innerHTML = ''; return; }
+  var hien = viec.ds.filter(function (x) { return x.hien; }), sau = viec.ds.filter(function (x) { return !x.hien; }), ds = viecHetCa ? viec.ds : hien;
+  $('tcViec').innerHTML = '<div class="the"><div class="hang gian"><h2 style="margin:0">⏰ Nhắc việc</h2><span class="nho">' + hien.length + ' việc cần làm' + (sau.length ? ' · ' + sau.length + ' việc sắp tới' : '') + '</span></div>' +
+    (ds.length ? ds.map(function (x) {
+      return '<div class="viec ' + x.muc + (x.con < 0 ? ' qua-han' : '') + '"><div class="nd">' + (x.muc === 'gap' ? '🔴 ' : x.muc === 'quantrong' ? '🟠 ' : '') + esc(x.nd) + '</div>' +
+        '<div class="tt">' + esc(thoiGianViec(x)) + (x.ten ? ' · Em ' + esc(x.ten) : '') + (x.lap ? ' · 🔁 ' + NV_LAP[x.lap].toLowerCase() : '') + (x.baoLich ? ' · 📱' : '') + '</div>' +
+        '<div class="hang"><button class="nut nut-nho" onclick="viecXong(\'' + x.ma + '\')">✓ Xong</button>' +
+        '<button class="nut phu nut-nho" onclick="viecMai(\'' + x.ma + '\')">⏭ Để mai</button>' +
+        (x.nguonNgay ? '<button class="nut phu nut-nho" onclick="viecMoGhiChu(\'' + x.ma + '\')">🗒️ Xem ghi chú</button>' : '') + '</div></div>';
+    }).join('') : '<div class="nho" style="margin-top:6px">Hôm nay chưa có việc cần nhắc.</div>') +
+    (sau.length ? '<div style="margin-top:8px"><a href="javascript:void 0" onclick="viecHetCa=!viecHetCa;veViec()">' + (viecHetCa ? 'Chỉ xem việc cần làm' : 'Xem cả ' + sau.length + ' việc sắp tới') + '</a></div>' : '') + '</div>';
+}
+function viecXong(ma) {
+  var x = viec.ds.filter(function (y) { return y.ma === ma; })[0];
+  chay('xongNhacViec', ma).then(function (d) { viec = d; veViec(); bao('Đã xong' + (x && x.lap ? ' – đã đặt lần nhắc tiếp theo.' : '.')); });
+}
+function viecMai(ma) {
+  var x = viec.ds.filter(function (y) { return y.ma === ma; })[0]; if (!x) return;
+  var d = new Date(); d.setDate(d.getDate() + 1);
+  chay('hoanNhacViec', ma, dmyCua(d), x.gio).then(function (r) { viec = r; veViec(); bao(r.canh || 'Đã dời sang ngày mai ' + x.gio + '.', r.canh ? 9000 : 3000); });
+}
+function viecMoGhiChu(ma) {
+  var x = viec.ds.filter(function (y) { return y.ma === ma; })[0]; if (!x) return;
+  gcPhan = x.nguonLoai || 'khac'; gcMa = x.maHS || ''; gcSuaMau = false; $('stNgay').value = dmyToIso(x.nguonNgay);
+  diToi({ tab: 'sotheodoi', buoc: 'gc' });
 }
 
 // ============================================================================ SỔ CHỦ NHIỆM (Sổ theo dõi → 📘 Sổ chủ nhiệm)

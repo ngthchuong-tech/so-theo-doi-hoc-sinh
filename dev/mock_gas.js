@@ -70,6 +70,14 @@
     base64Encode: function (s) { return s; },
     newBlob: function (data, type, ten) { return { ten: ten, type: type, size: data.length, data: data }; }
   };
+  // Lịch Google giả lập (nhắc việc): giữ sự kiện trong bộ nhớ, xem bằng window._lich
+  window._lich = {};
+  window.CalendarApp = { getDefaultCalendar: function () { return {
+    createEvent: function (ten, bd, kt, o) { var id = 'ev' + Math.random().toString(16).slice(2, 10), ev = { ten: ten, bd: bd, nhac: [] };
+      window._lich[id] = ev;
+      return { getId: function () { return id; }, removeAllReminders: function () { ev.nhac = []; }, addPopupReminder: function (p) { ev.nhac.push(p); } }; },
+    getEventById: function (id) { return window._lich[id] ? { deleteEvent: function () { delete window._lich[id]; } } : null; }
+  }; } };
   // Google Drive giả lập: ghi nhận tên file đã lưu; nội dung giữ trong bộ nhớ (mất khi tải lại trang)
   window._driveFiles = {};
   function thuMucGia(ten) {

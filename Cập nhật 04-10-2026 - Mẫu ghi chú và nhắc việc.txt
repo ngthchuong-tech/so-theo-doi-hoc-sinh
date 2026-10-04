@@ -1,0 +1,24 @@
+CẬP NHẬT 04/10/2026 – MẪU GHI CHÚ CỦA CÔ VÀ NHẮC VIỆC
+
+1. MẪU GHI CHÚ CỦA CÔ (Sổ theo dõi → 🗒️ Ghi chú)
+- Chạm chip "✎ Mẫu của cô" → gõ câu → "＋ Lưu mẫu". Mẫu cô lưu hiện với dấu ★, dùng lại bằng 1 chạm.
+- Trong lúc sửa mẫu: chạm × để xoá mẫu của cô, hoặc ẩn mẫu có sẵn mà cô không dùng (có nút "hiện lại").
+- Mỗi mục (Chung cả lớp / Riêng từng em / Ghi chú khác) có bộ mẫu riêng. Mẫu giữ qua các năm học.
+
+2. NHẮC VIỆC (nút "⏰ Đặt nhắc việc" dưới mỗi ghi chú, nút ⏰ cạnh ghi chú cũ)
+- Việc cần làm: lấy sẵn nội dung ghi chú, cô sửa lại cho gọn (VD "Gọi điện phụ huynh em Bách").
+- Khi nào: Chiều nay 16:30 · Tối nay 20:00 · Sáng mai 7:00 · Thứ Sáu 16:30 · Thứ Hai tuần sau 7:00, hoặc chọn ngày giờ bất kì.
+- Mức độ:
+    🟢 Bình thường – hiện ở Trang chủ đúng ngày; điện thoại báo đúng giờ.
+    🟠 Quan trọng  – hiện ở Trang chủ từ trước 1 ngày; điện thoại báo trước 30 phút và đúng giờ.
+    🔴 Gấp         – đứng đầu Trang chủ từ trước 2 ngày; điện thoại báo trước 1 ngày, 1 giờ và đúng giờ.
+- Lặp lại: không lặp / hằng ngày (thứ 2–6) / hằng tuần. Bấm "Xong" thì app tự đặt lần tiếp theo.
+- Cách báo:
+    a) Luôn hiện ở thẻ "⏰ Nhắc việc" đầu Trang chủ: việc quá hạn (viền đỏ) → việc gấp → theo giờ.
+       Nút: ✓ Xong · ⏭ Để mai · 🗒️ Xem ghi chú (mở đúng ngày, đúng em). "Xem cả … việc sắp tới" để xem việc chưa tới hạn.
+    b) Tuỳ chọn "📱 Báo trên điện thoại": app tạo sự kiện trong Lịch Google của cô (tài khoản của cô, không chia sẻ),
+       điện thoại cài Google Calendar sẽ đổ chuông. Xong sớm hoặc xoá việc thì app tự bỏ sự kiện.
+
+LƯU Ý KHI CẬP NHẬT MÃ LÊN APPS SCRIPT
+- Lần đầu mở app sau cập nhật, Google sẽ hỏi thêm quyền "Xem, chỉnh sửa lịch" (Lịch Google) – cô bấm Cho phép.
+  Nếu không cho phép, nhắc việc vẫn hiện ở Trang chủ, chỉ không báo trên điện thoại.

@@ -47,6 +47,10 @@ var BANG = {
   // Điểm bài kiểm tra (Tiếng Việt, Toán): Ky = GK1 / CK1 / GK2 / CK2. Điểm cuối kì (CK) cũng là "Điểm KTĐK" của màn Định kỳ.
   DiemKiemTra:  ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'Diem', 'CapNhat'],
   GhiChuNgay:   ['Ngay', 'Loai', 'MaDinhDanh', 'NoiDung', 'CapNhat'],     // Loai: lop / hs / khac
+  // Mẫu ghi chú của cô (chip chạm nhanh): An = '1' là ẩn mẫu có sẵn của app
+  MauGhiChu:    ['Loai', 'NoiDung', 'An', 'CapNhat'],
+  // Nhắc việc: Han dd/MM/yyyy, Gio HH:mm, MucDo thuong/quantrong/gap, Lap ''/ngay/tuan, BaoLich '1' = tạo sự kiện Lịch Google (báo trên điện thoại)
+  NhacViec:     ['Ma', 'Han', 'Gio', 'NoiDung', 'MaDinhDanh', 'MucDo', 'Lap', 'BaoLich', 'LichID', 'TrangThai', 'NguonNgay', 'NguonLoai', 'CapNhat'],
   // Bài kiểm tra nhập từ file của cô: đề (mỗi câu: điểm tối đa, mức, kĩ năng) và điểm từng câu của từng em (JSON {câu: điểm})
   DeKiemTra:    ['NamHoc', 'Ky', 'Mon', 'Cau', 'DiemToiDa', 'Muc', 'KiNang', 'CapNhat'],
   DiemCau:      ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'DiemCau', 'CapNhat'],
@@ -153,7 +157,7 @@ function sh_(ten) {
 //    nên bản nhớ cũ không bao giờ được dùng lại. Sửa TRỰC TIẾP trên Trang tính thì dùng menu "📒 Sổ theo dõi → Làm mới dữ liệu".
 var _NHO = {}, _SHEET = {};
 var BANG_THEM_COT = { SoChuNhiem: 1 };     // bảng được thêm cột ở bản cập nhật sau → tự thêm tiêu đề cột
-var BANG_DEM = { CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1, ThuVienThang: 1, ThuVienYeuCau: 1, MauCuaCo: 1, NhomHS: 1 };
+var BANG_DEM = { MauGhiChu: 1, CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1, ThuVienThang: 1, ThuVienYeuCau: 1, MauCuaCo: 1, NhomHS: 1 };
 function sheetNho_(ten) { return _SHEET[ten] || (_SHEET[ten] = sh_(ten)); }
 function docTrangTinh_(ten) {     // mảng các dòng (mảng giá trị), không kể dòng tiêu đề
   var sh = sheetNho_(ten), n = sh.getLastRow();
@@ -904,7 +908,119 @@ function layGhiChu(ngay) {
   });
   ['lop', 'khac'].forEach(function (l) { o.ganDay[l].sort(function (a, b) { return key_(b.ngay) - key_(a.ngay); }); o.ganDay[l] = o.ganDay[l].slice(0, 15); });
   o.dsHS = hocSinhDangHoc_(ngay).map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; });
+  o.mau = mauGhiChu_();
+  o.nhac = doc_('NhacViec').filter(function (r) { return !r.TrangThai && r.NguonNgay === ngay; }).map(nhacRa_);
   return o;
+}
+// ---- Mẫu ghi chú của cô: { them: {loai: [câu]}, an: {loai: [câu mẫu sẵn đã ẩn]} }
+function mauGhiChu_() {
+  var o = { them: { lop: [], hs: [], khac: [] }, an: { lop: [], hs: [], khac: [] } };
+  doc_('MauGhiChu').forEach(function (r) { var d = o[r.An ? 'an' : 'them'][r.Loai]; if (d && r.NoiDung) d.push(r.NoiDung); });
+  return o;
+}
+// thaoTac: 'them' (lưu mẫu mới) · 'xoa' (xoá mẫu của cô, hoặc ẩn mẫu có sẵn) · 'khoiPhuc' (hiện lại các mẫu có sẵn đã ẩn)
+function luuMauGhiChu(loai, nd, thaoTac) {
+  return voiKhoa_(function () {
+    if (['lop', 'hs', 'khac'].indexOf(loai) < 0) throw new Error('Loại ghi chú không hợp lệ.');
+    nd = String(nd || '').trim().replace(/\s+/g, ' ').slice(0, 120);
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm'), ds = doc_('MauGhiChu');
+    if (thaoTac === 'khoiPhuc') thayTheTheo_('MauGhiChu', function (r) { return !(r.Loai === loai && r.An); }, []);
+    else if (!nd) throw new Error('Mẫu đang trống.');
+    else if (thaoTac === 'them') {
+      if (ds.some(function (r) { return r.Loai === loai && !r.An && r.NoiDung === nd; })) throw new Error('Đã có mẫu này.');
+      thayTheTheo_('MauGhiChu', function (r) { return !(r.Loai === loai && r.An && r.NoiDung === nd); }, [hang_('MauGhiChu', { Loai: loai, NoiDung: nd, CapNhat: luc })]);
+    } else {
+      var rieng = ds.some(function (r) { return r.Loai === loai && !r.An && r.NoiDung === nd; });
+      thayTheTheo_('MauGhiChu', function (r) { return !(r.Loai === loai && r.NoiDung === nd); },
+        rieng ? [] : [hang_('MauGhiChu', { Loai: loai, NoiDung: nd, An: '1', CapNhat: luc })]);
+    }
+    return mauGhiChu_();
+  });
+}
+
+// ============================================================================ NHẮC VIỆC (từ ghi chú → Trang chủ, tuỳ chọn Lịch Google)
+// Mức độ: thuong (đến ngày mới hiện), quantrong (hiện trước 1 ngày), gap (hiện trước 2 ngày, đứng đầu).
+// Báo trên điện thoại: sự kiện Lịch Google 15 phút ở tài khoản của cô, nhắc trước (phút) theo mức độ.
+var NHAC_MUC = { thuong: { ten: 'Bình thường', truoc: 0, phut: [0] }, quantrong: { ten: 'Quan trọng', truoc: 1, phut: [30, 0] }, gap: { ten: 'Gấp', truoc: 2, phut: [1440, 60, 0] } };
+function nhacRa_(r) {
+  return { ma: r.Ma, han: r.Han, gio: r.Gio, nd: r.NoiDung, maHS: r.MaDinhDanh, muc: r.MucDo || 'thuong', lap: r.Lap, baoLich: !!r.BaoLich, xong: !!r.TrangThai,
+           nguonNgay: r.NguonNgay, nguonLoai: r.NguonLoai };
+}
+function luc_(han, gio) { var d = toDate_(han), g = String(gio || '07:00').split(':'); d.setHours(+g[0] || 0, +g[1] || 0, 0, 0); return d; }
+function lichNhac_(r, idCu) {         // tạo lại sự kiện Lịch Google cho 1 việc; trả {id, loi}
+  var out = { id: '', loi: '' };
+  try {
+    var cal = CalendarApp.getDefaultCalendar();
+    if (idCu) { try { var cu = cal.getEventById(idCu); if (cu) cu.deleteEvent(); } catch (e) {} }
+    if (!r.BaoLich || r.TrangThai) return out;
+    var bd = luc_(r.Han, r.Gio), ten = r.MaDinhDanh ? (tenHS_(r.MaDinhDanh) + ': ') : '';
+    var ev = cal.createEvent('⏰ ' + (r.MucDo === 'gap' ? '[GẤP] ' : '') + ten + String(r.NoiDung).slice(0, 90), bd, new Date(bd.getTime() + 15 * 60000),
+      { description: 'Nhắc việc từ app Sổ theo dõi học sinh. ' + String(r.NoiDung) });
+    ev.removeAllReminders(); (NHAC_MUC[r.MucDo] || NHAC_MUC.thuong).phut.forEach(function (p) { ev.addPopupReminder(p); });
+    out.id = ev.getId();
+  } catch (e) { out.loi = 'Chưa tạo được nhắc trên Lịch Google (' + (e.message || e) + '). Việc vẫn hiện ở Trang chủ.'; }
+  return out;
+}
+function tenHS_(ma) { var h = doc_('HocSinh').filter(function (x) { return x.MaDinhDanh === ma; })[0]; return h ? tenGoi_(h.HoTen) : ''; }
+// x: {ma?, han, gio, nd, maHS, muc, lap, baoLich, nguonNgay, nguonLoai}
+function luuNhacViec(x) {
+  return voiKhoa_(function () {
+    var nd = String(x.nd || '').trim().slice(0, 300);
+    if (!nd) throw new Error('Cô ghi việc cần nhắc.');
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(x.han || '')) throw new Error('Ngày nhắc chưa đúng.');
+    if (x.gio && !/^\d{2}:\d{2}$/.test(x.gio)) throw new Error('Giờ nhắc chưa đúng.');
+    var cu = x.ma ? doc_('NhacViec').filter(function (r) { return r.Ma === x.ma; })[0] : null;
+    var r = { Ma: x.ma || ('NV' + Utilities.getUuid().replace(/-/g, '').slice(0, 10)), Han: x.han, Gio: x.gio || '07:00', NoiDung: nd, MaDinhDanh: x.maHS || '',
+              MucDo: NHAC_MUC[x.muc] ? x.muc : 'thuong', Lap: x.lap === 'ngay' || x.lap === 'tuan' ? x.lap : '', BaoLich: x.baoLich ? '1' : '', TrangThai: '',
+              NguonNgay: x.nguonNgay || (cu && cu.NguonNgay) || '', NguonLoai: x.nguonLoai || (cu && cu.NguonLoai) || '',
+              CapNhat: Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm') };
+    var l = lichNhac_(r, cu && cu.LichID); r.LichID = l.id;
+    thayTheTheo_('NhacViec', function (y) { return y.Ma !== r.Ma; }, [hang_('NhacViec', r)]);
+    return { viec: nhacRa_(r), canh: l.loi };
+  });
+}
+// Xong: đánh dấu xong; việc lặp lại thì tạo lần tiếp theo (hằng ngày bỏ qua thứ Bảy, Chủ nhật)
+function xongNhacViec(ma) {
+  return voiKhoa_(function () {
+    var r = doc_('NhacViec').filter(function (y) { return y.Ma === ma; })[0]; if (!r) throw new Error('Không thấy việc này (có thể đã xoá).');
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm'), moi = [];
+    if (r.LichID && luc_(r.Han, r.Gio) > new Date()) lichNhac_({ BaoLich: '' }, r.LichID);    // xong sớm → bỏ nhắc trên Lịch
+    var xong = JSON.parse(JSON.stringify(r)); xong.TrangThai = 'xong'; xong.CapNhat = luc; moi.push(hang_('NhacViec', xong));
+    if (r.Lap) {
+      var d = toDate_(r.Han), hn = toDate_(homNay_());
+      do { d.setDate(d.getDate() + (r.Lap === 'tuan' ? 7 : 1)); if (r.Lap === 'ngay') while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); } while (d < hn);
+      var tiep = JSON.parse(JSON.stringify(r)); tiep.Ma = 'NV' + Utilities.getUuid().replace(/-/g, '').slice(0, 10); tiep.TrangThai = ''; tiep.CapNhat = luc;
+      tiep.Han = Utilities.formatDate(d, TZ, 'dd/MM/yyyy'); tiep.LichID = lichNhac_(tiep, '').id; moi.push(hang_('NhacViec', tiep));
+    }
+    thayTheTheo_('NhacViec', function (y) { return y.Ma !== ma; }, moi);
+    return layNhacViec();
+  });
+}
+function hoanNhacViec(ma, han, gio) {      // dời sang ngày / giờ khác
+  var r = doc_('NhacViec').filter(function (y) { return y.Ma === ma; })[0]; if (!r) throw new Error('Không thấy việc này (có thể đã xoá).');
+  var x = nhacRa_(r); x.han = han; x.gio = gio || x.gio;
+  var kq = luuNhacViec(x), ds = layNhacViec(); ds.canh = kq.canh; return ds;
+}
+function xoaNhacViec(ma) {
+  return voiKhoa_(function () {
+    var r = doc_('NhacViec').filter(function (y) { return y.Ma === ma; })[0];
+    if (r && r.LichID) lichNhac_({ BaoLich: '' }, r.LichID);
+    thayTheTheo_('NhacViec', function (y) { return y.Ma !== ma; }, []);
+    return layNhacViec();
+  });
+}
+// Trang chủ: việc chưa xong. hien = quá hạn, hôm nay, hoặc sắp tới trong số ngày "hiện trước" của mức độ.
+function layNhacViec() {
+  var hn = homNay_(), ten = {};
+  doc_('HocSinh').forEach(function (h) { ten[h.MaDinhDanh] = tenGoi_(h.HoTen); });
+  var thu = { gap: 0, quantrong: 1, thuong: 2 };
+  var ds = doc_('NhacViec').filter(function (r) { return !r.TrangThai; }).map(function (r) {
+    var x = nhacRa_(r), con = soNgay_(hn, r.Han);
+    x.ten = ten[r.MaDinhDanh] || ''; x.con = con; x.hien = con <= (NHAC_MUC[x.muc] || NHAC_MUC.thuong).truoc; return x;
+  });
+  var nhom = function (x) { return x.con < 0 ? 0 : x.muc === 'gap' && x.hien ? 1 : 2; };      // quá hạn → gấp → còn lại theo thời gian
+  ds.sort(function (a, b) { return nhom(a) - nhom(b) || key_(a.han) - key_(b.han) || String(a.gio).localeCompare(String(b.gio)) || (thu[a.muc] - thu[b.muc]); });
+  return { homNay: hn, ds: ds };
 }
 function luuGhiChu(ngay, loai, ma, nd) {
   return voiKhoa_(function () {
