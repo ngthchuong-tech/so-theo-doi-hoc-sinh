@@ -132,4 +132,90 @@
   .tg-nhan { min-width: 74px; font-size: 13px; color: var(--mo); }
   .bm-o .dem.vuot { color: var(--do); font-weight: 700; }
   ul.canh { margin: 6px 0; padding-left: 18px; font-size: 14px; color: var(--vang); }
+  /* ================================================================== GIAO DIỆN MỚI (04/10/2026): màu theo từng khu vực, thẻ nổi, biểu tượng */
+  /* Mỗi khu vực một màu chủ đạo: đổi --chinh / --chinh2 / --chinh-nhat theo body[data-tab] → nút, chip, tiêu đề, thanh trên tự đổi theo */
+  body { --chinh: #1e5fbf; --chinh2: #3b9be8; --chinh-nhat: #e7f0fc; }
+  body[data-tab="diemdanh"]  { --chinh: #15803d; --chinh2: #3fb871; --chinh-nhat: #e6f6ec; }
+  body[data-tab="sotheodoi"] { --chinh: #c2410c; --chinh2: #f59a4a; --chinh-nhat: #fdf0e6; }
+  body[data-tab="danhgia"]   { --chinh: #6d28d9; --chinh2: #a47cf3; --chinh-nhat: #f1eafd; }
+  body[data-tab="hocsinh"]   { --chinh: #be185d; --chinh2: #ee6aa6; --chinh-nhat: #fce8f1; }
+  body[data-tab="caidat"]    { --chinh: #334e68; --chinh2: #6b8cad; --chinh-nhat: #e9eff5; }
+  body[data-tab="huongdan"]  { --chinh: #0f766e; --chinh2: #35b9a8; --chinh-nhat: #e3f5f2; }
+  body { background: radial-gradient(circle at 0 0, var(--chinh-nhat) 0, rgba(255,255,255,0) 340px), radial-gradient(circle at 100% 30%, #fff6e5 0, rgba(255,255,255,0) 300px), #f3f5fa; background-attachment: fixed; transition: background-color .3s; }
+
+  /* Thanh trên: chuyển màu, bo góc, chấm trang trí */
+  header { background: radial-gradient(circle at 92% -20%, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 90px), radial-gradient(circle at 70% 140%, rgba(255,255,255,.18) 0, rgba(255,255,255,0) 70px), linear-gradient(120deg, var(--chinh), var(--chinh2));
+    border-radius: 0 0 18px 18px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 12px 14px 14px; transition: background .3s; }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+  .nut-lui { background: rgba(255,255,255,.2); border-radius: 12px; }
+  .nut-lui:active { transform: scale(.94); }
+
+  /* Thẻ */
+  .the { border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.05); border: 1px solid rgba(16,24,40,.04); }
+  .the h2 { font-size: 17px; display: flex; align-items: center; gap: 8px; color: var(--chinh); }
+  .the h2::before { content: ''; width: 5px; height: 20px; border-radius: 3px; background: linear-gradient(var(--chinh2), var(--chinh)); flex: none; }
+  .the h2[style*="margin:0"]::before { height: 18px; }
+  .the h3 { color: #344054; }
+  details summary { color: var(--chinh); }
+
+  /* Nút */
+  button.nut { background: linear-gradient(135deg, var(--chinh), var(--chinh2)); box-shadow: 0 2px 6px rgba(0,0,0,.12); font-weight: 600; transition: transform .08s, box-shadow .2s; }
+  button.nut:active { transform: scale(.97); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  button.nut.phu { background: var(--chinh-nhat); color: var(--chinh); box-shadow: none; }
+  button.nut.do { background: linear-gradient(135deg, #b42318, #e5484d); }
+  .chip { border-radius: 20px; transition: background .15s; }
+  .chip.on { background: linear-gradient(135deg, var(--chinh), var(--chinh2)); border-color: transparent; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--chinh2); outline-offset: 0; border-color: transparent; }
+
+  /* Thanh điều hướng dưới: mỗi mục một màu, mục đang mở nổi lên */
+  nav { border-top: 0; box-shadow: 0 -4px 16px rgba(16,24,40,.08); border-radius: 18px 18px 0 0; padding: 4px 4px 2px; }
+  nav button .ic { width: 46px; height: 32px; margin: 0 auto 2px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: background .2s, transform .2s; }
+  nav button.on { color: var(--chinh); font-weight: 700; }
+  nav button.on .ic { background: var(--chinh-nhat); transform: translateY(-2px); }
+  .the-chan { background: rgba(255,255,255,.92); backdrop-filter: blur(6px); border-top: 0; box-shadow: 0 -4px 14px rgba(16,24,40,.06); bottom: 66px; }
+
+  /* Trang chủ: thẻ ngày có hình minh hoạ, nút nhanh nhiều màu */
+  .hero { position: relative; overflow: hidden; color: #fff; border: 0; min-height: 108px; padding-right: 100px;
+    background: radial-gradient(circle at 85% 20%, rgba(255,255,255,.25) 0, rgba(255,255,255,0) 60px), linear-gradient(125deg, #1e5fbf, #3b9be8 60%, #5cc6e8); }
+  .hero .ngay-lon { font-size: 21px; white-space: nowrap; }
+  .hero .nho { color: rgba(255,255,255,.92); font-size: 14px; line-height: 1.45; }
+  .hero .loi-chao { font-size: 13px; opacity: .9; margin-bottom: 2px; }
+  .hero svg { position: absolute; right: 4px; bottom: 0; width: 100px; height: 84px; }
+  .luoi-nut button.o-nhanh { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 2px 10px; border-radius: 14px; color: #fff; font-size: 13px; font-weight: 600; }
+  .luoi-nut .o-ic { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.28); display: flex; align-items: center; justify-content: center; font-size: 21px; }
+  .o-nhanh.c1 { background: linear-gradient(135deg, #15803d, #3fb871); }
+  .o-nhanh.c2 { background: linear-gradient(135deg, #c2410c, #f59a4a); }
+  .o-nhanh.c3 { background: linear-gradient(135deg, #6d28d9, #a47cf3); }
+  .o-nhanh.c4 { background: linear-gradient(135deg, #be185d, #ee6aa6); }
+
+  /* Thẻ nhắc có biểu tượng */
+  .nhac { border-left-width: 0; position: relative; padding-left: 44px; box-shadow: 0 1px 3px rgba(16,24,40,.06); border-radius: 14px; line-height: 1.45; }
+  .nhac::before { position: absolute; left: 12px; top: 9px; font-size: 18px; }
+  .nhac.do { background: linear-gradient(90deg, #fde3e1, #fff1f0); } .nhac.do::before { content: '⚠️'; }
+  .nhac.vang { background: linear-gradient(90deg, #ffeccb, #fff7e8); } .nhac.vang::before { content: '🔔'; }
+  .nhac.xanh { background: linear-gradient(90deg, #d9f2e1, #effaf2); } .nhac.xanh::before { content: '💡'; }
+
+  /* Lịch dạy: số tiết thành ô màu */
+  .tiet { border-bottom: 1px dashed var(--vien); }
+  .tiet .so { border-radius: 10px; background: linear-gradient(135deg, var(--chinh), var(--chinh2)); color: #fff; }
+  .tiet.mo .so { background: #e6e9ef; color: #98a2b3; }
+
+  /* Lưới học sinh: số thứ tự thành vòng tròn màu */
+  .hs { border-radius: 12px; transition: background .12s, box-shadow .12s; }
+  .hs .stt { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: var(--chinh-nhat); color: var(--chinh); font-weight: 700; font-size: 11.5px; margin-bottom: 3px; }
+  .hs.on { background: var(--chinh-nhat); border-color: var(--chinh); box-shadow: 0 0 0 2px var(--chinh) inset, 0 2px 6px rgba(0,0,0,.08); }
+  .hs.on .stt { background: var(--chinh); color: #fff; }
+  .cau { border-radius: 10px; }
+  .cau.on { border-color: var(--chinh); background: var(--chinh-nhat); }
+  .muc button { border-radius: 12px; font-weight: 600; }
+  .muc button.on { border-color: var(--chinh); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+
+  /* Danh sách, bảng, thẻ học sinh ở màn đánh giá */
+  table.bang th { background: var(--chinh-nhat); color: var(--chinh); }
+  .bm-hs { border-left: 5px solid var(--chinh2); }
+  .tag { border-radius: 8px; }
+  .seg { border-radius: 10px; }
+  .vo-nut button { border-radius: 10px; }
+  #toast { border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .modal .the { border-radius: 18px; }
 </style>

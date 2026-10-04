@@ -142,6 +142,92 @@
   .tg-nhan { min-width: 74px; font-size: 13px; color: var(--mo); }
   .bm-o .dem.vuot { color: var(--do); font-weight: 700; }
   ul.canh { margin: 6px 0; padding-left: 18px; font-size: 14px; color: var(--vang); }
+  /* ================================================================== GIAO DIỆN MỚI (04/10/2026): màu theo từng khu vực, thẻ nổi, biểu tượng */
+  /* Mỗi khu vực một màu chủ đạo: đổi --chinh / --chinh2 / --chinh-nhat theo body[data-tab] → nút, chip, tiêu đề, thanh trên tự đổi theo */
+  body { --chinh: #1e5fbf; --chinh2: #3b9be8; --chinh-nhat: #e7f0fc; }
+  body[data-tab="diemdanh"]  { --chinh: #15803d; --chinh2: #3fb871; --chinh-nhat: #e6f6ec; }
+  body[data-tab="sotheodoi"] { --chinh: #c2410c; --chinh2: #f59a4a; --chinh-nhat: #fdf0e6; }
+  body[data-tab="danhgia"]   { --chinh: #6d28d9; --chinh2: #a47cf3; --chinh-nhat: #f1eafd; }
+  body[data-tab="hocsinh"]   { --chinh: #be185d; --chinh2: #ee6aa6; --chinh-nhat: #fce8f1; }
+  body[data-tab="caidat"]    { --chinh: #334e68; --chinh2: #6b8cad; --chinh-nhat: #e9eff5; }
+  body[data-tab="huongdan"]  { --chinh: #0f766e; --chinh2: #35b9a8; --chinh-nhat: #e3f5f2; }
+  body { background: radial-gradient(circle at 0 0, var(--chinh-nhat) 0, rgba(255,255,255,0) 340px), radial-gradient(circle at 100% 30%, #fff6e5 0, rgba(255,255,255,0) 300px), #f3f5fa; background-attachment: fixed; transition: background-color .3s; }
+
+  /* Thanh trên: chuyển màu, bo góc, chấm trang trí */
+  header { background: radial-gradient(circle at 92% -20%, rgba(255,255,255,.28) 0, rgba(255,255,255,0) 90px), radial-gradient(circle at 70% 140%, rgba(255,255,255,.18) 0, rgba(255,255,255,0) 70px), linear-gradient(120deg, var(--chinh), var(--chinh2));
+    border-radius: 0 0 18px 18px; box-shadow: 0 4px 14px rgba(0,0,0,.12); padding: 12px 14px 14px; transition: background .3s; }
+  header h1 { font-size: 18px; font-weight: 700; letter-spacing: .2px; }
+  .nut-lui { background: rgba(255,255,255,.2); border-radius: 12px; }
+  .nut-lui:active { transform: scale(.94); }
+
+  /* Thẻ */
+  .the { border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(16,24,40,.06), 0 4px 14px rgba(16,24,40,.05); border: 1px solid rgba(16,24,40,.04); }
+  .the h2 { font-size: 17px; display: flex; align-items: center; gap: 8px; color: var(--chinh); }
+  .the h2::before { content: ''; width: 5px; height: 20px; border-radius: 3px; background: linear-gradient(var(--chinh2), var(--chinh)); flex: none; }
+  .the h2[style*="margin:0"]::before { height: 18px; }
+  .the h3 { color: #344054; }
+  details summary { color: var(--chinh); }
+
+  /* Nút */
+  button.nut { background: linear-gradient(135deg, var(--chinh), var(--chinh2)); box-shadow: 0 2px 6px rgba(0,0,0,.12); font-weight: 600; transition: transform .08s, box-shadow .2s; }
+  button.nut:active { transform: scale(.97); box-shadow: 0 1px 2px rgba(0,0,0,.12); }
+  button.nut.phu { background: var(--chinh-nhat); color: var(--chinh); box-shadow: none; }
+  button.nut.do { background: linear-gradient(135deg, #b42318, #e5484d); }
+  .chip { border-radius: 20px; transition: background .15s; }
+  .chip.on { background: linear-gradient(135deg, var(--chinh), var(--chinh2)); border-color: transparent; box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--chinh2); outline-offset: 0; border-color: transparent; }
+
+  /* Thanh điều hướng dưới: mỗi mục một màu, mục đang mở nổi lên */
+  nav { border-top: 0; box-shadow: 0 -4px 16px rgba(16,24,40,.08); border-radius: 18px 18px 0 0; padding: 4px 4px 2px; }
+  nav button .ic { width: 46px; height: 32px; margin: 0 auto 2px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: background .2s, transform .2s; }
+  nav button.on { color: var(--chinh); font-weight: 700; }
+  nav button.on .ic { background: var(--chinh-nhat); transform: translateY(-2px); }
+  .the-chan { background: rgba(255,255,255,.92); backdrop-filter: blur(6px); border-top: 0; box-shadow: 0 -4px 14px rgba(16,24,40,.06); bottom: 66px; }
+
+  /* Trang chủ: thẻ ngày có hình minh hoạ, nút nhanh nhiều màu */
+  .hero { position: relative; overflow: hidden; color: #fff; border: 0; min-height: 108px; padding-right: 100px;
+    background: radial-gradient(circle at 85% 20%, rgba(255,255,255,.25) 0, rgba(255,255,255,0) 60px), linear-gradient(125deg, #1e5fbf, #3b9be8 60%, #5cc6e8); }
+  .hero .ngay-lon { font-size: 21px; white-space: nowrap; }
+  .hero .nho { color: rgba(255,255,255,.92); font-size: 14px; line-height: 1.45; }
+  .hero .loi-chao { font-size: 13px; opacity: .9; margin-bottom: 2px; }
+  .hero svg { position: absolute; right: 4px; bottom: 0; width: 100px; height: 84px; }
+  .luoi-nut button.o-nhanh { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 2px 10px; border-radius: 14px; color: #fff; font-size: 13px; font-weight: 600; }
+  .luoi-nut .o-ic { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.28); display: flex; align-items: center; justify-content: center; font-size: 21px; }
+  .o-nhanh.c1 { background: linear-gradient(135deg, #15803d, #3fb871); }
+  .o-nhanh.c2 { background: linear-gradient(135deg, #c2410c, #f59a4a); }
+  .o-nhanh.c3 { background: linear-gradient(135deg, #6d28d9, #a47cf3); }
+  .o-nhanh.c4 { background: linear-gradient(135deg, #be185d, #ee6aa6); }
+
+  /* Thẻ nhắc có biểu tượng */
+  .nhac { border-left-width: 0; position: relative; padding-left: 44px; box-shadow: 0 1px 3px rgba(16,24,40,.06); border-radius: 14px; line-height: 1.45; }
+  .nhac::before { position: absolute; left: 12px; top: 9px; font-size: 18px; }
+  .nhac.do { background: linear-gradient(90deg, #fde3e1, #fff1f0); } .nhac.do::before { content: '⚠️'; }
+  .nhac.vang { background: linear-gradient(90deg, #ffeccb, #fff7e8); } .nhac.vang::before { content: '🔔'; }
+  .nhac.xanh { background: linear-gradient(90deg, #d9f2e1, #effaf2); } .nhac.xanh::before { content: '💡'; }
+
+  /* Lịch dạy: số tiết thành ô màu */
+  .tiet { border-bottom: 1px dashed var(--vien); }
+  .tiet .so { border-radius: 10px; background: linear-gradient(135deg, var(--chinh), var(--chinh2)); color: #fff; }
+  .tiet.mo .so { background: #e6e9ef; color: #98a2b3; }
+
+  /* Lưới học sinh: số thứ tự thành vòng tròn màu */
+  .hs { border-radius: 12px; transition: background .12s, box-shadow .12s; }
+  .hs .stt { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 11px; background: var(--chinh-nhat); color: var(--chinh); font-weight: 700; font-size: 11.5px; margin-bottom: 3px; }
+  .hs.on { background: var(--chinh-nhat); border-color: var(--chinh); box-shadow: 0 0 0 2px var(--chinh) inset, 0 2px 6px rgba(0,0,0,.08); }
+  .hs.on .stt { background: var(--chinh); color: #fff; }
+  .cau { border-radius: 10px; }
+  .cau.on { border-color: var(--chinh); background: var(--chinh-nhat); }
+  .muc button { border-radius: 12px; font-weight: 600; }
+  .muc button.on { border-color: var(--chinh); box-shadow: 0 2px 6px rgba(0,0,0,.12); }
+
+  /* Danh sách, bảng, thẻ học sinh ở màn đánh giá */
+  table.bang th { background: var(--chinh-nhat); color: var(--chinh); }
+  .bm-hs { border-left: 5px solid var(--chinh2); }
+  .tag { border-radius: 8px; }
+  .seg { border-radius: 10px; }
+  .vo-nut button { border-radius: 10px; }
+  #toast { border-radius: 14px; box-shadow: 0 6px 20px rgba(0,0,0,.25); }
+  .modal .the { border-radius: 18px; }
 </style>
 
 </head>
@@ -159,21 +245,23 @@
   <main>
     <!-- ======================= TRANG CHỦ ======================= -->
     <section id="v-trangchu">
-      <div class="the">
+      <div class="the hero">
+        <div class="loi-chao" id="tcChao"></div>
         <div class="ngay-lon" id="tcNgay"></div>
         <div class="nho" id="tcTuan"></div>
+        <svg viewBox="0 0 124 104" aria-hidden="true"><circle cx="100" cy="20" r="13" fill="#ffd54f"/><circle cx="100" cy="20" r="18" fill="#ffd54f" opacity=".25"/><rect x="0" y="96" width="124" height="8" rx="4" fill="#fff" opacity=".3"/><circle cx="110" cy="74" r="12" fill="#4ade80"/><circle cx="102" cy="80" r="8" fill="#22c55e"/><rect x="108" y="82" width="4" height="14" fill="#8d6e63"/><line x1="56" y1="22" x2="56" y2="4" stroke="#fff" stroke-width="2"/><polygon points="56,4 72,8.5 56,13" fill="#e53935"/><polygon points="56,7.2 57,9.6 59.4,9.6 57.5,11 58.2,13.3 56,12 56,7.2" fill="#ffeb3b" opacity="0"/><rect x="24" y="46" width="64" height="50" rx="3" fill="#fff"/><polygon points="18,48 56,22 94,48" fill="#ff7a59"/><rect x="31" y="56" width="12" height="10" rx="2" fill="#93c5fd"/><rect x="69" y="56" width="12" height="10" rx="2" fill="#93c5fd"/><rect x="48" y="70" width="16" height="26" rx="2" fill="#3b82f6"/><circle cx="56" cy="38" r="5" fill="#fff"/><rect x="2" y="88" width="20" height="7" rx="1.5" fill="#f472b6"/><rect x="4" y="81" width="17" height="7" rx="1.5" fill="#facc15"/><rect x="3" y="74" width="18" height="7" rx="1.5" fill="#60a5fa"/></svg>
       </div>
       <div id="tcNhac"></div>
       <div class="the">
         <div class="luoi-nut">
-          <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
-          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })">📒<br>Nộp vở</button>
-          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })">📋<br>Đánh giá tháng</button>
-          <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
+          <button class="nut o-nhanh c1" onclick="moTab('diemdanh')"><span class="o-ic">✅</span>Điểm danh</button>
+          <button class="nut o-nhanh c2" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })"><span class="o-ic">📒</span>Nộp vở</button>
+          <button class="nut o-nhanh c3" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })"><span class="o-ic">📋</span>Đánh giá tháng</button>
+          <button class="nut o-nhanh c4" onclick="moTab('hocsinh')"><span class="o-ic">👧</span>Học sinh</button>
         </div>
       </div>
       <div class="the">
-        <h2>Lịch dạy hôm nay</h2>
+        <h2>📅 Lịch dạy hôm nay</h2>
         <div id="tcLich"></div>
       </div>
     </section>
@@ -182,7 +270,7 @@
     <section id="v-diemdanh" class="an">
       <div class="the">
         <div class="hang gian">
-          <h2 style="margin:0">Điểm danh</h2>
+          <h2 style="margin:0">✅ Điểm danh</h2>
           <input type="date" id="ddNgay" onchange="doiNgayDiemDanh()">
         </div>
         <div class="hang" style="margin-top:6px" id="ddCheRow">
@@ -219,7 +307,7 @@
     <section id="v-sotheodoi" class="an">
       <div class="the">
         <div class="hang gian">
-          <h2 style="margin:0">Sổ theo dõi</h2>
+          <h2 style="margin:0">📝 Sổ theo dõi</h2>
           <input type="date" id="stNgay" onchange="doiNgaySTD()">
         </div>
         <div class="hang" style="margin-top:8px">
@@ -313,7 +401,7 @@
       <!-- ---------- ĐÁNH GIÁ THƯỜNG XUYÊN HẰNG THÁNG (cách mới) ---------- -->
       <div id="dgThang">
       <div class="the">
-        <h2>Đánh giá thường xuyên – hằng tháng</h2>
+        <h2>📆 Đánh giá thường xuyên – hằng tháng</h2>
         <div class="nho">Nơi thống nhất kết quả của tháng để xuất file nộp hệ thống. <b>Tiếng Việt, Toán</b>: kết quả cô ghi ở Sổ theo dõi → 📋 Đánh giá tháng
           (mức tự tính, nhận xét ghép sẵn). <b>HĐTN, Đạo đức</b>: cô chọn mức, có câu gợi ý. <b>Năng lực – phẩm chất</b>: app tự suy từ kết quả các môn, nộp vở,
           chuyên cần, phong trào. Cô sửa được mọi ô nhận xét.</div>
@@ -337,7 +425,7 @@
         <div id="tgDs"></div>
 
         <div class="the">
-          <h2>Xuất file nộp hệ thống</h2>
+          <h2>📤 Xuất file nộp hệ thống</h2>
           <ol class="nho" style="padding-left:18px;line-height:1.5">
             <li>Tải file mẫu đánh giá thường xuyên của tháng ("filemau_danhgia_thuongxuyen…") của lớp từ hệ thống của Bộ.</li>
             <li>Chọn file đó ở đây – app điền nhận xét vào đúng ô (Sổ tổng hợp các môn và từng môn), ghép theo mã định danh, giữ nguyên định dạng.</li>
@@ -352,7 +440,7 @@
       <!-- ---------- ĐỊNH KỲ ---------- -->
       <div id="dgKy" class="an">
         <div class="the">
-          <h2>Đánh giá định kỳ</h2>
+          <h2>🏅 Đánh giá định kỳ</h2>
           <div class="nho">App gợi ý mức đạt được của từng môn (T/H/C), 15 mức năng lực – phẩm chất (T/Đ/C) và nhận xét, từ <b>đánh giá các tháng</b> trong kì. Cô xem, chốt mức, nhập điểm KTĐK (cuối kì), rồi xuất vào 2 file mẫu của Bộ.</div>
           <div class="hang" style="margin-top:8px">
             <label>Kì <select id="kyChon">
@@ -376,7 +464,7 @@
           <div id="kyDs"></div>
 
           <div class="the">
-            <h2>Xuất file nộp hệ thống</h2>
+            <h2>📤 Xuất file nộp hệ thống</h2>
             <div id="kyXuatThuong">
             <div class="nho">Tải 2 file mẫu của kì này từ hệ thống của Bộ, rồi chọn ở đây. App điền đúng ô theo mã định danh, giữ nguyên định dạng.</div>
             <label class="dong">1. File đánh giá định kỳ môn học <span class="nho">(tên dạng "filemau_danhgia_dinhkyc1…")</span></label>
@@ -398,7 +486,7 @@
     <!-- ======================= HỌC SINH ======================= -->
     <section id="v-hocsinh" class="an">
       <div class="the">
-        <h2>Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
+        <h2>👧 Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
         <div class="hang" id="hsNhomLoc" style="margin-bottom:6px"></div>
         <div id="hsGoiY"></div>
         <input id="hsTim" placeholder="Tìm tên…" oninput="veHocSinh()" style="width:100%;margin-bottom:8px">
@@ -406,7 +494,7 @@
         <details style="margin-top:10px"><summary>Học sinh đã chuyển đi</summary><div id="hsChuyenDi"></div></details>
       </div>
       <div class="the">
-        <h2>Tải danh sách học sinh</h2>
+        <h2>📥 Tải danh sách học sinh</h2>
         <div class="nho">Dùng file "Danh sách học sinh" xuất từ hệ thống của trường (.xlsx). Tải lại khi có học sinh chuyển đến/chuyển đi.</div>
         <input type="file" id="hsFile" accept=".xlsx,.xls" onchange="docFileHocSinh(this)" style="margin-top:8px">
         <div id="hsXem"></div>
@@ -662,13 +750,13 @@
       </div>
 
       <div class="the">
-        <h2>Chức năng</h2>
+        <h2>🧩 Chức năng</h2>
         <div class="nho">Để app gọn, các chức năng nâng cao được tắt sẵn. Cô bật khi cần dùng – tắt đi thì chỉ ẩn khỏi màn hình, dữ liệu đã ghi vẫn giữ nguyên.</div>
         <div id="cnDs" style="margin-top:6px"></div>
       </div>
 
       <div class="the">
-        <h2>Mở app nhanh trên điện thoại, máy tính</h2>
+        <h2>📱 Mở app nhanh trên điện thoại, máy tính</h2>
         <div class="nho">Quét mã QR bằng camera điện thoại để mở app, rồi "Thêm vào màn hình chính" để lần sau chỉ cần chạm biểu tượng.</div>
         <div class="hang" style="margin-top:10px;align-items:flex-start">
           <div id="qrApp" style="background:#fff;padding:6px;border:1px solid var(--vien);border-radius:8px"></div>
@@ -686,12 +774,12 @@
         </div>
       </div>
       <div class="the">
-        <h2>Học kì đang dùng</h2>
+        <h2>🗓️ Học kì đang dùng</h2>
         <div id="cdHocKy"></div>
       </div>
 
       <div class="the">
-        <h2>Tải Sổ báo giảng</h2>
+        <h2>📘 Tải Sổ báo giảng</h2>
         <div class="hang">
           <label>Năm học <input id="sbgNamHoc" size="10"></label>
           <label>Học kì <select id="sbgHocKy"><option>I</option><option>II</option></select></label>
@@ -701,7 +789,7 @@
       </div>
 
       <div class="the">
-        <h2>Kho thư viện nhận xét</h2>
+        <h2>📚 Kho thư viện nhận xét</h2>
         <div id="khoKiemTra"></div>
         <input type="file" id="tvFile" accept=".xlsx" onchange="docFileThuVien(this)" style="margin-top:8px">
         <div id="tvXem"></div>
@@ -709,7 +797,7 @@
       </div>
 
       <div class="the">
-        <h2>Ghép tiết với bài</h2>
+        <h2>🔗 Ghép tiết với bài</h2>
         <div class="nho">App tự ghép tiết trong Sổ báo giảng với bài trong thư viện. Dòng tô vàng là app đoán, dòng tô đỏ là chưa ghép – cô kiểm tra và sửa.</div>
         <div class="hang" style="margin:8px 0"><select id="ghMon" onchange="doiMonGhep()"></select>
           <label class="nho"><input type="checkbox" id="ghChiCanXem" onchange="veGhep()"> Chỉ hiện dòng cần xem</label></div>
@@ -718,7 +806,7 @@
       </div>
 
       <div class="the">
-        <h2>Môn học</h2>
+        <h2>📖 Môn học</h2>
         <div class="nho">Các môn cô đánh giá. "Tên trong Sổ báo giảng" ghi đúng tên môn trong sổ (nhiều tên cách nhau bởi dấu ;).</div>
         <div class="cuon"><table class="bang" id="mhBang"></table></div>
         <div class="hang" style="margin-top:8px">
@@ -728,7 +816,7 @@
       </div>
 
       <div class="the" id="theAI">
-        <h2>Trợ lý AI (Gemini) – tuỳ chọn</h2>
+        <h2>✨ Trợ lý AI (Gemini) – tuỳ chọn</h2>
         <div id="aiTrangThai" class="nho"></div>
         <div class="nho" style="margin-top:6px;line-height:1.5">Dùng để: đọc điểm từ ảnh bài kiểm tra; (sắp có) viết lại nhận xét cuối kì, nhận xét GVCN cuối năm. Không có khoá thì app vẫn chạy đầy đủ, chỉ ẩn các nút AI.</div>
         <details style="margin-top:6px"><summary>Lấy khoá ở đâu? Có an toàn không?</summary>
@@ -750,17 +838,17 @@
       </div>
 
       <div class="the" id="theNamHoc">
-        <h2>Năm học và lưu trữ</h2>
+        <h2>🗄️ Năm học và lưu trữ</h2>
         <div id="nhNoiDung" class="nho">Đang tải…</div>
       </div>
 
       <div class="the" id="theDungLuong">
-        <h2>Dung lượng ảnh</h2>
+        <h2>🖼️ Dung lượng ảnh</h2>
         <div id="dlNoiDung" class="nho">Đang tải…</div>
       </div>
 
       <div class="the">
-        <h2>Thông tin chung</h2>
+        <h2>🏫 Thông tin chung</h2>
         <label class="dong">Trường</label><input id="cdTruong" style="width:100%">
         <div class="hang">
           <div><label class="dong">Lớp</label><input id="cdLop" size="6"></div>
@@ -1393,6 +1481,7 @@ if (coLichSu) google.script.history.setChangeHandler(function (e) {   // nút Ba
 function moTab(t) { if (t === hienTai.tab && !hienTai.buoc && !hienTai.hoSo) { apDung(hienTai); return; } diToi({ tab: t }); }
 function apDung(tt) {
   var cu = hienTai; hienTai = tt; var t = tt.tab;
+  document.body.setAttribute('data-tab', t);          // màu chủ đạo theo khu vực (Styles: body[data-tab])
   if (nd) { $('ndModal').style.display = 'none'; nd = null; }
   if (mcTL || mcXemTT) { $('mcModal').style.display = 'none'; $('mcXem').style.display = 'none'; mcTL = null; mcXemTT = null; }
   if (cu.nhapDiem && t === 'danhgia' && cu.tab === t) { $('nutLui').classList.toggle('an', !(nganXep.length > 0)); veDanhGiaKy(); return; }   // chỉ đóng cửa sổ nhập điểm
@@ -1454,6 +1543,8 @@ function veTrangChu(d) {
   if (d.giaoDien) apDungGiaoDien(d.giaoDien);
   {
     $('phuDe').textContent = [d.truong, d.lop ? 'Lớp ' + d.lop : '', d.namHoc ? 'Năm học ' + d.namHoc : ''].filter(Boolean).join(' · ') || 'Chưa có thông tin lớp';
+    var gio = new Date().getHours();
+    $('tcChao').textContent = gio < 11 ? 'Chào buổi sáng, cô! ☀️' : gio < 13 ? 'Chào buổi trưa, cô! 🌤️' : gio < 18 ? 'Chào buổi chiều, cô! 🌻' : 'Chào buổi tối, cô! 🌙';
     $('tcNgay').textContent = d.thu + ', ' + d.homNay;
     $('tcTuan').textContent = ['Tháng ' + d.thang, d.tuan ? 'Tuần ' + d.tuan : '', d.hocKy ? 'Học kì ' + d.hocKy : '', d.chuDe, d.siSo ? 'Sĩ số ' + d.siSo : ''].filter(Boolean).join(' · ');
     if (!d.siSo || !d.hocKy) d.nhac.unshift({ muc: 'xanh', text: '📖 Lần đầu dùng app? Chạm vào đây để xem Hướng dẫn sử dụng (mục 1: làm theo thứ tự).', toi: 'huongdan' });

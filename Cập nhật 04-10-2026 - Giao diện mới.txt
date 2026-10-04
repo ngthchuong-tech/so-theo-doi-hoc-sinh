@@ -1,0 +1,14 @@
+CẬP NHẬT – GIAO DIỆN MỚI (sinh động hơn, theo ý cô: nhiều màu sắc, các mục nổi bật, có hình ảnh)
+
+- Mỗi khu vực một màu chủ đạo, thanh tiêu đề, nút, mục đang chọn đổi theo – nhìn là biết đang ở đâu:
+    Trang chủ xanh dương · Điểm danh xanh lá · Sổ theo dõi cam · Đánh giá tím · Học sinh hồng · Cài đặt xám xanh · Hướng dẫn xanh ngọc.
+- Thanh tiêu đề chuyển màu, bo góc; thẻ nội dung bo tròn, có bóng nhẹ; tiêu đề mỗi mục có vạch màu và biểu tượng
+  (📅 Lịch dạy, ✅ Điểm danh, 📝 Sổ theo dõi, 👧 Danh sách lớp, 📚 Kho thư viện, 📤 Xuất file…).
+- Trang chủ: thẻ ngày có lời chào theo buổi (Chào buổi sáng, cô! ☀️ …) và hình minh hoạ ngôi trường (vẽ sẵn trong app,
+  không tải ảnh từ ngoài); 4 nút nhanh mỗi nút một màu, biểu tượng to.
+- Thẻ nhắc có biểu tượng: ⚠️ việc gấp · 🔔 cần làm · 💡 gợi ý.
+- Thanh điều hướng dưới: mục đang mở được tô nền và nhô lên.
+- Lưới học sinh: số thứ tự thành vòng tròn màu; em đang chọn nổi rõ. Lịch dạy: số tiết thành ô màu.
+Chỉ thay phần trình bày, không đổi chức năng; đã thử mọi màn hình trên điện thoại giả lập, không lỗi.
+
+Cách cập nhật: dán lại Index.html (và Code.gs) → Triển khai → Phiên bản mới.

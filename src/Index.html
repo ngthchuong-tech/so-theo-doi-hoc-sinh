@@ -24,21 +24,23 @@
   <main>
     <!-- ======================= TRANG CHỦ ======================= -->
     <section id="v-trangchu">
-      <div class="the">
+      <div class="the hero">
+        <div class="loi-chao" id="tcChao"></div>
         <div class="ngay-lon" id="tcNgay"></div>
         <div class="nho" id="tcTuan"></div>
+        <svg viewBox="0 0 124 104" aria-hidden="true"><circle cx="100" cy="20" r="13" fill="#ffd54f"/><circle cx="100" cy="20" r="18" fill="#ffd54f" opacity=".25"/><rect x="0" y="96" width="124" height="8" rx="4" fill="#fff" opacity=".3"/><circle cx="110" cy="74" r="12" fill="#4ade80"/><circle cx="102" cy="80" r="8" fill="#22c55e"/><rect x="108" y="82" width="4" height="14" fill="#8d6e63"/><line x1="56" y1="22" x2="56" y2="4" stroke="#fff" stroke-width="2"/><polygon points="56,4 72,8.5 56,13" fill="#e53935"/><polygon points="56,7.2 57,9.6 59.4,9.6 57.5,11 58.2,13.3 56,12 56,7.2" fill="#ffeb3b" opacity="0"/><rect x="24" y="46" width="64" height="50" rx="3" fill="#fff"/><polygon points="18,48 56,22 94,48" fill="#ff7a59"/><rect x="31" y="56" width="12" height="10" rx="2" fill="#93c5fd"/><rect x="69" y="56" width="12" height="10" rx="2" fill="#93c5fd"/><rect x="48" y="70" width="16" height="26" rx="2" fill="#3b82f6"/><circle cx="56" cy="38" r="5" fill="#fff"/><rect x="2" y="88" width="20" height="7" rx="1.5" fill="#f472b6"/><rect x="4" y="81" width="17" height="7" rx="1.5" fill="#facc15"/><rect x="3" y="74" width="18" height="7" rx="1.5" fill="#60a5fa"/></svg>
       </div>
       <div id="tcNhac"></div>
       <div class="the">
         <div class="luoi-nut">
-          <button class="nut" onclick="moTab('diemdanh')">✅<br>Điểm danh</button>
-          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })">📒<br>Nộp vở</button>
-          <button class="nut" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })">📋<br>Đánh giá tháng</button>
-          <button class="nut" onclick="moTab('hocsinh')">👧<br>Học sinh</button>
+          <button class="nut o-nhanh c1" onclick="moTab('diemdanh')"><span class="o-ic">✅</span>Điểm danh</button>
+          <button class="nut o-nhanh c2" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })"><span class="o-ic">📒</span>Nộp vở</button>
+          <button class="nut o-nhanh c3" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })"><span class="o-ic">📋</span>Đánh giá tháng</button>
+          <button class="nut o-nhanh c4" onclick="moTab('hocsinh')"><span class="o-ic">👧</span>Học sinh</button>
         </div>
       </div>
       <div class="the">
-        <h2>Lịch dạy hôm nay</h2>
+        <h2>📅 Lịch dạy hôm nay</h2>
         <div id="tcLich"></div>
       </div>
     </section>
@@ -47,7 +49,7 @@
     <section id="v-diemdanh" class="an">
       <div class="the">
         <div class="hang gian">
-          <h2 style="margin:0">Điểm danh</h2>
+          <h2 style="margin:0">✅ Điểm danh</h2>
           <input type="date" id="ddNgay" onchange="doiNgayDiemDanh()">
         </div>
         <div class="hang" style="margin-top:6px" id="ddCheRow">
@@ -84,7 +86,7 @@
     <section id="v-sotheodoi" class="an">
       <div class="the">
         <div class="hang gian">
-          <h2 style="margin:0">Sổ theo dõi</h2>
+          <h2 style="margin:0">📝 Sổ theo dõi</h2>
           <input type="date" id="stNgay" onchange="doiNgaySTD()">
         </div>
         <div class="hang" style="margin-top:8px">
@@ -173,7 +175,7 @@
     <!-- ======================= HỌC SINH ======================= -->
     <section id="v-hocsinh" class="an">
       <div class="the">
-        <h2>Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
+        <h2>👧 Danh sách lớp <span class="nho" id="hsSiSo"></span></h2>
         <div class="hang" id="hsNhomLoc" style="margin-bottom:6px"></div>
         <div id="hsGoiY"></div>
         <input id="hsTim" placeholder="Tìm tên…" oninput="veHocSinh()" style="width:100%;margin-bottom:8px">
@@ -181,7 +183,7 @@
         <details style="margin-top:10px"><summary>Học sinh đã chuyển đi</summary><div id="hsChuyenDi"></div></details>
       </div>
       <div class="the">
-        <h2>Tải danh sách học sinh</h2>
+        <h2>📥 Tải danh sách học sinh</h2>
         <div class="nho">Dùng file "Danh sách học sinh" xuất từ hệ thống của trường (.xlsx). Tải lại khi có học sinh chuyển đến/chuyển đi.</div>
         <input type="file" id="hsFile" accept=".xlsx,.xls" onchange="docFileHocSinh(this)" style="margin-top:8px">
         <div id="hsXem"></div>
@@ -198,13 +200,13 @@
       </div>
 
       <div class="the">
-        <h2>Chức năng</h2>
+        <h2>🧩 Chức năng</h2>
         <div class="nho">Để app gọn, các chức năng nâng cao được tắt sẵn. Cô bật khi cần dùng – tắt đi thì chỉ ẩn khỏi màn hình, dữ liệu đã ghi vẫn giữ nguyên.</div>
         <div id="cnDs" style="margin-top:6px"></div>
       </div>
 
       <div class="the">
-        <h2>Mở app nhanh trên điện thoại, máy tính</h2>
+        <h2>📱 Mở app nhanh trên điện thoại, máy tính</h2>
         <div class="nho">Quét mã QR bằng camera điện thoại để mở app, rồi "Thêm vào màn hình chính" để lần sau chỉ cần chạm biểu tượng.</div>
         <div class="hang" style="margin-top:10px;align-items:flex-start">
           <div id="qrApp" style="background:#fff;padding:6px;border:1px solid var(--vien);border-radius:8px"></div>
@@ -222,12 +224,12 @@
         </div>
       </div>
       <div class="the">
-        <h2>Học kì đang dùng</h2>
+        <h2>🗓️ Học kì đang dùng</h2>
         <div id="cdHocKy"></div>
       </div>
 
       <div class="the">
-        <h2>Tải Sổ báo giảng</h2>
+        <h2>📘 Tải Sổ báo giảng</h2>
         <div class="hang">
           <label>Năm học <input id="sbgNamHoc" size="10"></label>
           <label>Học kì <select id="sbgHocKy"><option>I</option><option>II</option></select></label>
@@ -237,7 +239,7 @@
       </div>
 
       <div class="the">
-        <h2>Kho thư viện nhận xét</h2>
+        <h2>📚 Kho thư viện nhận xét</h2>
         <div id="khoKiemTra"></div>
         <input type="file" id="tvFile" accept=".xlsx" onchange="docFileThuVien(this)" style="margin-top:8px">
         <div id="tvXem"></div>
@@ -245,7 +247,7 @@
       </div>
 
       <div class="the">
-        <h2>Ghép tiết với bài</h2>
+        <h2>🔗 Ghép tiết với bài</h2>
         <div class="nho">App tự ghép tiết trong Sổ báo giảng với bài trong thư viện. Dòng tô vàng là app đoán, dòng tô đỏ là chưa ghép – cô kiểm tra và sửa.</div>
         <div class="hang" style="margin:8px 0"><select id="ghMon" onchange="doiMonGhep()"></select>
           <label class="nho"><input type="checkbox" id="ghChiCanXem" onchange="veGhep()"> Chỉ hiện dòng cần xem</label></div>
@@ -254,7 +256,7 @@
       </div>
 
       <div class="the">
-        <h2>Môn học</h2>
+        <h2>📖 Môn học</h2>
         <div class="nho">Các môn cô đánh giá. "Tên trong Sổ báo giảng" ghi đúng tên môn trong sổ (nhiều tên cách nhau bởi dấu ;).</div>
         <div class="cuon"><table class="bang" id="mhBang"></table></div>
         <div class="hang" style="margin-top:8px">
@@ -264,7 +266,7 @@
       </div>
 
       <div class="the" id="theAI">
-        <h2>Trợ lý AI (Gemini) – tuỳ chọn</h2>
+        <h2>✨ Trợ lý AI (Gemini) – tuỳ chọn</h2>
         <div id="aiTrangThai" class="nho"></div>
         <div class="nho" style="margin-top:6px;line-height:1.5">Dùng để: đọc điểm từ ảnh bài kiểm tra; (sắp có) viết lại nhận xét cuối kì, nhận xét GVCN cuối năm. Không có khoá thì app vẫn chạy đầy đủ, chỉ ẩn các nút AI.</div>
         <details style="margin-top:6px"><summary>Lấy khoá ở đâu? Có an toàn không?</summary>
@@ -286,17 +288,17 @@
       </div>
 
       <div class="the" id="theNamHoc">
-        <h2>Năm học và lưu trữ</h2>
+        <h2>🗄️ Năm học và lưu trữ</h2>
         <div id="nhNoiDung" class="nho">Đang tải…</div>
       </div>
 
       <div class="the" id="theDungLuong">
-        <h2>Dung lượng ảnh</h2>
+        <h2>🖼️ Dung lượng ảnh</h2>
         <div id="dlNoiDung" class="nho">Đang tải…</div>
       </div>
 
       <div class="the">
-        <h2>Thông tin chung</h2>
+        <h2>🏫 Thông tin chung</h2>
         <label class="dong">Trường</label><input id="cdTruong" style="width:100%">
         <div class="hang">
           <div><label class="dong">Lớp</label><input id="cdLop" size="6"></div>
