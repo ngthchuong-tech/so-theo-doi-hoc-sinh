@@ -51,7 +51,7 @@ var BANG = {
   DeKiemTra:    ['NamHoc', 'Ky', 'Mon', 'Cau', 'DiemToiDa', 'Muc', 'KiNang', 'CapNhat'],
   DiemCau:      ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'DiemCau', 'CapNhat'],
   // Sổ chủ nhiệm: kế hoạch – kết quả từng tuần; theo dõi học sinh chưa tiến bộ (Thang = số tháng; '*' = em được thêm vào danh sách)
-  SoChuNhiem:   ['NamHoc', 'Tuan', 'TuNgay', 'DenNgay', 'NoiDung', 'KetQua', 'CapNhat'],
+  SoChuNhiem:   ['NamHoc', 'Tuan', 'TuNgay', 'DenNgay', 'NoiDung', 'KetQua', 'CapNhat', 'ChuDe'],   // Tuan: '0','1'… hoặc 'T9' = khối kế hoạch tháng 9
   TheoDoiTienBo: ['NamHoc', 'MaDinhDanh', 'Thang', 'NoiDung', 'BienPhap', 'KetQua', 'CapNhat']
 };
 var MUC4 = ['Hoàn thành xuất sắc', 'Hoàn thành tốt', 'Hoàn thành', 'Chưa hoàn thành'];
@@ -140,6 +140,11 @@ function sh_(ten) {
     sh.getRange(1, 1, sh.getMaxRows(), BANG[ten].length).setNumberFormat('@');
   }
   if (!sh) throw new Error('Chưa có bảng "' + ten + '". Hãy chạy hàm caiDatLanDau trước.');
+  if (BANG_THEM_COT[ten] && phienBan_('cot_' + ten) !== String(BANG[ten].length)) {
+    var lc = sh.getLastColumn();
+    if (lc < BANG[ten].length) sh.getRange(1, lc + 1, 1, BANG[ten].length - lc).setValues([BANG[ten].slice(lc)]).setFontWeight('bold').setBackground('#D9E2F3');
+    thuocTinh_().setProperty('pb_cot_' + ten, String(BANG[ten].length)); if (_PB) _PB['pb_cot_' + ten] = String(BANG[ten].length);
+  }
   return sh;
 }
 // ---------------------------------------------------------------------------- Đọc / ghi bảng (có nhớ tạm để nhanh hơn)
@@ -147,6 +152,7 @@ function sh_(ten) {
 // 2) Bảng lớn, ít đổi (BANG_DEM): nhớ thêm 6 giờ trong CacheService của Google; mỗi lần app ghi bảng đó thì tăng "phiên bản"
 //    nên bản nhớ cũ không bao giờ được dùng lại. Sửa TRỰC TIẾP trên Trang tính thì dùng menu "📒 Sổ theo dõi → Làm mới dữ liệu".
 var _NHO = {}, _SHEET = {};
+var BANG_THEM_COT = { SoChuNhiem: 1 };     // bảng được thêm cột ở bản cập nhật sau → tự thêm tiêu đề cột
 var BANG_DEM = { CaiDat: 1, MonHoc: 1, HocKy: 1, TuanHoc: 1, LichBaoGiang: 1, ThuVien: 1, KhoThuVien: 1, NhanXetChung: 1, ThuVienThang: 1, ThuVienYeuCau: 1, MauCuaCo: 1, NhomHS: 1 };
 function sheetNho_(ten) { return _SHEET[ten] || (_SHEET[ten] = sh_(ten)); }
 function docTrangTinh_(ten) {     // mảng các dòng (mảng giá trị), không kể dòng tiêu đề
@@ -933,21 +939,77 @@ function laySoChuNhiem() {
   doc_('SoChuNhiem').forEach(function (r) { if (r.NamHoc === namHoc) luu[r.Tuan] = r; });
   if (!tuan['0']) tuan['0'] = { tuan: '0', tu: '', den: '', chuDe: '' };
   Object.keys(luu).forEach(function (k) { if (!tuan[k]) tuan[k] = { tuan: k, tu: luu[k].TuNgay, den: luu[k].DenNgay, chuDe: '' }; });
+  Object.keys(tuan).forEach(function (k) { if (/^T/.test(k)) delete tuan[k]; });
   var ds = Object.keys(tuan).map(function (k) {
     var t = tuan[k], r = luu[k] || {};
-    return { tuan: t.tuan, tu: r.TuNgay || t.tu, den: r.DenNgay || t.den, chuDe: t.chuDe, noiDung: r.NoiDung || '', ketQua: r.KetQua || '' };
+    return { key: t.tuan, loai: 'tuan', tuan: t.tuan, tu: r.TuNgay || t.tu, den: r.DenNgay || t.den, chuDeHD: t.chuDe, noiDung: r.NoiDung || '', ketQua: r.KetQua || '' };
   }).sort(function (a, b) { return +a.tuan - +b.tuan; });
+  // Như sổ của trường: KẾ HOẠCH THÁNG m (chủ đề tháng, kế hoạch – kết quả cả tháng) rồi các tuần của tháng, đánh số TUẦN 1, 2… trong tháng
+  var muc = [], thangCo = {};
+  ds.forEach(function (t) {
+    var th = t.tu ? +String(t.tu).split('/')[1] : 8, nam = t.tu ? +String(t.tu).split('/')[2] : namCuaThang_(namHoc, 8);
+    if (!thangCo[th]) {
+      var r = luu['T' + th] || {};
+      thangCo[th] = { key: 'T' + th, loai: 'thang', thang: th, nam: nam, chuDe: r.ChuDe || '', noiDung: r.NoiDung || '', ketQua: r.KetQua || '', soTuan: 0, tuanDau: t.tuan, tuanCuoi: t.tuan };
+      muc.push(thangCo[th]);
+    }
+    var m = thangCo[th]; t.thang = th; t.k = t.tuan === '0' ? 0 : ++m.soTuan; m.tuanCuoi = t.tuan; if (m.tuanDau === '0') m.tuanDau = t.tuan;
+    muc.push(t);
+  });
   var tuanNay = (ds.filter(function (t) { return t.tu && key_(t.tu) <= nay && nay <= key_(t.den) + 2; })[0] || {}).tuan;
   if (tuanNay == null) { var qua = ds.filter(function (t) { return t.den && key_(t.den) < nay; }); tuanNay = qua.length ? qua[qua.length - 1].tuan : '0'; }
-  return { namHoc: namHoc, lop: cd.Lop || '', truong: cd.Truong || '', tuan: ds, tuanNay: tuanNay, theoDoi: layTheoDoiHS_(namHoc) };
+  return { namHoc: namHoc, lop: cd.Lop || '', truong: cd.Truong || '', muc: muc, tuanNay: tuanNay, theoDoi: layTheoDoiHS_(namHoc) };
 }
 function luuTuanCN(tuan, x) {
   return voiKhoa_(function () {
     var namHoc = caiDat_().NamHoc || '', luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
     thayTheTheo_('SoChuNhiem', function (r) { return !(r.NamHoc === namHoc && String(r.Tuan) === String(tuan)); },
-      [hang_('SoChuNhiem', { NamHoc: namHoc, Tuan: tuan, TuNgay: x.tu || '', DenNgay: x.den || '', NoiDung: x.noiDung || '', KetQua: x.ketQua || '', CapNhat: luc })]);
+      [hang_('SoChuNhiem', { NamHoc: namHoc, Tuan: tuan, TuNgay: x.tu || '', DenNgay: x.den || '', NoiDung: x.noiDung || '', KetQua: x.ketQua || '', CapNhat: luc, ChuDe: x.chuDe || '' })]);
     return luc;
   });
+}
+// Gợi ý khối KẾ HOẠCH THÁNG: kế hoạch chung của tháng; kết quả theo Ưu điểm – Tồn tại – Biện pháp khắc phục (như sổ của trường)
+function goiYThangCN(thang) {
+  thang = +thang;
+  var cd = caiDat_(), namHoc = cd.NamHoc || '', nam = namCuaThang_(namHoc, thang), ten = {};
+  var trongThang = function (ngay) { var p = String(ngay).split('/'); return +p[1] === thang && +p[2] === nam; };
+  hocSinhDangHoc_(homNay_()).forEach(function (h) { ten[h.MaDinhDanh] = tenGoi_(h.HoTen); });
+  var tuan = cacTuanNam_(namHoc), cac = Object.keys(tuan).map(function (k) { return tuan[k]; }).filter(function (t) { return t.tu && trongThang(t.tu); })
+    .sort(function (a, b) { return +a.tuan - +b.tuan; });
+  var nd = [], kq = [];
+  if (cac.length) nd.push('- Thực hiện kế hoạch dạy tháng ' + thang + ' từ tuần ' + cac[0].tuan + (cac.length > 1 ? ' – ' + cac[cac.length - 1].tuan : '') + ' theo chương trình.');
+  nd.push('- Nhắc học sinh chuẩn bị đủ sách vở, đồ dùng học tập theo thời khóa biểu.');
+  nd.push('- Duy trì sĩ số học sinh.');
+  nd.push('- Dạy học đúng chương trình, thời khóa biểu; thực hiện đánh giá học sinh thường xuyên.');
+  var chuDe = []; cac.forEach(function (t) { if (t.chuDe && chuDe.indexOf(t.chuDe) < 0) chuDe.push(t.chuDe); });
+  if (chuDe.length) nd.push('- Hoạt động trải nghiệm theo chủ đề: ' + chuDe.join('; ') + '.');
+  var nhom = layNhomHS().ds, ren = [], bd = [];
+  Object.keys(nhom).forEach(function (ma) { if (!ten[ma]) return; if (nhom[ma].nhom.indexOf('Cần rèn thêm') >= 0) ren.push(ten[ma]); if (nhom[ma].nhom.indexOf('Bồi dưỡng') >= 0) bd.push(ten[ma]); });
+  if (ren.length) nd.push('- Lên kế hoạch giúp đỡ HS tiếp thu còn chậm: ' + ren.join(', ') + '; rèn và hỗ trợ hằng ngày, phối hợp phụ huynh.');
+  if (bd.length) nd.push('- Bồi dưỡng học sinh năng khiếu: ' + bd.join(', ') + '.');
+  var pt = doc_('PhongTrao').filter(function (p) { return p.NamHoc === namHoc && trongThang(p.Ngay); }).sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); });
+  pt.forEach(function (p) { nd.push('- Tham gia ' + tenPT_({ loai: p.Loai, ten: p.Ten }) + ' (' + ngayNgan_(p.Ngay) + ').'); });
+  // kết quả: số liệu thật của tháng
+  var uu = ['Thực hiện tốt các kế hoạch đề ra theo tuần'], ton = [];
+  var vangKP = 0, coDD = false;
+  doc_('DiemDanh').forEach(function (r) { if (!trongThang(r.Ngay)) return; coDD = true; if (r.TrangThai === 'Vắng không phép') vangKP++; });
+  if (coDD) (vangKP ? ton : uu).push(vangKP ? 'còn ' + vangKP + ' lượt vắng không phép' : 'học sinh đi học đều, không có vắng không phép');
+  var dv = demVo_(trongThang), chuaNop = [];
+  Object.keys(dv.vo).forEach(function (ma) { if (!ten[ma]) return; var s = 0; MON_VO.forEach(function (m) { var x = dv.vo[ma][m]; if (x) s += x.N + x.cu; }); if (s >= 3) chuaNop.push(ten[ma]); });
+  if (dv.soNgay) (chuaNop.length ? ton : uu).push(chuaNop.length ? 'một số em chưa nộp vở đầy đủ: ' + chuaNop.join(', ') : 'học sinh nộp vở đầy đủ');
+  var tg = doc_('ThamGia'), giai = [];
+  pt.forEach(function (p) { tg.filter(function (r) { return r.MaPT === p.MaPT && r.KetQua && r.KetQua !== 'Tham gia'; }).forEach(function (r) { giai.push((ten[r.MaDinhDanh] || '') + ' – ' + r.KetQua + ' ' + p.Ten); }); });
+  if (giai.length) uu.push('đạt giải: ' + giai.join('; '));
+  try {
+    var t = duLieuThang_(thang), cht = {};
+    MON_VO.forEach(function (m) { Object.keys(t.du).forEach(function (ma) { var o = t.du[ma][m]; if (o && (o.mucKT === 'CHT' || o.mucKN === 'CHT') && ten[ma]) (cht[m] = cht[m] || []).push(ten[ma]); }); });
+    Object.keys(cht).forEach(function (m) { ton.push(m + ' còn ' + cht[m].length + ' em chưa hoàn thành một số yêu cầu: ' + cht[m].slice(0, 5).join(', ')); });
+  } catch (e) {}
+  if (ren.length) ton.push('một số em tiếp thu còn chậm: ' + ren.join(', '));
+  kq.push('- Ưu điểm: ' + uu.join('; ') + '.');
+  kq.push('- Tồn tại: ' + (ton.length ? ton.join('; ') + '.' : ''));
+  kq.push('- Biện pháp khắc phục: Thường xuyên nhắc nhở, kèm cặp học sinh còn chậm; phối hợp phụ huynh hỗ trợ thêm ở nhà.');
+  return { noiDung: nd, ketQua: kq };
 }
 // Tuần có ngày cuối tháng (để gợi ý chấm vở, kết quả vở của tháng): trả số tháng hoặc 0
 function thangKetThucTrongTuan_(tu, den) {

@@ -21,6 +21,7 @@
     _d: function () { return data[this.name]; },
     getLastRow: function () { var r = this._d().rows; for (var i = r.length - 1; i >= 0; i--) if (r[i] && r[i].some(function (v) { return v !== '' && v != null; })) return i + 1; return 0; },
     getMaxRows: function () { return Math.max(this._d().max, this._d().rows.length); },
+    getLastColumn: function () { var h = this._d().rows[0] || []; for (var i = h.length - 1; i >= 0; i--) if (h[i] !== '' && h[i] != null) return i + 1; return 0; },
     insertRowsAfter: function (after, n) { this._d().max += n; save(); },
     deleteRows: function (row, n) { ghiDem('ghi', this.name, n); this._d().rows.splice(row - 1, n); save(); },
     setFrozenRows: function () {},

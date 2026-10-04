@@ -1,0 +1,18 @@
+CẬP NHẬT – SỔ CHỦ NHIỆM: KẾ HOẠCH THÁNG, TUẦN THEO ĐÚNG SỔ CỦA TRƯỜNG (tham khảo so_chu_nhiem_46_2025-2026.pdf)
+
+Theo ý cô: cột NỘI DUNG là KẾ HOẠCH, cột KẾT QUẢ ghi sau khi thực hiện.
+Sửa cho giống sổ của trường:
+1. Mỗi tháng có khối "KẾ HOẠCH THÁNG m-năm/ CHỦ ĐỀ THÁNG m: …" (cô ghi chủ đề tháng):
+   - Nội dung: kế hoạch chung của tháng. 💡 Gợi ý: thực hiện kế hoạch dạy tháng m từ tuần a – b; chuẩn bị sách vở, đồ dùng;
+     duy trì sĩ số; dạy đúng chương trình, đánh giá thường xuyên; chủ đề HĐTN; giúp đỡ HS còn chậm (tên em); bồi dưỡng; phong trào trong tháng.
+   - Kết quả: "- Ưu điểm: … / - Tồn tại: … / - Biện pháp khắc phục: …" – gợi ý từ số liệu thật của tháng
+     (chuyên cần, nộp vở, giải thưởng, em chưa hoàn thành yêu cầu ở đánh giá tháng, em cần rèn thêm).
+2. Tuần đánh số TRONG THÁNG: "TUẦN 1: 5/10 – 9/10" (dòng đầu "- Thực hiện chương trình tuần 5"), Tuần 0 thuộc tháng 8.
+3. Nhãn ô: "Nội dung (kế hoạch)" và "Kết quả". 📋 Chép tuần có dòng "TUẦN k: …" ở đầu như trong sổ.
+4. Xuất Word: mỗi tháng 1 tiêu đề "KẾ HOẠCH THÁNG …/ CHỦ ĐỀ THÁNG …" + bảng 2 cột Nội dung – Kết quả (dòng tháng rồi các tuần),
+   cuối là "PHẦN THEO DÕI SỰ TIẾN BỘ, CHƯA TIẾN BỘ CỦA HỌC SINH" – đúng như sổ của trường.
+Dữ liệu đã ghi trước đó giữ nguyên (tự xếp vào đúng tháng).
+
+Đã thử trên máy giả lập: Tháng 8 (Tuần 0), Tháng 9 (Tuần 1–4), Tháng 10 bắt đầu lại Tuần 1 (chương trình tuần 5); gợi ý khối tháng 10;
+chủ đề tháng vào tiêu đề; chép; xuất Word; màn điện thoại; không lỗi.
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

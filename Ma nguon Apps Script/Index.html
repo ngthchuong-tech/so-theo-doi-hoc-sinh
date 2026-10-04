@@ -432,7 +432,7 @@
       <div id="stCN" class="an">
         <div class="the">
           <div class="hang gian"><h3 style="margin:0">📘 Sổ chủ nhiệm</h3><button class="nut phu nut-nho" onclick="cnXuatWord()">⬇ Xuất Word cả sổ</button></div>
-          <div class="hang" style="margin-top:8px"><span class="chip on" id="cnChonTuan" onclick="cnChon('tuan')">🗓️ Kế hoạch – kết quả tuần</span>
+          <div class="hang" style="margin-top:8px"><span class="chip on" id="cnChonTuan" onclick="cnChon('tuan')">🗓️ Kế hoạch tháng, tuần</span>
             <span class="chip" id="cnChonHS" onclick="cnChon('hs')">🧒 Theo dõi HS chưa tiến bộ</span></div>
           <div class="nho" style="margin-top:4px">Theo mẫu sổ chủ nhiệm điện tử của trường. Cô viết, sửa trực tiếp (app tự lưu); <b>💡 Gợi ý</b> lấy từ dữ liệu của app;
             <b>📋 Chép</b> rồi dán lên sổ của trường.</div>
@@ -668,9 +668,13 @@
           <div class="nho">Điều lệ trường tiểu học (Thông tư 28/2020, Điều 21): giáo viên chủ nhiệm có Sổ chủ nhiệm, được dùng hồ sơ điện tử. Bộ không ban hành mẫu –
             app làm đúng 2 phần như sổ chủ nhiệm điện tử của trường.</div>
           <div style="margin-top:6px"><b>Vào:</b> Sổ theo dõi → <b>📘 Sổ chủ nhiệm</b>.</div>
-          <div style="margin-top:6px"><b>1. Kế hoạch – kết quả tuần</b> (Tuần 0 đến hết năm; tiêu đề "TUẦN n: ngày – ngày" lấy từ Sổ báo giảng, Tuần 0 cô tự ghi ngày):</div>
+          <div style="margin-top:6px"><b>1. Kế hoạch tháng, tuần</b> – như sổ của trường: mỗi tháng có khối <b>"KẾ HOẠCH THÁNG m / CHỦ ĐỀ THÁNG m: …"</b>,
+            sau đó các tuần của tháng đánh số <b>TUẦN 1, 2…</b> trong tháng (dòng đầu "Thực hiện chương trình tuần n"). Cột <b>Nội dung là kế hoạch</b>, cột <b>Kết quả</b> ghi sau khi thực hiện.</div>
           <ul>
-            <li>Chọn tuần (← → hoặc ô chọn; ✓ là tuần đã ghi). Cô gõ thẳng vào ô <b>Nội dung</b> và <b>Kết quả</b> – app tự lưu.</li>
+            <li>Chọn mục (← → hoặc ô chọn: 📅 THÁNG m, rồi các tuần; ✓ là đã ghi). Gõ thẳng vào ô – app tự lưu. Ngày các tuần lấy từ Sổ báo giảng; Tuần 0 cô tự ghi ngày.</li>
+            <li><b>Khối tháng</b>: ghi chủ đề tháng; <b>💡 Gợi ý</b> kế hoạch chung của tháng (dạy chương trình tuần nào – tuần nào, nề nếp, sĩ số, đánh giá thường xuyên,
+              chủ đề hoạt động trải nghiệm, giúp đỡ học sinh còn chậm, bồi dưỡng, phong trào); kết quả tháng theo
+              <b>Ưu điểm – Tồn tại – Biện pháp khắc phục</b> lấy từ số liệu thật (chuyên cần, nộp vở, giải thưởng, em chưa hoàn thành yêu cầu…).</li>
             <li><b>💡 Gợi ý</b> ở ô Nội dung: thực hiện chương trình tuần, chủ đề hoạt động trải nghiệm, phong trào – cuộc thi trong tuần, rèn thêm cho các em nhóm Cần rèn thêm,
               bồi dưỡng, cuối tháng thì chấm vở sạch chữ đẹp. <b>↺ Lấy từ tuần trước</b>: chép các dòng lặp lại (tiếp tục ổn định nề nếp…).</li>
             <li><b>💡 Gợi ý</b> ở ô Kết quả: thực hiện chương trình, chuyên cần, nộp vở, số em tham gia / đạt giải phong trào, cuối tháng có
@@ -3996,8 +4000,8 @@ function gcLuuNgay() {
 // Đúng 2 phần như sổ chủ nhiệm điện tử của trường: kế hoạch – kết quả theo tuần; theo dõi học sinh chưa tiến bộ.
 var cn = null, cnTuanChon = null, cnPhan = 'tuan', cnHen = null, cnCho = null, cnThang = null;
 function moSoCN() {
-  ['stChonBai', 'stNhap', 'stPT', 'stVo', 'stThang'].forEach(function (id) { $(id).classList.add('an'); });
-  ['stCheBai', 'stCheChung', 'stChePT', 'stCheVo', 'stCheThang'].forEach(function (id) { $(id).classList.remove('on'); });
+  ['stChonBai', 'stNhap', 'stPT', 'stVo', 'stThang', 'stGC'].forEach(function (id) { $(id).classList.add('an'); });
+  ['stCheBai', 'stCheChung', 'stChePT', 'stCheVo', 'stCheThang', 'stCheGC'].forEach(function (id) { $(id).classList.remove('on'); });
   $('stCN').classList.remove('an'); $('stCheCN').classList.add('on');
   chay('laySoChuNhiem').then(function (d) { cn = d; if (cnTuanChon == null || !cnTuan(cnTuanChon)) cnTuanChon = d.tuanNay; cnChon(cnPhan); });
 }
@@ -4006,44 +4010,58 @@ function cnChon(p) {
   $('cnTuan').classList.toggle('an', p !== 'tuan'); $('cnHS').classList.toggle('an', p !== 'hs');
   if (p === 'tuan') veCNTuan(); else veCNHS();
 }
-function cnTuan(k) { return cn && cn.tuan.filter(function (t) { return t.tuan === String(k); })[0]; }
+// cn.muc: theo đúng sổ của trường – [khối KẾ HOẠCH THÁNG m, TUẦN 1, TUẦN 2… của tháng m, khối THÁNG m+1, …]
+function cnTuan(k) { return cn && cn.muc.filter(function (t) { return t.key === String(k); })[0]; }
 function ngayNganJS(dmy) { var p = String(dmy || '').split('/'); return p.length < 2 ? '' : (+p[0]) + '/' + (+p[1]); }
-function cnTieuDe(t) { return 'TUẦN ' + t.tuan + (t.tu ? ': ' + ngayNganJS(t.tu) + ' – ' + ngayNganJS(t.den) : ''); }
+function cnTieuDe(t) {
+  if (t.loai === 'thang') return 'KẾ HOẠCH THÁNG ' + t.thang + '-' + t.nam + (t.chuDe ? '/ CHỦ ĐỀ THÁNG ' + t.thang + ': ' + t.chuDe.toUpperCase() : '');
+  if (t.tuan === '0') return 'TUẦN 0' + (t.tu ? ' (Từ ' + ngayNganJS(t.tu) + ' – ' + ngayNganJS(t.den) + ')' : '');
+  return 'TUẦN ' + t.k + ': ' + ngayNganJS(t.tu) + ' – ' + ngayNganJS(t.den);
+}
+function cnTenMuc(x) {
+  return x.loai === 'thang' ? '📅 THÁNG ' + x.thang + (x.chuDe ? ' – ' + x.chuDe : ' – kế hoạch tháng') + (x.noiDung || x.ketQua ? ' ✓' : '')
+    : '\u00a0\u00a0\u00a0Tuần ' + (x.tuan === '0' ? '0' : x.k + ' (chương trình tuần ' + x.tuan + ')') + (x.tu ? ' · ' + ngayNganJS(x.tu) + ' – ' + ngayNganJS(x.den) : '') +
+      (x.noiDung || x.ketQua ? ' ✓' : '') + (x.tuan === cn.tuanNay ? ' · tuần này' : '');
+}
 function veCNTuan() {
   if (!cn) return;
-  var t = cnTuan(cnTuanChon) || cn.tuan[0], i = cn.tuan.indexOf(t);
+  var t = cnTuan(cnTuanChon) || cn.muc[0], i = cn.muc.indexOf(t), thang = t.loai === 'thang';
   $('cnTuan').innerHTML = '<div class="the">' +
     '<div class="hang" style="flex-wrap:nowrap"><button class="nut phu nut-nho" onclick="cnDiTuan(-1)"' + (i ? '' : ' disabled') + ' style="flex:none">←</button>' +
-    '<select style="flex:1;min-width:0;font-size:15px" onchange="cnDenTuan(this.value)">' + cn.tuan.map(function (x) {
-      return '<option value="' + x.tuan + '"' + (x === t ? ' selected' : '') + '>Tuần ' + x.tuan + (x.tu ? ' (' + ngayNganJS(x.tu) + ' – ' + ngayNganJS(x.den) + ')' : '') +
-        (x.noiDung || x.ketQua ? ' ✓' : '') + (x.tuan === cn.tuanNay ? ' · tuần này' : '') + '</option>'; }).join('') + '</select>' +
-    '<button class="nut phu nut-nho" onclick="cnDiTuan(1)"' + (i < cn.tuan.length - 1 ? '' : ' disabled') + ' style="flex:none">→</button></div>' +
+    '<select style="flex:1;min-width:0;font-size:15px" onchange="cnDenTuan(this.value)">' + cn.muc.map(function (x) {
+      return '<option value="' + x.key + '"' + (x === t ? ' selected' : '') + '>' + esc(cnTenMuc(x)) + '</option>'; }).join('') + '</select>' +
+    '<button class="nut phu nut-nho" onclick="cnDiTuan(1)"' + (i < cn.muc.length - 1 ? '' : ' disabled') + ' style="flex:none">→</button></div>' +
     '<div class="cn-dau">' + esc(cnTieuDe(t)) + '</div>' +
+    (thang ? '<div class="hang" style="flex-wrap:nowrap"><span class="nho" style="flex:none">Chủ đề tháng</span><input id="cnChuDe" style="flex:1;min-width:0" placeholder="VD: Em lớn lên cùng mái trường mến yêu" value="' + esc(t.chuDe) + '" oninput="cnGhiTuan()"></div>' +
+      '<div class="nho" style="margin-top:4px">Kế hoạch chung của tháng (chương trình tuần ' + esc(t.tuanDau) + (t.tuanCuoi !== t.tuanDau ? ' – ' + esc(t.tuanCuoi) : '') + '); kết quả tháng viết theo Ưu điểm – Tồn tại – Biện pháp khắc phục.</div>'
+      : t.tuan !== '0' ? '<div class="nho">Chương trình tuần ' + esc(t.tuan) + (t.chuDeHD ? ' · HĐTN: ' + esc(t.chuDeHD) : '') + '</div>' : '') +
     (t.tuan === '0' ? '<div class="hang"><span class="nho">Từ ngày</span><input id="cnTu" style="width:110px" placeholder="26/08/2026" value="' + esc(t.tu) + '" onchange="cnGhiTuan()">' +
       '<span class="nho">đến</span><input id="cnDen" style="width:110px" placeholder="05/09/2026" value="' + esc(t.den) + '" onchange="cnGhiTuan()"></div>' : '') +
-    '<div class="cn-o"><div class="hang gian"><b>Nội dung</b><span class="hang">' +
-      '<button class="nut phu nut-nho" onclick="cnGoiY(\'nd\')">💡 Gợi ý</button><button class="nut phu nut-nho" onclick="cnLayTuanTruoc()"' + (i ? '' : ' disabled') + '>↺ Lấy từ tuần trước</button>' +
+    '<div class="cn-o"><div class="hang gian"><b>Nội dung (kế hoạch)</b><span class="hang">' +
+      '<button class="nut phu nut-nho" onclick="cnGoiY(\'nd\')">💡 Gợi ý</button>' +
+      (thang ? '' : '<button class="nut phu nut-nho" onclick="cnLayTuanTruoc()">↺ Lấy từ tuần trước</button>') +
       '<button class="nut phu nut-nho" onclick="cnChep(\'nd\')">📋 Chép</button></span></div>' +
-      '<textarea id="cnND" oninput="cnGhiTuan()" placeholder="- Thực hiện chương trình tuần…">' + esc(t.noiDung) + '</textarea></div>' +
+      '<textarea id="cnND" oninput="cnGhiTuan()" placeholder="' + (thang ? '- Thực hiện kế hoạch dạy tháng…' : '- Thực hiện chương trình tuần…') + '">' + esc(t.noiDung) + '</textarea></div>' +
     '<div class="cn-o"><div class="hang gian"><b>Kết quả</b><span class="hang">' +
       '<button class="nut phu nut-nho" onclick="cnGoiY(\'kq\')">💡 Gợi ý</button><button class="nut phu nut-nho" onclick="cnChep(\'kq\')">📋 Chép</button></span></div>' +
-      '<textarea id="cnKQ" oninput="cnGhiTuan()" placeholder="- Thực hiện đúng, đủ, kịp thời chương trình tuần…">' + esc(t.ketQua) + '</textarea></div>' +
+      '<textarea id="cnKQ" oninput="cnGhiTuan()" placeholder="' + (thang ? '- Ưu điểm: …\n- Tồn tại: …\n- Biện pháp khắc phục: …' : '- Thực hiện đúng, đủ, kịp thời chương trình tuần…') + '">' + esc(t.ketQua) + '</textarea></div>' +
     '<div class="nho" id="cnTT" style="margin-top:6px"></div></div>';
 }
 function cnDenTuan(k) { cnLuuNgay(); cnTuanChon = String(k); veCNTuan(); }
-function cnDiTuan(b) { var i = cn.tuan.indexOf(cnTuan(cnTuanChon)) + b; if (i >= 0 && i < cn.tuan.length) cnDenTuan(cn.tuan[i].tuan); }
+function cnDiTuan(b) { var i = cn.muc.indexOf(cnTuan(cnTuanChon)) + b; if (i >= 0 && i < cn.muc.length) cnDenTuan(cn.muc[i].key); }
 function cnGhiTuan() {                      // tự lưu (gom các lần gõ gần nhau)
   var t = cnTuan(cnTuanChon); if (!t) return;
   t.noiDung = $('cnND').value; t.ketQua = $('cnKQ').value;
   if ($('cnTu')) { t.tu = $('cnTu').value.trim(); t.den = $('cnDen').value.trim(); }
+  if ($('cnChuDe')) { t.chuDe = $('cnChuDe').value.trim(); var dau = document.querySelector('.cn-dau'); if (dau) dau.textContent = cnTieuDe(t); }
   cnCho = t; clearTimeout(cnHen); $('cnTT').textContent = 'Đang soạn…';
   cnHen = setTimeout(cnLuuNgay, 900);
 }
 function cnLuuNgay() {
   clearTimeout(cnHen); cnHen = null; var t = cnCho; if (!t) return; cnCho = null;
-  goi('luuTuanCN', t.tuan, { tu: t.tu, den: t.den, noiDung: t.noiDung, ketQua: t.ketQua })
+  goi('luuTuanCN', t.key, { tu: t.tu || '', den: t.den || '', noiDung: t.noiDung, ketQua: t.ketQua, chuDe: t.chuDe || '' })
     .then(function (luc) { if ($('cnTT')) $('cnTT').textContent = 'Đã lưu lúc ' + luc.slice(-5) + '.'; },
-          function (e) { bao('Chưa lưu được sổ chủ nhiệm tuần ' + t.tuan + ': ' + ((e && e.message) || e) + ' – gõ lại 1 ký tự để lưu lần nữa.', 8000); });
+          function (e) { bao('Chưa lưu được sổ chủ nhiệm (' + cnTieuDe(t) + '): ' + ((e && e.message) || e) + ' – gõ lại 1 ký tự để lưu lần nữa.', 8000); });
 }
 function themDong(o, ds) {                  // thêm các dòng gợi ý chưa có vào ô
   var cu = o.value.replace(/\s+$/, ''), co = cu.split('\n').map(function (x) { return x.trim(); }), them = ds.filter(function (x) { return co.indexOf(x.trim()) < 0; });
@@ -4052,15 +4070,17 @@ function themDong(o, ds) {                  // thêm các dòng gợi ý chưa c
 }
 function cnGoiY(loai) {
   var t = cnTuan(cnTuanChon);
-  chay('goiYTuanCN', t.tuan, t.tu, t.den).then(function (g) {
+  (t.loai === 'thang' ? chay('goiYThangCN', t.thang) : chay('goiYTuanCN', t.tuan, t.tu, t.den)).then(function (g) {
     var n = themDong($(loai === 'nd' ? 'cnND' : 'cnKQ'), loai === 'nd' ? g.noiDung : g.ketQua);
-    cnGhiTuan(); bao(n ? 'Đã thêm ' + n + ' dòng gợi ý – cô xoá, sửa tuỳ ý.' : 'Không có gợi ý mới cho tuần này.');
+    cnGhiTuan(); bao(n ? 'Đã thêm ' + n + ' dòng gợi ý – cô xoá, sửa tuỳ ý.' : 'Không có gợi ý mới.');
   });
 }
 function cnLayTuanTruoc() {
-  var i = cn.tuan.indexOf(cnTuan(cnTuanChon)), tr = cn.tuan[i - 1]; if (!tr || !tr.noiDung) return bao('Tuần trước chưa có nội dung.');
+  var i = cn.muc.indexOf(cnTuan(cnTuanChon)), tr = null;
+  for (var j = i - 1; j >= 0; j--) if (cn.muc[j].loai === 'tuan') { tr = cn.muc[j]; break; }
+  if (!tr || !tr.noiDung) return bao('Tuần trước chưa có nội dung.');
   var ds = tr.noiDung.split('\n').filter(function (x) { return x.trim() && !/chương trình tuần|Chấm vở sạch|theo chủ đề:/i.test(x); });   // bỏ dòng chỉ đúng cho tuần đó
-  var n = themDong($('cnND'), ds); cnGhiTuan(); bao(n ? 'Đã lấy ' + n + ' dòng từ tuần ' + tr.tuan + '.' : 'Các dòng của tuần trước đã có.');
+  var n = themDong($('cnND'), ds); cnGhiTuan(); bao(n ? 'Đã lấy ' + n + ' dòng từ tuần trước.' : 'Các dòng của tuần trước đã có.');
 }
 function chepVao(text, ten) {
   var xong = function () { bao('Đã chép ' + ten + ' – dán vào sổ chủ nhiệm của trường.'); };
@@ -4068,7 +4088,12 @@ function chepVao(text, ten) {
   chepCu(text); xong();
 }
 function chepCu(text) { var o = document.createElement('textarea'); o.value = text; o.style.position = 'fixed'; o.style.opacity = '0'; document.body.appendChild(o); o.select(); try { document.execCommand('copy'); } catch (e) {} document.body.removeChild(o); }
-function cnChep(loai) { var t = cnTuan(cnTuanChon); cnGhiTuan(); chepVao(cnTieuDe(t) + '\n' + (loai === 'nd' ? t.noiDung : t.ketQua).trim(), loai === 'nd' ? 'nội dung tuần ' + t.tuan : 'kết quả tuần ' + t.tuan); }
+// Chép như trong sổ: khối tuần có dòng "TUẦN k: …" ở đầu cả 2 cột; khối tháng chép đúng nội dung
+function cnChep(loai) {
+  var t = cnTuan(cnTuanChon); cnGhiTuan();
+  var v = (loai === 'nd' ? t.noiDung : t.ketQua).trim();
+  chepVao(t.loai === 'thang' ? v : cnTieuDe(t) + '\n' + v, (loai === 'nd' ? 'nội dung' : 'kết quả') + ' ' + (t.loai === 'thang' ? 'tháng ' + t.thang : 'tuần ' + (t.k || 0) + ' tháng ' + t.thang));
+}
 
 // ---------------------------------------------------------------- Theo dõi học sinh chưa tiến bộ
 function cnCacThang() {
@@ -4128,20 +4153,27 @@ function cnBoHS(ma) {
 function cnXuatWord() {
   if (!cn) return; cnLuuNgay();
   var br = function (s) { return esc(String(s || '').trim()).replace(/\n/g, '<br>'); };
-  var tuan = cn.tuan.filter(function (t) { return t.noiDung || t.ketQua; });
   var thuTu = function (a, b) { return (a < 8 ? +a + 12 : +a) - (b < 8 ? +b + 12 : +b); };
   var gop = function (h, k) { return Object.keys(h.thang).sort(thuTu).map(function (t) { var v = (h.thang[t][k] || '').trim(); return v ? (k !== 'nd' && !/^Tháng/.test(v) ? 'Tháng ' + t + ': ' : '') + v : ''; }).filter(Boolean).join('\n'); };
+  // Như sổ của trường: mỗi tháng 1 tiêu đề "KẾ HOẠCH THÁNG m-yyyy/ CHỦ ĐỀ THÁNG m: …", bảng 2 cột Nội dung – Kết quả (dòng tháng rồi các tuần)
+  var khoi = [], cur = null, soTuan = 0;
+  cn.muc.forEach(function (x) {
+    if (x.loai === 'thang') { cur = { th: x, dong: [] }; khoi.push(cur); if (x.noiDung || x.ketQua) cur.dong.push([x.noiDung, x.ketQua]); return; }
+    if (cur && (x.noiDung || x.ketQua)) { cur.dong.push([cnTieuDe(x) + '\n' + x.noiDung, cnTieuDe(x) + '\n' + x.ketQua]); soTuan++; }
+  });
   var html = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word"><head><meta charset="utf-8"><title>Sổ chủ nhiệm</title>' +
-    '<style>body{font-family:"Times New Roman";font-size:13pt} table{border-collapse:collapse;width:100%} td,th{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:13pt} th{background:#eee} h1,h2{text-align:center}</style></head><body>' +
-    '<h1>SỔ CHỦ NHIỆM</h1><p style="text-align:center">' + esc([cn.truong, cn.lop ? 'Lớp ' + cn.lop : '', cn.namHoc ? 'Năm học ' + cn.namHoc : ''].filter(Boolean).join(' – ')) + '</p>' +
-    '<table><tr><th style="width:12%">THỜI GIAN</th><th style="width:44%">NỘI DUNG</th><th style="width:44%">KẾT QUẢ</th></tr>' +
-    tuan.map(function (t) { return '<tr><td>Tuần ' + t.tuan + '</td><td>' + br(cnTieuDe(t) + '\n' + t.noiDung) + '</td><td>' + br(cnTieuDe(t) + '\n' + t.ketQua) + '</td></tr>'; }).join('') + '</table>' +
-    '<h2>THEO DÕI HS CHƯA TIẾN BỘ</h2><table><tr><th>STT</th><th>Họ và tên học sinh</th><th>Nội dung cần lưu ý (Tiến bộ, chưa tiến bộ)</th><th>Biện pháp giúp đỡ</th><th>Kết quả</th></tr>' +
+    '<style>body{font-family:"Times New Roman";font-size:13pt} table{border-collapse:collapse;width:100%;margin-bottom:14pt} td,th{border:1px solid #000;padding:4px 6px;vertical-align:top;font-size:13pt} th{background:#eee} h1,h2,h3{text-align:center} h3{font-size:13pt}</style></head><body>' +
+    '<h1>SỔ CÔNG TÁC CHỦ NHIỆM</h1><p style="text-align:center">' + esc([cn.truong, cn.lop ? 'Lớp ' + cn.lop : '', cn.namHoc ? 'Năm học ' + cn.namHoc : ''].filter(Boolean).join(' – ')) + '</p>' +
+    khoi.filter(function (k) { return k.dong.length; }).map(function (k) {
+      return '<h3>' + esc(cnTieuDe(k.th)) + '</h3><table><tr><th style="width:55%">Nội dung</th><th style="width:45%">Kết quả</th></tr>' +
+        k.dong.map(function (d) { return '<tr><td>' + br(d[0]) + '</td><td>' + br(d[1]) + '</td></tr>'; }).join('') + '</table>';
+    }).join('') +
+    '<h2>PHẦN THEO DÕI SỰ TIẾN BỘ, CHƯA TIẾN BỘ CỦA HỌC SINH</h2><table><tr><th>STT</th><th>Họ và tên học sinh</th><th>Nội dung cần lưu ý (Tiến bộ, chưa tiến bộ)</th><th>Biện pháp giúp đỡ</th><th>Kết quả</th></tr>' +
     cn.theoDoi.map(function (h, i) { return '<tr><td>' + (i + 1) + '</td><td>' + esc(h.ten) + '</td><td>' + br(gop(h, 'nd')) + '</td><td>' + br(gop(h, 'bp')) + '</td><td>' + br(gop(h, 'kq')) + '</td></tr>'; }).join('') +
     '</table></body></html>';
   var b64 = btoa(unescape(encodeURIComponent(html)));
   hienKetQuaXuat($('cnKetQua'), ('So chu nhiem ' + (cn.lop ? 'lop ' + cn.lop + ' ' : '') + cn.namHoc).replace(/[\\/:*?"<>|]/g, '-') + '.doc', b64,
-    '<div class="nho">' + tuan.length + ' tuần đã ghi · ' + cn.theoDoi.length + ' học sinh theo dõi. Mở bằng Word.</div>', false);
+    '<div class="nho">' + khoi.filter(function (k) { return k.dong.length; }).length + ' tháng, ' + soTuan + ' tuần đã ghi · ' + cn.theoDoi.length + ' học sinh theo dõi. Mở bằng Word.</div>', false);
 }
 
 // ============================================================================ KHỞI ĐỘNG
