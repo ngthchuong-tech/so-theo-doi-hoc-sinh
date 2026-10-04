@@ -1,0 +1,35 @@
+CẬP NHẬT – BƯỚC 6: THƯ VIỆN THÁNG 11, 12, 1 (BẢN NHÁP 3)
+
+File: D:\Chuong\Thư viện nhận xét THÁNG - Lớp 2 - HK I (bản nháp 3 - yêu cầu kiến thức, kỹ năng - T11, T12, T1).xlsx
+Soạn cùng cách với bản nháp 2 (tháng 9, 10), căn cứ Lịch báo giảng tuần 9–18 và Mục tiêu SGV KNTT lớp 2 tập 1.
+
+Chia tuần: tháng 11 = tuần 9–12; tháng 12 = tuần 13–17; tháng 1 = tuần 18 (ôn tập cuối kì I).
+
+Tiếng Việt (25 yêu cầu, 300 câu)
+- Tháng 11: ôn tập giữa kì I; Bài 17–22 (Gọi bạn, Tớ nhớ cậu, Chữ A và những người bạn, Nhím nâu kết bạn, Thả diều, Tớ là lê-gô)
+    Kiến thức 4: hiểu bài đọc; từ ngữ về tình bạn, đặc điểm, hoạt động; câu và dấu chấm/hỏi/than; chính tả c/k, g/gh…, chữ hoa H, I, K, L
+    Kỹ năng 5: đọc lưu loát; viết chữ hoa; nghe – viết; đoạn văn về bạn bè, đồ chơi; kể chuyện, nói và nghe
+- Tháng 12: Bài 23–32 (Rồng rắn lên mây … Chơi chong chóng) – trò chơi, đồ chơi, gia đình
+    Kiến thức 4: hiểu bài đọc; từ ngữ về gia đình; câu nêu đặc điểm/hoạt động, dấu phẩy; chính tả d/gi, s/x, l/n, ch/tr, viết hoa tên riêng, chữ hoa M–P
+    Kỹ năng 5: đọc diễn cảm; viết chữ hoa M, N, O, Ô, Ơ, P; nghe – viết; tả đồ chơi, kể về người thân, viết tin nhắn; kể chuyện
+- Tháng 1: ôn tập cuối kì I – Kiến thức 3, Kỹ năng 4
+Toán (22 yêu cầu, 264 câu)
+- Tháng 11: Bài 16–23 – lít; cộng, trừ có nhớ trong phạm vi 100; kg, lít trong thực tế (4 + 4)
+- Tháng 12: Bài 24–33 – điểm, đoạn thẳng…; đường gấp khúc, hình tứ giác; ngày – giờ, xem đồng hồ; ngày – tháng, xem lịch (4 + 4)
+- Tháng 1: Bài 33–36 – ôn tập số và phép tính, hình phẳng, đo lường (3 + 3)
+
+Đã kiểm tra: mỗi mức đúng 3 câu, không câu nào mở đầu "Em", ≤ 75 ký tự, có dấu chấm, không trùng câu giữa các yêu cầu cùng tháng.
+Đã thử nạp vào app giả lập cùng bản nháp 2: Kho có đủ tháng 9 → 1, tháng 9, 10 giữ nguyên; tháng 1 xếp cuối danh sách;
+ghi và tổng hợp tháng 1 đúng; CK1 lấy cả tháng 1.
+
+Lưu ý
+- Cô duyệt bản nháp 2 sửa thế nào thì mình sửa theo cho bản nháp 3 (cùng giọng văn, cùng cách chia yêu cầu).
+- Bản nháp 2 có 2 câu trùng giữa hai yêu cầu (Toán T9 "Tính còn chậm, đôi khi sai.", T10 "Đọc cân còn chậm.") – app đã tự bỏ câu trùng khi ghép,
+  dữ liệu gốc đã sửa; file bản nháp 2 KHÔNG tạo lại để không mất phần cô đang sửa.
+- Các tuần học kì II rơi vào tháng 1 sẽ được thêm khi có Sổ báo giảng HK II.
+- Sửa nhỏ trong app: Cài đặt → Kho thư viện hiện tháng theo thứ tự năm học (9, 10, 11, 12, 1).
+- Skill "tao-thu-vien-nhan-xet" đã thêm phần THƯ VIỆN THÁNG (quy tắc cô đã chốt, script build_thang.py, dữ liệu mẫu tháng 9 → 1)
+  để học kì II soạn tháng 2 – 5 nhanh và đúng định dạng.
+
+Cách dùng: Cài đặt → Kho thư viện → chọn file bản nháp 3 → Đưa vào Kho thư viện (sau khi cô duyệt).
+Cập nhật app: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

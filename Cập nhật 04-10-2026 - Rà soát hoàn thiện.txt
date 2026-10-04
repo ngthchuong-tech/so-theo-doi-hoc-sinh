@@ -1,0 +1,29 @@
+CẬP NHẬT – RÀ SOÁT, HOÀN THIỆN TRƯỚC KHI SOẠN THƯ VIỆN THÁNG 11, 12, 1
+
+Kiểm tra toàn bộ
+- Kiểm tra máy móc toàn bộ mã: không còn hàm trùng tên, mọi lời gọi máy chủ đều có hàm, mọi nút bấm đều có hàm xử lí,
+  mọi ô giao diện được dùng đều tồn tại.
+- Chạy thử mọi màn hình (cả khi bật hết chức năng nâng cao), các kì GK1 / CK1 / GK2 / CK2 / GVCN, hồ sơ học sinh: không lỗi.
+
+Đã sửa
+1. Trang chủ:
+   - Thẻ nhắc theo cách làm mới: cuối tháng (từ ngày 25) "ghi đánh giá ở Sổ theo dõi → 📋 Đánh giá tháng…";
+     đầu tháng (ngày 1–5) "hoàn tất đánh giá tháng trước, xuất file". Chạm vào thẻ → mở thẳng màn Đánh giá tháng.
+   - MỚI: nhắc khi Kho chưa có thư viện yêu cầu của tháng này (từ ngày 20 nhắc cả tháng sau) – tránh tới tháng 11 mới thấy thiếu.
+   - Không còn nhắc "thư viện tạm" (thư viện theo bài) khi cô không bật ghi theo bài.
+   - Thêm nút nhanh "📋 Đánh giá tháng" (4 nút một hàng: Điểm danh, Nộp vở, Đánh giá tháng, Học sinh).
+2. Nộp vở: em đã điểm danh vắng cả ngày hiện nhãn "vắng", không điền sẵn mức, không bị tính là "chưa chọn".
+3. Màn chọn tháng: báo rõ khi Kho chưa có thư viện của tháng hiện tại.
+4. Đánh giá định kỳ: khi kì chưa tổng hợp được (VD chưa có Sổ báo giảng HK II) thì không còn hiện số liệu của kì trước gây nhầm;
+   sửa chữ mô tả: gợi ý lấy từ đánh giá các tháng.
+5. Riêng tư: nhóm học sinh (mã định danh + ghi chú) chỉ giữ trong lúc mở app, không lưu xuống bộ nhớ điện thoại.
+6. Dọn mã: bỏ phần màn "Nhận xét tháng" cũ không còn dùng (3 hàm máy chủ, 7 hàm trình duyệt); dữ liệu cũ vẫn giữ.
+7. Chữ: "Đã ghi cho bài này" → "Đã ghi" (dùng chung cho đánh giá tháng).
+
+Tài liệu
+- Hướng dẫn trong app: viết lại mục 1 (Lần đầu dùng + Việc thường làm: hằng ngày / cuối tháng / giữa – cuối kì),
+  mục 2 (Trang chủ), mục 8 (Mỗi học kì), mục 10 (câu hỏi thường gặp) theo cách làm hiện nay.
+- README của kho mã: cập nhật danh sách chức năng.
+- MỚI: "Bước 5 - Phiếu thử app cho cô giáo (bản 2).docx" – 21 việc thử theo các chức năng mới + 5 câu hỏi cho cô.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

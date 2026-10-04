@@ -1,0 +1,26 @@
+CẬP NHẬT – BƯỚC 2: MÀN GHI ĐÁNH GIÁ THÁNG THEO YÊU CẦU CẦN ĐẠT (theo ý kiến cô, mục I)
+
+Cách dùng (Sổ theo dõi → 📋 Đánh giá tháng)
+- Chọn tháng (tuần đầu tháng app tự chọn sẵn tháng trước) → chạm môn: Kiến thức hoặc Kỹ năng.
+- Màn ghi giống màn ghi theo bài cũ:
+    1. Yêu cầu cần đạt (KT1, KT2…; bên cạnh: số em đã ghi / sĩ số; dưới: căn cứ bài học)
+    2. Mức: HTXS / HTT / HT / CHT
+    3. Nhận xét: 3 câu gợi ý của thư viện + mẫu của cô (★) + ô tự viết
+    4. Học sinh (chấm màu = mức đã ghi lần mới nhất) → Lưu
+- Nút "Cả lớp: HTT": ghi HTT cho các em chưa được ghi ở yêu cầu đang chọn, mỗi em 1 câu gợi ý khác nhau (cố định theo em).
+  Sau đó cô chọn mức khác, chạm em cần sửa, Lưu – lần ghi mới nhất được tính. Có Hoàn tác.
+- Mẫu của cô: viết câu vào ô "Ghi thêm" → "★ Lưu câu đang viết thành mẫu của cô". Mẫu gắn với môn – nội dung – yêu cầu – mức,
+  tự hiện lại lần sau; ✕ để xoá mẫu (không ảnh hưởng nhận xét đã ghi).
+
+Thư viện: tải file "Thư viện nhận xét THÁNG - Lớp 2 - HK I (bản nháp 2 - yêu cầu kiến thức, kỹ năng …).xlsx" ở Cài đặt → Kho thư viện.
+App nhận ra bản 2 (yêu cầu cần đạt) và lưu riêng; tải lại tháng nào thì chỉ thay tháng đó.
+Cài đặt hiện: "Tiếng Việt (18 yêu cầu, 216 câu, tháng 9, 10)", "Toán (16 yêu cầu, 192 câu, tháng 9, 10)".
+
+Bước sau (bước 3): gom các lần ghi này thành mức Kiến thức / Kỹ năng và nhận xét môn của tháng ở Đánh giá → Thường xuyên
+(điều làm tốt trước, điều cần cố gắng sau, kèm nhận xét vở) rồi xuất file của Bộ như trước.
+
+Kỹ thuật: bảng mới ThuVienYeuCau, MauCuaCo (tự tạo khi dùng); lần ghi lưu vào Sổ theo dõi với "bài" = "Tháng 9 – Kiến thức"…,
+"hoạt động" = yêu cầu cần đạt. "Cả lớp: HTT" ghi 35 em trong 1 lần gọi máy chủ.
+Đã thử trên máy giả lập: nhập thư viện, mở màn, Cả lớp HTT (35 em), sửa 1 em sang CHT, lưu / xoá mẫu, quay lại chọn tháng, màn điện thoại.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

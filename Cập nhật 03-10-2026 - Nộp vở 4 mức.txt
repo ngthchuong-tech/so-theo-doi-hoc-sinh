@@ -1,0 +1,26 @@
+CẬP NHẬT – BƯỚC 4: NỘP VỞ 4 MỨC (theo ý kiến cô, mục III)
+
+Sổ theo dõi → 📒 Nộp vở
+- Mỗi em, mỗi môn (Tiếng Việt, Toán) chọn 1 trong:
+    1. Nhanh, đẹp, đúng
+    2. Đẹp, đúng
+    3. Đúng, biết trình bày   |   Đúng, chưa biết trình bày   (mức 3 có 2 câu)
+    4. Chưa đúng – chưa đẹp
+    và Chưa nộp.
+- Mỗi em sẵn mức của LẦN CHẤM TRƯỚC (em lần trước chưa nộp thì lấy mức gần nhất em có nộp) → cô chỉ chạm sửa em khác mức, bấm Lưu.
+  Dòng trên cho biết "mức theo lần dd/mm" và đếm số em mỗi mức.
+- Lần đầu dùng (chưa có lần trước): nút "Em chưa chọn: Đẹp, đúng" rồi sửa riêng. Em chưa chọn mức thì không được ghi (app hỏi trước khi lưu).
+
+Nhận xét tháng (Đánh giá → Thường xuyên): câu vở theo mức em gặp nhiều nhất trong tháng (bằng nhau thì lấy mức tốt hơn):
+    "Bài làm trong vở nhanh, đẹp, đúng." / "Bài làm trong vở đẹp, đúng." / "Bài làm trong vở đúng, biết trình bày." /
+    "Bài làm trong vở đúng nhưng chưa biết trình bày." / "Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn."
+  + nếu có ngày chưa nộp: 1–2 lần "Đôi khi còn chưa nộp vở."; từ 3 lần "Cần chú ý nộp vở đầy đủ, đúng hạn."
+  Thẻ "Vở:" trên mỗi em ghi số lần từng mức trong tháng. Giữa kì / cuối kì: cùng cách, tính cả kì.
+
+Dữ liệu đã ghi theo cách cũ (Đã nộp / Chưa nộp / Chưa xong / Muộn) vẫn được tính.
+
+Kỹ thuật: lưu gọn mỗi ngày mỗi môn 1 dòng (thay vì mỗi em 1 dòng) → bảng NopVo cả năm chỉ khoảng 360 dòng, đọc nhanh.
+Đã thử trên máy giả lập: 2 ngày chấm (ngày sau tự lấy mức ngày trước, em chưa nộp không bị lấy "Chưa nộp" làm mặc định),
+câu vở trên máy và máy chủ khớp 70/70, GK1 lấy đúng câu vở cả kì, dữ liệu cách cũ đọc đúng, màn điện thoại gọn.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

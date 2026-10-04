@@ -1,0 +1,22 @@
+CẬP NHẬT – BƯỚC 5: NHÓM HỌC SINH CẦN QUAN TÂM (theo ý kiến cô, mục II – gọn, không thêm việc)
+
+3 nhóm sẵn: ● Bồi dưỡng (xanh)   ● Cần rèn thêm (cam)   ● Cần chú ý (đỏ). 1 em có thể ở nhiều nhóm, kèm 1 dòng ghi chú.
+
+Cách dùng
+- Xếp nhóm: Học sinh (👧) → chạm tên em → khung "Nhóm cần quan tâm": chạm chọn nhóm, ghi chú 1 dòng → Lưu.
+- Xem nhanh: chấm màu cạnh tên em ở Học sinh, Sổ theo dõi (lưới chọn em), Đánh giá tháng, Nộp vở.
+- Lọc: đầu danh sách lớp có Tất cả / Bồi dưỡng (n) / Cần rèn thêm (n) / Cần chú ý (n); ghi chú hiện dưới tên em.
+  Màn Đánh giá tháng có ô "Mọi nhóm"; khi ghi nhận xét có ô "Chọn nhóm…" để chọn cả nhóm một lần.
+- 💡 App gợi ý (chỉ chạy khi cô bấm, để app không chậm):
+    • Bồi dưỡng: tháng gần nhất có môn HTXS cả kiến thức và kỹ năng
+    • Cần rèn thêm: tháng gần nhất có kiến thức / kỹ năng CHT; vở "chưa đúng – chưa đẹp" từ 3 lần trong 30 ngày
+    • Cần chú ý: chưa nộp vở từ 3 lần, vắng từ 3 buổi trong 30 ngày; năng lực chung / phẩm chất "Cần cố gắng"
+  Mỗi gợi ý ghi rõ lí do. App KHÔNG tự xếp: cô bấm Thêm hoặc Bỏ qua (bỏ qua thì tháng sau mới nhắc lại nếu vẫn đúng).
+
+Dữ liệu: bảng NhomHS (mỗi em 1 dòng), thuộc dữ liệu năm học (sang năm học mới được lưu trữ và làm lại).
+Nhóm được nhớ trên máy nên chấm màu hiện ngay, cập nhật ngầm sau khi mở app.
+
+Đã thử trên máy giả lập: 5 gợi ý đúng cả 5 quy tắc; Thêm / Bỏ qua (không hiện lại); sửa nhóm + ghi chú ở hồ sơ;
+lọc danh sách, chọn cả nhóm khi ghi nhận xét, lọc màn đánh giá tháng; màn điện thoại gọn.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

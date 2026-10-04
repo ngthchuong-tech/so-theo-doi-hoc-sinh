@@ -1,0 +1,25 @@
+CẬP NHẬT – BƯỚC 3: TỔNG HỢP ĐÁNH GIÁ THÁNG TỪ CÁC YÊU CẦU CẦN ĐẠT
+
+Đánh giá → Thường xuyên (hằng tháng) → chọn tháng → Mở
+- Tiếng Việt, Toán (tháng đã ghi theo yêu cầu ở Sổ theo dõi → 📋 Đánh giá tháng):
+    • Mức Kiến thức, Kỹ năng app TỰ TÍNH từ các yêu cầu: HTXS = 4, HTT = 3, HT = 2, CHT = 1, lấy trung bình
+      từ 3,5 → HTXS; từ 2,5 → HTT; từ 1,5 → HT; dưới 1,5 → CHT.
+    • Mỗi em hiện mức từng yêu cầu: "KT1 HTT · KT2 HT · KT3 HTT · KT4 HTT" (giữ ngón tay trên mã để xem câu đã ghi).
+    • Nhận xét môn tự ghép: điều em làm tốt (câu mức HTXS, HTT) → điều em cần cố gắng (câu mức HT, CHT) → câu nộp vở.
+      Không quá 250 ký tự; luôn giữ ít nhất 1 điều làm tốt, 1 điều cần cố gắng và câu vở.
+    • Cô vẫn sửa trực tiếp ô nhận xét như trước (↺ để lấy lại bản app ghép).
+    • Nút "✏️ Ghi / sửa Kiến thức (Kỹ năng)": sang Sổ theo dõi sửa; quay lại là màn tháng tự cập nhật.
+- Tháng chưa có thư viện yêu cầu: giữ cách cũ (chạm chọn 2 mức).
+- Năng lực đặc thù: CHT ở Toán / TV → "Cần cố gắng" như CCG.
+- Xuất file của Bộ: như cũ.
+
+Giữa kì / cuối kì (Đánh giá → Định kỳ): tự lấy các tháng đã ghi theo yêu cầu; mức T/H/C theo trung bình mức Kiến thức, Kỹ năng các tháng
+(CHT tính 1 điểm như CCG); nhận xét ghép từ nhận xét các tháng như trước.
+
+Sửa nhỏ: ghi xong rồi rời màn Sổ theo dõi không còn hỏi "chưa lưu" khi chỉ còn câu đang tích mà chưa chọn em.
+
+Đã thử trên máy giả lập (ngày giả 10/11/2026): ghi tháng 9 cho 35 em (1 em toàn HTXS, 1 em có HT, 1 em nhiều CHT, còn lại HTT)
+→ mức tự tính đúng; 105 ô nhận xét trên máy và trên máy chủ khớp hoàn toàn; GK1 gợi ý T / T / C (Tiếng Việt), T / T / H (Toán);
+sửa 1 em sang CHT ở Sổ theo dõi, quay lại thấy mức và nhận xét mới; dựng dữ liệu xuất file đủ 5 sheet.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.
