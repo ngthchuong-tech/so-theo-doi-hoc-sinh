@@ -250,13 +250,6 @@
   .cn-o textarea { min-height: 180px; font-size: 15px; line-height: 1.5; }
   .cn-hs textarea { min-height: 70px; }
   .cn-cu { font-size: 13.5px; color: #475467; white-space: pre-line; margin-top: 4px; }
-  /* Sổ chủ nhiệm */
-  .cn-dau { font-size: 17px; font-weight: 800; color: var(--chinh); margin: 4px 0 2px; }
-  .cn-o { margin-top: 12px; }
-  .cn-o .hang.gian > b { font-size: 14.5px; }
-  .cn-o textarea { min-height: 180px; font-size: 15px; line-height: 1.5; }
-  .cn-hs textarea { min-height: 70px; }
-  .cn-cu { font-size: 13.5px; color: #475467; white-space: pre-line; margin-top: 4px; }
   /* Bài kiểm tra */
   .kt-hang { display: flex; align-items: center; gap: 10px; padding: 9px 2px; border-bottom: 1px dashed var(--vien); cursor: pointer; }
   .kt-hang:last-child { border-bottom: 0; }
@@ -357,7 +350,6 @@
           <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
           <span class="chip" id="stChePT" onclick="doiCheDo('pt')">🏆 Phong trào – Cuộc thi</span>
           <span class="chip" id="stCheCN" onclick="doiCheDo('cn')">📘 Sổ chủ nhiệm</span>
-          <span class="chip" id="stCheCN" onclick="doiCheDo('cn')">📘 Sổ chủ nhiệm</span>
         </div>
       </div>
 
@@ -418,19 +410,6 @@
         </div>
         <div class="the" id="voDs"></div>
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
-      </div>
-
-      <div id="stCN" class="an">
-        <div class="the">
-          <div class="hang gian"><h3 style="margin:0">📘 Sổ chủ nhiệm</h3><button class="nut phu nut-nho" onclick="cnXuatWord()">⬇ Xuất Word cả sổ</button></div>
-          <div class="hang" style="margin-top:8px"><span class="chip on" id="cnChonTuan" onclick="cnChon('tuan')">🗓️ Kế hoạch – kết quả tuần</span>
-            <span class="chip" id="cnChonHS" onclick="cnChon('hs')">🧒 Theo dõi HS chưa tiến bộ</span></div>
-          <div class="nho" style="margin-top:4px">Theo mẫu sổ chủ nhiệm điện tử của trường. Cô viết, sửa trực tiếp (app tự lưu); <b>💡 Gợi ý</b> lấy từ dữ liệu của app;
-            <b>📋 Chép</b> rồi dán lên sổ của trường.</div>
-          <div id="cnKetQua"></div>
-        </div>
-        <div id="cnTuan"></div>
-        <div id="cnHS" class="an"></div>
       </div>
 
       <div id="stCN" class="an">
