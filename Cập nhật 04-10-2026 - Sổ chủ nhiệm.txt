@@ -1,0 +1,27 @@
+CẬP NHẬT – 📘 SỔ CHỦ NHIỆM (Sổ theo dõi → 📘 Sổ chủ nhiệm)
+
+Căn cứ: Điều lệ trường tiểu học (TT 28/2020) Điều 21 – GVCN có Sổ chủ nhiệm, được dùng hồ sơ điện tử; Bộ không ban hành mẫu.
+→ Làm ĐÚNG 2 phần như file "mẫu làm sổ cn hàng năm" cô dùng để đưa lên sổ chủ nhiệm điện tử của trường.
+
+1. Kế hoạch – kết quả tuần (Thời gian | Nội dung | Kết quả), Tuần 0 → hết năm
+   - Tiêu đề "TUẦN n: ngày – ngày" lấy từ Sổ báo giảng (Tuần 0 cô tự ghi ngày). Gõ thẳng, app tự lưu.
+   - 💡 Gợi ý Nội dung: thực hiện chương trình tuần n; chủ đề HĐTN của tuần; phong trào – cuộc thi trong tuần; rèn thêm cho các em
+     nhóm Cần rèn thêm (kèm ghi chú); bồi dưỡng; cuối tháng: chấm vở sạch chữ đẹp, hoàn thành đánh giá tháng.
+     ↺ Lấy từ tuần trước: các dòng lặp lại (bỏ dòng chỉ đúng cho tuần trước).
+   - 💡 Gợi ý Kết quả: thực hiện chương trình; chuyên cần (ai vắng, có phép / không phép); nộp vở; phong trào (x/sĩ số tham gia, đạt giải);
+     tuần cuối tháng: "Kết quả vở sạch chữ đẹp tháng m: A … B … C … D …" (theo mức em đạt nhiều nhất cả tháng ở Nộp vở:
+     A nhanh, đẹp, đúng · B đẹp, đúng · C đúng (biết / chưa biết trình bày) · D chưa đúng – chưa đẹp).
+   - Gợi ý chỉ thêm dòng chưa có. 📋 Chép: kèm dòng "TUẦN n: …" để dán lên sổ của trường.
+2. Theo dõi HS chưa tiến bộ (STT | Họ tên | Nội dung cần lưu ý | Biện pháp giúp đỡ | Kết quả)
+   - Danh sách: nhóm Cần rèn thêm, Cần chú ý + em cô thêm. Mỗi tháng 3 ô; các tháng trước hiện dưới tên em.
+   - 💡 Gợi ý tháng: điều em còn hạn chế (từ đánh giá tháng), chưa nộp vở, vắng; so với tháng trước; biện pháp theo môn em còn yếu.
+   - 📋 Chép từng ô: gộp các tháng như cột trong sổ.
+⬇ Xuất Word cả sổ: đúng 2 bảng như mẫu, lưu thêm bản sao trong Drive.
+
+Sửa lỗi phát hiện khi làm: dữ liệu đánh giá tháng tính năm theo đồng hồ máy thay vì năm học → sang tháng 1/2027, đánh giá tháng 12
+sẽ không thấy nộp vở, điểm danh của tháng 12/2026. Đã sửa (lấy năm theo năm học).
+
+Đã thử trên máy giả lập: gợi ý tuần 4 (cuối tháng 9) ra đủ chủ đề, rèn thêm, chuyên cần, nộp vở, vở sạch chữ đẹp A 6, B 21, C 5, D 3;
+tự lưu, lấy từ tuần trước, chép; theo dõi 2 em (gợi ý đúng điều còn hạn chế, so sánh tháng trước); xuất Word; màn điện thoại; không lỗi.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.
