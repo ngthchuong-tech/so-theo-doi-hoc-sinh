@@ -108,3 +108,34 @@ function cauNLPC(kq, phan, ma, n) {
   cau.forEach(function (x) { if (!x || da[x]) return; da[x] = 1; var th = out ? out + ' ' + x : x; if (th.length <= n) out = th; });
   return out;
 }
+
+
+// ============================================================================ NHẬN XÉT TỪ BÀI KIỂM TRA (điểm từng câu × đề)
+// de: [{cau, toiDa, muc, kiNang}] · cau: {câu: điểm em đạt}. Trọn điểm → làm tốt; dưới nửa số điểm → cần rèn thêm; còn lại → còn sai sót nhỏ.
+function soVN(x) { return String(x).replace('.', ','); }
+function nhanXetBKT(de, cau, diem, tenBai, n) {
+  if (!de || !de.length || !cau) return '';
+  var tot = [], vua = [], yeu = [], m3 = { tot: 0, yeu: 0, co: 0 };
+  de.forEach(function (c) {
+    var td = Number(String(c.toiDa).replace(',', '.')), d = cau[c.cau];
+    if (!(td > 0) || d === undefined || d === null || d === '' || !c.kiNang) return;
+    d = Number(String(d).replace(',', '.')); if (isNaN(d)) return;
+    var kn = String(c.kiNang).trim().replace(/\.$/, ''); kn = kn.charAt(0).toLowerCase() + kn.slice(1);
+    var r = d / td;
+    if (r >= 0.999) tot.push(kn); else if (r < 0.5) yeu.push(kn); else vua.push(kn);
+    if (String(c.muc) === '3') { m3.co++; if (r >= 0.999) m3.tot++; else if (r < 0.5) m3.yeu++; }
+  });
+  if (!tot.length && !vua.length && !yeu.length) return '';
+  var bo = function (ds) { var o = []; ds.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; };
+  tot = bo(tot); vua = bo(vua); yeu = bo(yeu);
+  var cau3 = [];
+  if (diem) cau3.push('Bài kiểm tra ' + tenBai + ' đạt ' + diem + ' điểm.');
+  if (tot.length) cau3.push('Làm tốt: ' + tot.slice(0, 4).join('; ') + '.');
+  if (vua.length) cau3.push('Còn sai sót nhỏ ở: ' + vua.slice(0, 2).join('; ') + '.');
+  if (yeu.length) cau3.push('Cần rèn thêm: ' + yeu.slice(0, 3).join('; ') + '.');
+  if (m3.co && m3.tot === m3.co && yeu.length + vua.length) cau3.push('Làm được cả câu vận dụng (mức 3).');
+  else if (m3.co && m3.yeu === m3.co && tot.length) cau3.push('Câu vận dụng (mức 3) còn lúng túng.');
+  var out = '';
+  cau3.forEach(function (x) { var th = out ? out + ' ' + x : x; if (th.length <= (n || 300)) out = th; });
+  return out;
+}

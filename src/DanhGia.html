@@ -22,6 +22,17 @@
             <button class="nut phu" onclick="ktXuat()">⬇ Xuất Excel bảng điểm</button></div>
           <div id="ktKetQua"></div>
         </div>
+        <div class="the">
+          <h2>📤 Nhập từ file của cô</h2>
+          <div class="nho">Cho bài và môn đang chọn ở trên. App điền <b>điểm đã làm tròn</b> vào bảng điểm, lưu <b>điểm từng câu</b>, đối chiếu với <b>đề</b>
+            để gợi ý nhận xét cho từng em (dùng ở màn Định kỳ). Cô xem trước rồi mới lưu.</div>
+          <label class="dong">1. File điểm của lớp (Excel – có điểm từng câu)</label>
+          <input type="file" id="ktFileDiem" accept=".xlsx,.xls,.csv" onchange="ktDocFileDiem(this)">
+          <label class="dong">2. File đề (Word .docx) – hoặc dán nội dung đề vào ô dưới</label>
+          <input type="file" id="ktFileDe" accept=".docx" onchange="ktDocFileDe(this)">
+          <textarea id="ktDeText" placeholder="(Dán nội dung đề vào đây nếu đề không phải file Word)" onchange="ktPhanTichDe()" style="margin-top:6px;min-height:60px"></textarea>
+          <div id="ktNhapND"></div>
+        </div>
         <div class="the" id="ktDs"></div>
       </div>
 

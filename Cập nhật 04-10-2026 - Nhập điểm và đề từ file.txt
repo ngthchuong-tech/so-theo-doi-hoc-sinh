@@ -1,0 +1,19 @@
+CẬP NHẬT – NHẬP ĐIỂM VÀ ĐỀ TỪ FILE CỦA CÔ (Đánh giá → 📝 Bài kiểm tra → 📤 Nhập từ file của cô)
+
+Theo ý cô: cô vẫn chấm điểm thập phân trong file của mình; app giữ điểm tròn (Thông tư 27: thang 10, không cho điểm 0, không thập phân).
+
+1. File điểm của lớp (Excel, có điểm từng câu): app tự nhận cột Họ tên, các cột câu ("Câu 1", "C1", "1", tiêu đề 2 dòng…),
+   cột Tổng, cột Làm tròn, dòng "Điểm tối đa". Nhận sai thì cô chọn lại; dòng chưa khớp tên thì cô chọn em tương ứng.
+   Điểm điền vào bảng điểm = cột Làm tròn (nếu còn lẻ thì làm tròn tiếp, từ 0,5 lên); không có cột này thì làm tròn cột Tổng / tổng các câu.
+2. File đề (Word .docx) hoặc dán nội dung đề: app tách các câu "Câu n (x điểm) – Mn: …" thành bảng câu – điểm tối đa – mức – kĩ năng;
+   cô sửa kĩ năng cho gọn. Có khoá AI: "✨ Nhờ AI đọc đề" (chỉ gửi nội dung đề). Tổng điểm tối đa khác 10 thì app nhắc kiểm tra.
+   Đề đã lưu được dùng lại ở lần nhập sau.
+3. Xem trước nhận xét gợi ý → "✔ Điền điểm": lưu điểm tròn (cuối kì tự sang Định kỳ) và điểm từng câu.
+4. Nhận xét gợi ý từng em: "Làm tốt: …" (câu trọn điểm) · "Còn sai sót nhỏ ở: …" · "Cần rèn thêm: …" (câu dưới nửa số điểm) · câu vận dụng (mức 3).
+   Hiện dưới tên em ở bảng điểm và ở màn Định kỳ (nút "＋ Chèn vào nhận xét").
+
+Đã thử trên máy giả lập với file điểm và đề thử (tạo giả theo dạng phổ biến): nhận đúng cột, khớp 6/6 tên (kể cả viết HOA, thừa dấu cách),
+điểm làm tròn đúng, đọc đúng 4 câu của đề, nhận xét gợi ý đúng từng em, chèn ở Định kỳ, dùng lại đề đã lưu; màn điện thoại; không lỗi.
+CẦN THỬ VỚI FILE THẬT CỦA CÔ để chỉnh cách nhận cột / tách câu cho khớp.
+
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.

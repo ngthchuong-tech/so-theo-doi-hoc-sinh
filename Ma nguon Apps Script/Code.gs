@@ -47,6 +47,9 @@ var BANG = {
   // Điểm bài kiểm tra (Tiếng Việt, Toán): Ky = GK1 / CK1 / GK2 / CK2. Điểm cuối kì (CK) cũng là "Điểm KTĐK" của màn Định kỳ.
   DiemKiemTra:  ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'Diem', 'CapNhat'],
   GhiChuNgay:   ['Ngay', 'Loai', 'MaDinhDanh', 'NoiDung', 'CapNhat'],     // Loai: lop / hs / khac
+  // Bài kiểm tra nhập từ file của cô: đề (mỗi câu: điểm tối đa, mức, kĩ năng) và điểm từng câu của từng em (JSON {câu: điểm})
+  DeKiemTra:    ['NamHoc', 'Ky', 'Mon', 'Cau', 'DiemToiDa', 'Muc', 'KiNang', 'CapNhat'],
+  DiemCau:      ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'DiemCau', 'CapNhat'],
   // Sổ chủ nhiệm: kế hoạch – kết quả từng tuần; theo dõi học sinh chưa tiến bộ (Thang = số tháng; '*' = em được thêm vào danh sách)
   SoChuNhiem:   ['NamHoc', 'Tuan', 'TuNgay', 'DenNgay', 'NoiDung', 'KetQua', 'CapNhat'],
   TheoDoiTienBo: ['NamHoc', 'MaDinhDanh', 'Thang', 'NoiDung', 'BienPhap', 'KetQua', 'CapNhat']
@@ -1082,6 +1085,46 @@ function goiYTheoDoiHS(ma, thang) {
 }
 
 // ============================================================================ BÀI KIỂM TRA (Đánh giá → 📝 Bài kiểm tra)
+// ---------------------------------------------------------------------------- Nhập từ file của cô: điểm từng câu + đề → điểm tròn, nhận xét gợi ý
+function deKT_(namHoc) {           // {'ky|môn': [{cau, toiDa, muc, kiNang}]}
+  var o = {};
+  doc_('DeKiemTra').forEach(function (r) { if (r.NamHoc === namHoc) (o[r.Ky + '|' + r.Mon] = o[r.Ky + '|' + r.Mon] || []).push({ cau: r.Cau, toiDa: r.DiemToiDa, muc: r.Muc, kiNang: r.KiNang }); });
+  return o;
+}
+function diemCau_(namHoc) {        // {'ky|môn|mã': {câu: điểm}}
+  var o = {};
+  doc_('DiemCau').forEach(function (r) { if (r.NamHoc === namHoc) { try { o[r.Ky + '|' + r.Mon + '|' + r.MaDinhDanh] = JSON.parse(r.DiemCau || '{}'); } catch (e) {} } });
+  return o;
+}
+// de: [{cau, toiDa, muc, kiNang}] · ds: [{ma, diem (đã làm tròn, 1..10), cau: {câu: điểm}}]
+function luuKetQuaBKT(ky, mon, de, ds) {
+  return voiKhoa_(function () {
+    if (KY_KT.indexOf(ky) < 0) throw new Error('Bài kiểm tra không hợp lệ.');
+    if (!ds || !ds.length) throw new Error('Chưa có học sinh nào khớp để lưu.');
+    var namHoc = caiDat_().NamHoc || '', luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm'), co = {};
+    ds.forEach(function (x) { if (!/^(10|[1-9])$/.test(String(x.diem))) throw new Error('Điểm phải là số nguyên từ 1 đến 10 (em ' + x.ma + ').'); co[x.ma] = 1; });
+    var cung = function (r) { return r.NamHoc === namHoc && r.Ky === ky && r.Mon === mon; };
+    thayTheTheo_('DiemKiemTra', function (r) { return !(cung(r) && co[r.MaDinhDanh]); },
+      ds.map(function (x) { return hang_('DiemKiemTra', { NamHoc: namHoc, Ky: ky, Mon: mon, MaDinhDanh: x.ma, Diem: String(x.diem), CapNhat: luc }); }));
+    thayTheTheo_('DiemCau', function (r) { return !(cung(r) && co[r.MaDinhDanh]); },
+      ds.map(function (x) { return hang_('DiemCau', { NamHoc: namHoc, Ky: ky, Mon: mon, MaDinhDanh: x.ma, DiemCau: JSON.stringify(x.cau || {}), CapNhat: luc }); }));
+    if (de && de.length) thayTheTheo_('DeKiemTra', function (r) { return !cung(r); }, de.map(function (c) {
+      return hang_('DeKiemTra', { NamHoc: namHoc, Ky: ky, Mon: mon, Cau: c.cau, DiemToiDa: c.toiDa, Muc: c.muc || '', KiNang: String(c.kiNang || '').slice(0, 120), CapNhat: luc }); }));
+    return 'Đã điền điểm ' + ds.length + ' em và lưu điểm từng câu' + (de && de.length ? ', ' + de.length + ' câu của đề' : '') + '.';
+  });
+}
+// Đọc đề bằng AI: CHỈ gửi nội dung đề (không có tên, điểm học sinh) → mỗi câu: điểm tối đa, mức, kĩ năng (cụm từ ngắn)
+function phanTichDeAI(mon, text) {
+  text = String(text || '').slice(0, 15000);
+  if (text.length < 30) throw new Error('Nội dung đề quá ngắn.');
+  var kq = goiGeminiJson_([{ text: 'Đây là đề kiểm tra môn ' + mon + ' lớp 2 (Việt Nam, Thông tư 27). Với MỖI câu (hoặc ý a, b nếu chấm riêng), trả về JSON là mảng các đối tượng ' +
+    '{"cau": "số câu như trong đề, VD 1, 2, 3a", "diemToiDa": số điểm tối đa (số, dùng dấu chấm), "muc": 1|2|3 nếu đề có ghi mức (M1/M2/M3) không thì 0, ' +
+    '"kiNang": "cụm từ ngắn tối đa 10 chữ, viết thường, nêu kĩ năng / kiến thức câu đó kiểm tra, VD: đặt tính rồi tính cộng có nhớ; đọc hiểu chi tiết bài đọc"}. ' +
+    'Chỉ trả JSON, không giải thích.\n\nĐỀ:\n' + text }], 0);
+  var ds = Array.isArray(kq) ? kq : (kq.cau || kq.ds || []);
+  return ds.map(function (c) { return { cau: String(c.cau || '').replace(/^câu\s*/i, '').trim(), toiDa: Number(c.diemToiDa) || '', muc: +c.muc ? String(+c.muc) : '', kiNang: String(c.kiNang || '').slice(0, 80) }; })
+    .filter(function (c) { return c.cau; });
+}
 // Thông tư 27: lớp 1–3 kiểm tra định kì Tiếng Việt, Toán cuối HK I và cuối năm (bắt buộc, vào file Bộ); trường có thể cho thêm bài giữa kì.
 var KY_KT = ['GK1', 'CK1', 'GK2', 'CK2'];
 function diemKiemTra_(namHoc) {        // {ky: {'ma|môn': điểm}}
@@ -1100,7 +1143,7 @@ function layDiemKiemTra() {
   var anh = {};
   doc_('BaiKiemTra').forEach(function (r) { if (r.NamHoc === namHoc) anh[r.Ky + '|' + r.MaDinhDanh + '|' + r.Mon] = r.Url; });
   var hs = doc_('HocSinh').filter(function (h) { return h.TrangThai !== 'Đã chuyển đi'; }).sort(function (a, b) { return +a.ThuTu - +b.ThuTu; });
-  return { namHoc: namHoc, ky: KY_KT, mon: mon, diem: diemKiemTra_(namHoc), anh: anh,
+  return { namHoc: namHoc, ky: KY_KT, mon: mon, diem: diemKiemTra_(namHoc), anh: anh, de: deKT_(namHoc), cau: diemCau_(namHoc),
            hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; }) };
 }
 // diem: 1..10 hoặc '' (xoá)
@@ -1137,6 +1180,7 @@ function layDanhGiaKy(ky) {
   var anhBai = {};
   doc_('BaiKiemTra').forEach(function (r) { if (r.NamHoc === pv.namHoc && r.Ky === ky) anhBai[r.MaDinhDanh + '|' + r.Mon] = r.Url; });
   var diemKT = diemKiemTra_(pv.namHoc);              // điểm nhập ở Đánh giá → Bài kiểm tra
+  var deKT = deKT_(pv.namHoc), cauKT = diemCau_(pv.namHoc), TEN_KT_ = { GK1: 'giữa kì I', CK1: 'cuối kì I', GK2: 'giữa kì II', CK2: 'cuối năm' };
   var daSua = {};
   doc_('DanhGiaKy').forEach(function (r) { if (r.NamHoc === pv.namHoc && r.Ky === ky) daSua[r.MaDinhDanh + '|' + r.Phan] = r; });
   var du = {};
@@ -1154,6 +1198,8 @@ function layDanhGiaKy(ky) {
       var dKT = (diemKT[ky] || {})[h.MaDinhDanh + '|' + m.TenMon];
       if (dKT) x.diem = dKT;                          // cuối kì: điểm bài kiểm tra là điểm KTĐK
       if (!pv.cuoiKy && dKT) x.diemGK = dKT;          // giữa kì: chỉ hiện để tham khảo (file Bộ lớp 2 không có điểm giữa kì)
+      var cKT = cauKT[ky + '|' + m.TenMon + '|' + h.MaDinhDanh];
+      if (cKT) x.nxBKT = nhanXetBKT(deKT[ky + '|' + m.TenMon], cKT, dKT, TEN_KT_[ky], 300);   // gợi ý từ điểm từng câu
       o.mon[m.TenMon] = x;
     });
     // 15 mức năng lực – phẩm chất + 3 nhận xét
@@ -1602,7 +1648,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo', 'GhiChuNgay'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo', 'GhiChuNgay', 'DeKiemTra', 'DiemCau'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';
@@ -2345,5 +2391,36 @@ function cauNLPC(kq, phan, ma, n) {
   var cau = tot.concat(can); if (!cau.length) cau = dat.slice(0, 2); else if (cau.length < 2) cau = cau.concat(dat.slice(0, 1));
   var out = '', da = {};
   cau.forEach(function (x) { if (!x || da[x]) return; da[x] = 1; var th = out ? out + ' ' + x : x; if (th.length <= n) out = th; });
+  return out;
+}
+
+
+// ============================================================================ NHẬN XÉT TỪ BÀI KIỂM TRA (điểm từng câu × đề)
+// de: [{cau, toiDa, muc, kiNang}] · cau: {câu: điểm em đạt}. Trọn điểm → làm tốt; dưới nửa số điểm → cần rèn thêm; còn lại → còn sai sót nhỏ.
+function soVN(x) { return String(x).replace('.', ','); }
+function nhanXetBKT(de, cau, diem, tenBai, n) {
+  if (!de || !de.length || !cau) return '';
+  var tot = [], vua = [], yeu = [], m3 = { tot: 0, yeu: 0, co: 0 };
+  de.forEach(function (c) {
+    var td = Number(String(c.toiDa).replace(',', '.')), d = cau[c.cau];
+    if (!(td > 0) || d === undefined || d === null || d === '' || !c.kiNang) return;
+    d = Number(String(d).replace(',', '.')); if (isNaN(d)) return;
+    var kn = String(c.kiNang).trim().replace(/\.$/, ''); kn = kn.charAt(0).toLowerCase() + kn.slice(1);
+    var r = d / td;
+    if (r >= 0.999) tot.push(kn); else if (r < 0.5) yeu.push(kn); else vua.push(kn);
+    if (String(c.muc) === '3') { m3.co++; if (r >= 0.999) m3.tot++; else if (r < 0.5) m3.yeu++; }
+  });
+  if (!tot.length && !vua.length && !yeu.length) return '';
+  var bo = function (ds) { var o = []; ds.forEach(function (x) { if (o.indexOf(x) < 0) o.push(x); }); return o; };
+  tot = bo(tot); vua = bo(vua); yeu = bo(yeu);
+  var cau3 = [];
+  if (diem) cau3.push('Bài kiểm tra ' + tenBai + ' đạt ' + diem + ' điểm.');
+  if (tot.length) cau3.push('Làm tốt: ' + tot.slice(0, 4).join('; ') + '.');
+  if (vua.length) cau3.push('Còn sai sót nhỏ ở: ' + vua.slice(0, 2).join('; ') + '.');
+  if (yeu.length) cau3.push('Cần rèn thêm: ' + yeu.slice(0, 3).join('; ') + '.');
+  if (m3.co && m3.tot === m3.co && yeu.length + vua.length) cau3.push('Làm được cả câu vận dụng (mức 3).');
+  else if (m3.co && m3.yeu === m3.co && tot.length) cau3.push('Câu vận dụng (mức 3) còn lúng túng.');
+  var out = '';
+  cau3.forEach(function (x) { var th = out ? out + ' ' + x : x; if (th.length <= (n || 300)) out = th; });
   return out;
 }

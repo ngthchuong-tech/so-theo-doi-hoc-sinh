@@ -900,11 +900,149 @@ function veKT() {
   $('ktDs').innerHTML = kt.hs.map(function (h) {
     var d = ktDiem(ky, h.ma, ktMon), khac = kt.ky.filter(function (k) { return k !== ky && ktDiem(k, h.ma, ktMon); })
       .map(function (k) { return TEN_KT[k] + ' ' + ktDiem(k, h.ma, ktMon); }).join(' · ');
+    var nxk = ktNhanXet(ky, h.ma, ktMon);
     return '<div class="kt-hang" data-ma="' + h.ma + '" onclick="ktNhap(this.dataset.ma)"><span class="kt-stt">' + h.stt + '</span><span class="ten">' + esc(h.ten) + dauNhom(h.ma) +
-      (khac ? '<span class="nho">' + esc(khac) + '</span>' : '') + '</span>' + (kt.anh[ky + '|' + h.ma + '|' + ktMon] ? '<span title="Đã lưu ảnh bài">📷</span>' : '') +
+      (khac ? '<span class="nho">' + esc(khac) + '</span>' : '') + (nxk ? '<span class="nho" style="color:#475467">' + esc(nxk.replace(/^Bài kiểm tra [^.]*\.\s*/, '')) + '</span>' : '') + '</span>' + (kt.anh[ky + '|' + h.ma + '|' + ktMon] ? '<span title="Đã lưu ảnh bài">📷</span>' : '') +
       '<span class="kt-diem ' + ktLop(d) + '">' + (d || '–') + '</span></div>';
   }).join('') || '<div class="nho">Chưa có học sinh.</div>';
 }
+// ---------------------------------------------------------------- Nhập từ file của cô (điểm từng câu + đề)
+var ktf = null;      // {aoa, hdr, c: {ten, tron, tong, cau: [chỉ số cột]}, nhan: [tên cột], toiDaFile: {}, dong: [{ten, tron, cau}], khop: {i: ma}, de: [{cau, toiDa, muc, kiNang}]}
+function chuanTen(s) { return String(s || '').normalize('NFC').toLowerCase().replace(/\s+/g, ' ').trim(); }
+function soTP(v) { if (v === null || v === undefined || v === '') return null; var x = Number(String(v).replace(',', '.').trim()); return isNaN(x) ? null : x; }
+function lamTron(x) { return Math.max(1, Math.min(10, Math.floor(x + 0.5))); }        // thang 10, không điểm 0, không thập phân (TT 27)
+function nhanCau(h) {          // "Câu 3a" / "C3" / "3" / "Bài 2" → "3a"; không phải cột câu → ''
+  var m = /^\s*(?:câu|cau|c|bài|bai)\s*\.?\s*(\d+\s*[a-zđ]?)\s*$/i.exec(String(h || '')) || /^\s*(\d+\s*[a-z]?)\s*$/i.exec(String(h || ''));
+  return m ? m[1].replace(/\s+/g, '').toLowerCase() : '';
+}
+function ktDocFileDiem(input) {
+  if (!kt || !ktMon) { input.value = ''; return bao('Chọn bài và môn trước.'); }
+  docFile(input).then(function (f) {
+    try {
+      var x = docExcel(f.data), tot = null;
+      x.ten.forEach(function (n) { var aoa = x.sheets[n]; for (var r = 0; r < Math.min(aoa.length, 15); r++) if ((aoa[r] || []).some(function (v) { return /họ\s*(và)?\s*tên|tên học sinh/i.test(String(v || '')); })) { if (!tot) tot = { aoa: aoa, hdr: r, sheet: n }; return; } });
+      if (!tot) throw new Error('Không thấy dòng tiêu đề có cột "Họ và tên" trong file.');
+      var H = tot.aoa[tot.hdr].map(function (v) { return String(v || '').trim(); }), duoi = (tot.aoa[tot.hdr + 1] || []).map(function (v) { return String(v || '').trim(); });
+      var c = { ten: H.findIndex(function (v) { return /họ\s*(và)?\s*tên|tên học sinh/i.test(v); }), tron: -1, tong: -1, cau: [] }, nhan = H.slice(), batDau = tot.hdr + 1;
+      H.forEach(function (v, j) { if (nhanCau(v)) c.cau.push(j); });
+      if (!c.cau.length && duoi.some(nhanCau)) {           // tiêu đề 2 dòng: "Câu" gộp ô ở trên, số câu ở dòng dưới
+        duoi.forEach(function (v, j) { if (nhanCau(v)) { c.cau.push(j); nhan[j] = 'Câu ' + v; } }); batDau = tot.hdr + 2;
+        duoi.forEach(function (v, j) { if (!nhan[j] && v) nhan[j] = v; });
+      }
+      nhan.forEach(function (v, j) { if (c.tron < 0 && /làm tròn|lam tron|điểm\s*(ktđk|kiểm tra|bài|chính thức)|^điểm$/i.test(v)) c.tron = j; if (c.tong < 0 && /tổng|tong/i.test(v)) c.tong = j; });
+      var toiDa = {}, dong = [];
+      for (var r = batDau; r < tot.aoa.length; r++) {
+        var row = tot.aoa[r] || [], ten = String(row[c.ten] || '').trim(); if (!ten) continue;
+        if (/tối đa|toi da|thang điểm|điểm chuẩn|đáp án/i.test(ten + ' ' + String(row[0] || ''))) { c.cau.forEach(function (j) { toiDa[j] = soTP(row[j]); }); continue; }
+        if (/^(tổng|cộng|trung bình|tb)\b/i.test(ten)) continue;
+        dong.push({ r: r, ten: ten });
+      }
+      if (!dong.length) throw new Error('Không thấy học sinh nào dưới dòng tiêu đề.');
+      ktf = { aoa: tot.aoa, sheet: tot.sheet, c: c, nhan: nhan, toiDaFile: toiDa, dong: dong, khop: {}, de: ktf && ktf.de || [] };
+      var theoTen = {}; kt.hs.forEach(function (h) { theoTen[chuanTen(h.ten)] = h.ma; });
+      dong.forEach(function (d, i) { if (theoTen[chuanTen(d.ten)]) ktf.khop[i] = theoTen[chuanTen(d.ten)]; });
+      ktGhepDe(); veKTNhap();
+    } catch (e) { input.value = ''; $('ktNhapND').innerHTML = '<div class="nhac do" style="cursor:default">' + esc(loiFile(e)) + '</div>'; }
+  });
+}
+// Đề Word: lấy chữ từng đoạn → tách "Câu 1 … (2 điểm) … M2"
+function ktDocFileDe(input) {
+  docFile(input).then(function (f) { return JSZip.loadAsync(f.data); }).then(function (z) {
+    var x = z.file('word/document.xml'); if (!x) throw new Error('Không phải file Word (.docx).'); return x.async('string');
+  }).then(function (xml) {
+    var giai = function (s) { return s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'"); };
+    var text = xml.split(/<\/w:p>/).map(function (p) { return giai(p.replace(/<w:tab\/>/g, ' ').replace(/<[^>]+>/g, '')).trim(); }).filter(Boolean).join('\n');
+    $('ktDeText').value = text; ktPhanTichDe();
+  }).catch(function (e) { input.value = ''; bao(loiFile(e, 'Word (.docx)'), 7000); });
+}
+function ktPhanTichDe() {
+  var text = $('ktDeText').value, ds = [], cur = null;
+  text.split('\n').forEach(function (l) {
+    var m = /^\s*(?:câu|bài)\s*(\d+\s*[a-z]?)\s*[\.:)\-–]?\s*(.*)$/i.exec(l);
+    if (m) { cur = { cau: m[1].replace(/\s+/g, '').toLowerCase(), chu: m[2] }; ds.push(cur); }
+    else if (cur && cur.chu.length < 300) cur.chu += ' ' + l.trim();
+  });
+  var de = ds.map(function (d) {
+    var dm = /\(?\s*(\d+(?:[,\.]\d+)?)\s*(?:điểm|đ)\s*\)?/i.exec(d.chu), mm = /\bM\s*([123])\b|mức\s*([123])/i.exec(d.chu);
+    var kn = d.chu.replace(/\(?\s*\d+(?:[,\.]\d+)?\s*(?:điểm|đ)\s*\)?/ig, '').replace(/\(?\s*\bM\s*[123]\b\s*\)?|mức\s*[123]/ig, '').replace(/\s+/g, ' ').trim();
+    kn = kn.replace(/^[\s\-–—:;,.)]+/, '');                 // bỏ dấu thừa đầu câu sau khi tách "(1 điểm) – M1:"
+    kn = kn.split(/[\.:?!]/)[0].trim(); if (kn.length > 70) kn = kn.slice(0, 67).replace(/\s+\S*$/, '') + '…';
+    return { cau: d.cau, toiDa: dm ? soTP(dm[1]) : '', muc: mm ? (mm[1] || mm[2]) : '', kiNang: kn };
+  });
+  if (ktf) { ktf.deFile = de; ktGhepDe(); veKTNhap(); } else { ktf = null; bao(de.length ? 'Đã đọc ' + de.length + ' câu trong đề – chọn file điểm để ghép.' : 'Chưa nhận ra câu nào trong đề (cần dạng "Câu 1 …").', 6000); window._deCho = de; }
+}
+// Bảng câu: theo các cột câu của file điểm; lấy điểm tối đa / mức / kĩ năng từ đề (hoặc dòng "tối đa" trong file), giữ phần cô đã sửa
+function ktGhepDe() {
+  if (!ktf) return;
+  var tuDe = {}; (ktf.deFile || window._deCho || []).forEach(function (d) { tuDe[d.cau] = d; });
+  ((kt.de || {})[$('ktKy').value + '|' + ktMon] || []).forEach(function (d) { if (!tuDe[d.cau]) tuDe[d.cau] = d; });   // đề đã lưu của bài này
+  var cu = {}; (ktf.de || []).forEach(function (d) { cu[d.cau] = d; });
+  ktf.de = ktf.c.cau.map(function (j) {
+    var k = nhanCau(ktf.nhan[j]) || String(ktf.nhan[j]), d = cu[k] || {}, e = tuDe[k] || {};
+    return { cau: k, cot: j, toiDa: d.toiDa !== undefined && d.toiDa !== '' ? d.toiDa : (ktf.toiDaFile[j] != null ? ktf.toiDaFile[j] : (e.toiDa || '')), muc: d.muc || e.muc || '', kiNang: d.kiNang || e.kiNang || '' };
+  });
+}
+function ktDiemDong(i) {        // {tron, cau}
+  var d = ktf.dong[i], row = ktf.aoa[d.r] || [], cau = {};
+  ktf.de.forEach(function (c) { var v = soTP(row[c.cot]); if (v !== null) cau[c.cau] = v; });
+  var tron = ktf.c.tron >= 0 ? soTP(row[ktf.c.tron]) : null, tong = ktf.c.tong >= 0 ? soTP(row[ktf.c.tong]) : null;
+  if (tron === null && tong === null) { var s = 0, co = false; Object.keys(cau).forEach(function (k) { s += cau[k]; co = true; }); if (co) tong = s; }
+  return { tron: tron !== null ? lamTron(tron) : tong !== null ? lamTron(tong) : null, cau: cau };
+}
+function veKTNhap() {
+  if (!ktf) return;
+  var opt = function (j, chon) { return ktf.nhan.map(function (v, k) { return v ? '<option value="' + k + '"' + (k === chon ? ' selected' : '') + '>' + esc(v) + '</option>' : ''; }).join(''); };
+  var khop = Object.keys(ktf.khop).length, n = ktf.dong.length, ky = $('ktKy').value;
+  var tongTD = ktf.de.reduce(function (s, c) { return s + (Number(c.toiDa) || 0); }, 0);
+  var canhTD = ktf.de.length && tongTD && Math.abs(tongTD - 10) > 0.01 ? '<div class="nhac vang" style="cursor:default;margin-top:8px">Tổng điểm tối đa các câu đang là ' + soVN(tongTD) +
+    ' (bài kiểm tra thang 10) – cô xem lại điểm tối đa từng câu trong bảng dưới.</div>' : '';
+  var chuaKhop = ktf.dong.map(function (d, i) { return ktf.khop[i] ? '' : '<div class="dd-hang"><span>' + esc(d.ten) + '</span><select onchange="ktGanHS(' + i + ', this.value)"><option value="">– chọn em –</option>' +
+    kt.hs.map(function (h) { return '<option value="' + h.ma + '">' + esc(h.ten) + '</option>'; }).join('') + '</select></div>'; }).join('');
+  var mau = Object.keys(ktf.khop).slice(0, 3).map(function (i) {
+    var x = ktDiemDong(+i), h = kt.hs.filter(function (y) { return y.ma === ktf.khop[i]; })[0];
+    return '<div class="gc-cu"><b>' + esc(h ? h.ten : '') + ' – ' + (x.tron || '?') + ' điểm</b>\n' + esc(nhanXetBKT(ktf.de, x.cau, x.tron, TEN_KT[ky], 300) || '(chưa đủ thông tin câu để nhận xét)') + '</div>';
+  }).join('');
+  $('ktNhapND').innerHTML = '<div class="the" style="background:#f7f9fc;margin-top:10px">' +
+    '<b>Sheet "' + esc(ktf.sheet) + '" · ' + n + ' dòng học sinh · khớp tên ' + khop + '/' + n + '</b>' +
+    '<div class="tg-hang"><span class="tg-nhan">Họ tên</span><select onchange="ktf.c.ten=+this.value">' + opt(0, ktf.c.ten) + '</select></div>' +
+    '<div class="tg-hang"><span class="tg-nhan">Điểm làm tròn</span><select onchange="ktf.c.tron=+this.value;veKTNhap()"><option value="-1">(không có – app làm tròn cột tổng)</option>' + opt(0, ktf.c.tron) + '</select></div>' +
+    '<div class="tg-hang"><span class="tg-nhan">Cột tổng</span><select onchange="ktf.c.tong=+this.value;veKTNhap()"><option value="-1">(không có – app cộng các câu)</option>' + opt(0, ktf.c.tong) + '</select></div>' +
+    (chuaKhop ? '<div class="nhac vang" style="cursor:default;margin-top:8px">' + (n - khop) + ' dòng chưa khớp tên với danh sách lớp – chọn em tương ứng (bỏ trống nếu không phải học sinh lớp):</div>' + chuaKhop : '') +
+    '<h3>Các câu của đề (' + ktf.de.length + ')</h3>' + canhTD + (ktf.de.length ? '<div class="nho">Điểm tối đa, mức, kĩ năng lấy từ đề (hoặc dòng "điểm tối đa" trong file) – cô sửa cho đúng; kĩ năng viết ngắn để ghép vào nhận xét.</div>' +
+      (aiCD.coKhoa && cnBat('ai') && $('ktDeText').value.trim() ? '<button class="nut phu nut-nho" style="margin:6px 0" onclick="ktDeAI()">✨ Nhờ AI đọc đề (chỉ gửi nội dung đề)</button>' : '') +
+      '<table class="bang"><tr><th>Câu</th><th>Tối đa</th><th>Mức</th><th>Kĩ năng / nội dung</th></tr>' + ktf.de.map(function (c, k) {
+        return '<tr><td>' + esc(c.cau) + '</td><td><input style="width:58px" value="' + esc(soVN(c.toiDa)) + '" onchange="ktf.de[' + k + '].toiDa=soTP(this.value);veKTNhap()"></td>' +
+          '<td><select onchange="ktf.de[' + k + '].muc=this.value;veKTNhap()">' + ['', '1', '2', '3'].map(function (m) { return '<option' + (String(c.muc) === m ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></td>' +
+          '<td><input style="width:100%" value="' + esc(c.kiNang) + '" placeholder="VD: đặt tính rồi tính" onchange="ktf.de[' + k + '].kiNang=this.value;veKTNhap()"></td></tr>'; }).join('') + '</table>'
+      : '<div class="nhac vang" style="cursor:default">Không thấy cột điểm từng câu (tiêu đề dạng "Câu 1", "C1", "1"…) – app vẫn điền điểm, nhưng không gợi ý nhận xét theo câu.</div>') +
+    '<h3>Xem trước nhận xét gợi ý</h3>' + (mau || '<div class="nho">Chưa có em nào khớp.</div>') +
+    '<div class="hang" style="margin-top:10px"><button class="nut lon" onclick="ktLuuFile()">✔ Điền điểm ' + TEN_KT[ky] + ' – ' + esc(ktMon) + ' cho ' + khop + ' em</button></div></div>';
+}
+function ktGanHS(i, ma) { if (ma) ktf.khop[i] = ma; else delete ktf.khop[i]; veKTNhap(); }
+function ktDeAI() {
+  chay('phanTichDeAI', ktMon, $('ktDeText').value).then(function (ds) {
+    var theo = {}; ds.forEach(function (d) { theo[d.cau] = d; });
+    ktf.de.forEach(function (c) { var d = theo[c.cau]; if (!d) return; if (d.toiDa) c.toiDa = d.toiDa; if (d.muc) c.muc = d.muc; if (d.kiNang) c.kiNang = d.kiNang; });
+    veKTNhap(); bao('AI đã đọc ' + ds.length + ' câu – cô kiểm tra lại bảng.');
+  });
+}
+function ktLuuFile() {
+  var ky = $('ktKy').value, ds = [], thieu = [], trung = {};
+  Object.keys(ktf.khop).forEach(function (i) {
+    var ma = ktf.khop[i], x = ktDiemDong(+i);
+    if (trung[ma]) return thieu.push(ktf.dong[i].ten + ' (trùng em đã chọn)'); trung[ma] = 1;
+    if (!x.tron) return thieu.push(ktf.dong[i].ten + ' (không có điểm)');
+    ds.push({ ma: ma, diem: x.tron, cau: x.cau });
+  });
+  var cuCo = ds.filter(function (d) { var c = ktDiem(ky, d.ma, ktMon); return c && String(c) !== String(d.diem); }).length;
+  if (!confirm('Điền điểm ' + TEN_KT[ky] + ' môn ' + ktMon + ' cho ' + ds.length + ' em' + (cuCo ? ' (' + cuCo + ' em đã có điểm khác – sẽ thay)' : '') +
+    (thieu.length ? '\nBỏ qua: ' + thieu.join(', ') : '') + '?')) return;
+  chay('luuKetQuaBKT', ky, ktMon, ktf.de.filter(function (c) { return c.toiDa; }).map(function (c) { return { cau: c.cau, toiDa: c.toiDa, muc: c.muc, kiNang: c.kiNang }; }), ds).then(function (m) {
+    bao(m, 7000); ktf = null; $('ktNhapND').innerHTML = '<div class="nhac xanh" style="cursor:default">' + esc(m) + ' Nhận xét gợi ý hiện ở màn Định kỳ (nút "＋ Chèn").</div>';
+    $('ktFileDiem').value = ''; taiKT();
+  });
+}
+function ktNhanXet(ky, ma, mon) { var c = (kt.cau || {})[ky + '|' + mon + '|' + ma]; return c ? nhanXetBKT((kt.de || {})[ky + '|' + mon], c, ktDiem(ky, ma, mon), TEN_KT[ky], 300) : ''; }
 function ktNhap(ma) {
   if (!kt || !ktMon) return;
   var ky = $('ktKy').value, mon = ktMon, k = function (m) { return m + '|' + mon; };
@@ -1025,6 +1163,8 @@ function theMon(h) {
     (dk.cuoiKy && m.coDiem ? ' <label class="nho">Điểm KTĐK <input type="number" inputmode="numeric" min="1" max="10" step="1" style="width:70px" value="' + esc(x.diem) + '" onchange="dkDatDiem(\'' + h.ma + '\', this)"></label>' +
       ' <button class="nut phu" style="padding:8px 10px" title="Nhập điểm" onclick="moNhapDiem(\'' + h.ma + '\')">' + (cnBat('chupBai') || cnBat('ai') ? '📷' : '✍') + '</button>' +
       (x.anh ? ' <a class="nho" href="' + esc(x.anh) + '" target="_blank">ảnh bài</a>' : '') : '') + '</div>' +
+    (x.nxBKT ? '<div class="nd-ai">📝 <b>Gợi ý từ bài kiểm tra:</b> ' + esc(x.nxBKT) + ((x.nx || '').indexOf(x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '').slice(0, 25)) >= 0 ? ' <span class="tag xanh">đã chèn</span>'
+      : ' <button class="nut phu nut-nho" onclick="dkChenBKT(\'' + h.ma + '\')">＋ Chèn vào nhận xét</button>') + '</div>' : '') +
     oChu(h.ma, dkPhan, 'nx', x.nx, 'Nội dung nhận xét') + '</div>';
 }
 function theNLPC(h) {
@@ -1049,6 +1189,11 @@ function dkDatDiem(ma, el) {
   var v = el.value.trim();
   if (v && !/^(10|[1-9])$/.test(v)) { bao('Điểm phải là số nguyên từ 1 đến 10.'); el.value = dk.du[ma].mon[dkPhan].diem || ''; return; }
   dk.du[ma].mon[dkPhan].diem = v; dkGui(ma, dkPhan);
+}
+function dkChenBKT(ma) {            // thêm câu nhận xét từ bài kiểm tra (bỏ câu "Bài kiểm tra … đạt n điểm") vào cuối nhận xét môn
+  var x = dk.du[ma].mon[dkPhan], c = x.nxBKT.replace(/^Bài kiểm tra [^.]*\.\s*/, '');
+  x.nx = ((x.nx || '').replace(/\s+$/, '') + ' ' + c).trim(); veDanhGiaKy(); dkGui(ma, dkPhan);
+  if (x.nx.length > dk.gioiHan) bao('Nhận xét dài quá ' + dk.gioiHan + ' ký tự – cô rút gọn giúp.', 6000);
 }
 function dkDatNL(ma, t, m) { var p = dk.du[ma].nlpc; p.muc[t] = p.muc[t] === m ? '' : m; veDanhGiaKy(); dkGui(ma, 'NLPC'); }
 function dkDem(el) { var d = el.parentNode.querySelector('.dem'), c = demHienThi(el.value); d.textContent = c.chu; d.classList.toggle('vuot', c.vuot); }
