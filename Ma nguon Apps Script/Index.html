@@ -243,6 +243,12 @@
   .bm-o textarea { font-size: 15.5px; line-height: 1.45; border-color: #d0d5dd; background: #fcfcfd; }
   .the h3 { color: var(--chinh); font-weight: 700; }
   .tg-hang .tag { font-size: 13px; padding: 3px 9px; }
+  /* Ghi chú hằng ngày */
+  .gc-o textarea { min-height: 150px; font-size: 15.5px; line-height: 1.5; }
+  .gc-cu { border-left: 3px solid var(--chinh2); padding: 4px 0 4px 10px; margin: 8px 0; font-size: 14px; white-space: pre-line; }
+  .gc-cu b { color: var(--chinh); font-size: 13px; }
+  .hs .gc-dau { position: absolute; top: 4px; right: 6px; font-size: 13px; }
+  .hs .gc-dem { display: block; font-size: 11px; color: var(--mo); }
   /* Sổ chủ nhiệm */
   .cn-dau { font-size: 17px; font-weight: 800; color: var(--chinh); margin: 4px 0 2px; }
   .cn-o { margin-top: 12px; }
@@ -350,6 +356,7 @@
           <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
           <span class="chip" id="stChePT" onclick="doiCheDo('pt')">🏆 Phong trào – Cuộc thi</span>
           <span class="chip" id="stCheCN" onclick="doiCheDo('cn')">📘 Sổ chủ nhiệm</span>
+          <span class="chip" id="stCheGC" onclick="doiCheDo('gc')">🗒️ Ghi chú</span>
         </div>
       </div>
 
@@ -410,6 +417,16 @@
         </div>
         <div class="the" id="voDs"></div>
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
+      </div>
+
+      <div id="stGC" class="an">
+        <div class="the">
+          <div class="hang gian"><h3 style="margin:0">🗒️ Ghi chú hằng ngày</h3><span class="nho" id="gcNgayTen"></span></div>
+          <div class="hang" style="margin-top:8px"><span class="chip on" id="gcChonlop" onclick="gcChon('lop')">1. Chung cả lớp</span>
+            <span class="chip" id="gcChonhs" onclick="gcChon('hs')">2. Riêng từng em</span><span class="chip" id="gcChonkhac" onclick="gcChon('khac')">3. Ghi chú khác</span></div>
+          <div class="nho" style="margin-top:4px">Ghi cho ngày ở ô ngày phía trên (đổi ngày để xem / ghi ngày khác). App tự lưu. Ghi chú được dùng khi gợi ý Sổ chủ nhiệm và hiện trong hồ sơ học sinh.</div>
+        </div>
+        <div id="gcND"></div>
       </div>
 
       <div id="stCN" class="an">
@@ -617,6 +634,20 @@
             <li>Điểm danh ngày khác: đổi ngày ở ô ngày phía trên.</li>
             <li>Chạm nhầm: chạm lại đúng trạng thái, hoặc bấm <b>Bỏ thay đổi</b> (trước khi lưu). Đã lưu rồi vẫn sửa được: chạm lại rồi Lưu lần nữa.</li>
             <li><b>📊 Tổng hợp</b>: chọn Tuần / Tháng / Học kì I / Học kì II / Cả năm học / Tuỳ chọn → <b>Tổng hợp</b>: số ngày vắng có phép, không phép, tỉ lệ chuyên cần và các ngày vắng của từng em (vắng nửa buổi tính 0,5 ngày). App nhắc những ngày có dạy mà chưa điểm danh. Bấm <b>⬇ Xuất file Excel</b> để tải về (kèm bản sao trong Drive).</li>
+          </ul>
+        </details>
+      </div>
+
+      <div class="the">
+        <details><summary>4b. 🗒️ Ghi chú hằng ngày</summary>
+          <ul>
+            <li>Vào <b>Sổ theo dõi → 🗒️ Ghi chú</b>. Ghi cho ngày ở ô ngày phía trên (đổi ngày để xem / ghi bù ngày khác). App tự lưu.</li>
+            <li><b>1. Chung cả lớp</b>: tình hình lớp trong ngày; có câu chạm nhanh (+ Lớp giữ trật tự, nề nếp tốt…). Bên dưới là ghi chú 30 ngày gần đây.</li>
+            <li><b>2. Riêng từng em</b>: chạm tên em → ghi (câu chạm nhanh: quên vở, chưa thuộc bài, hăng hái phát biểu, có tiến bộ…); hiện các ghi chú trước của em.
+              Dấu ✎ là em đã có ghi chú ngày đang chọn.</li>
+            <li><b>3. Ghi chú khác</b>: họp, việc cần nhớ, trao đổi với phụ huynh, giáo viên bộ môn…</li>
+            <li>Ghi chú của em hiện trong <b>hồ sơ học sinh</b>. <b>Sổ chủ nhiệm</b> dùng ghi chú khi gợi ý: ghi chú cả lớp trong tuần → ô Kết quả của tuần;
+              ghi chú riêng của em trong tháng → ô Nội dung cần lưu ý (theo dõi học sinh chưa tiến bộ).</li>
           </ul>
         </details>
       </div>
@@ -1592,6 +1623,7 @@ if (coLichSu) google.script.history.setChangeHandler(function (e) {   // nút Ba
 function moTab(t) { if (t === hienTai.tab && !hienTai.buoc && !hienTai.hoSo) { apDung(hienTai); return; } diToi({ tab: t }); }
 function apDung(tt) {
   if (cnHen) cnLuuNgay();                             // sổ chủ nhiệm đang soạn dở → lưu ngay khi chuyển màn
+  if (gcHen) gcLuuNgay();                             // ghi chú đang soạn dở
   var cu = hienTai; hienTai = tt; var t = tt.tab;
   document.body.setAttribute('data-tab', t);          // màu chủ đạo theo khu vực (Styles: body[data-tab])
   var veSauND = nd && nd.nguon && nd.nguon.dong;
@@ -1612,7 +1644,9 @@ function apDung(tt) {
     if (tt.ngay) $('stNgay').value = tt.ngay;
     $('stPT').classList.add('an'); $('stChePT').classList.remove('on'); $('stVo').classList.add('an'); $('stCheVo').classList.remove('on');
     $('stThang').classList.add('an'); $('stCheThang').classList.remove('on'); $('stCN').classList.add('an'); $('stCheCN').classList.remove('on');
+    $('stGC').classList.add('an'); $('stCheGC').classList.remove('on');
     if (tt.buoc === 'pt') moPhongTrao(tt.maPT);
+    else if (tt.buoc === 'gc') moGhiChu();
     else if (tt.buoc === 'cn') moSoCN();
     else if (tt.buoc === 'thang') moChonThang();
     else if (tt.buoc === 'vo' || (!tt.buoc && !cnBat('theoBai'))) moNopVo();
@@ -1723,6 +1757,7 @@ function doiCheDo(c) {
   if (c === 'thang') { if (hienTai.buoc !== 'thang') diToi({ tab: 'sotheodoi', buoc: 'thang' }); return; }
   if (c === 'pt') { if (hienTai.buoc !== 'pt' || hienTai.maPT) diToi({ tab: 'sotheodoi', buoc: 'pt' }); return; }
   if (c === 'cn') { if (hienTai.buoc !== 'cn') diToi({ tab: 'sotheodoi', buoc: 'cn' }); return; }
+  if (c === 'gc') { if (hienTai.buoc !== 'gc') diToi({ tab: 'sotheodoi', buoc: 'gc' }); return; }
   if (c === 'chung') { if (hienTai.buoc !== 'chung') diToi({ tab: 'sotheodoi', buoc: 'chung', ngay: $('stNgay').value }); }
   else if (hienTai.buoc) moChonBai();
 }
@@ -1753,6 +1788,7 @@ function taiTietTrongNgay() {
   });
 }
 function doiNgaySTD() {
+  if (!$('stGC').classList.contains('an')) return taiGhiChu();      // đang ở Ghi chú: đổi ngày = xem / ghi ngày đó
   if (!$('stVo').classList.contains('an')) {          // đang ở Nộp vở
     if (vo && vo.sua && !confirm('Cô chưa lưu nộp vở ngày ' + vo.ngay + '. Đổi ngày và bỏ thay đổi?')) { $('stNgay').value = dmyToIso(vo.ngay); return; }
     return taiNopVo();
@@ -2049,6 +2085,8 @@ function hienHoSo(ma) {
       (d.diemKT && d.diemKT.length ? '<h3>📝 Bài kiểm tra</h3><div class="hang">' + d.diemKT.map(function (x) {
         return '<span class="tag ' + ktLop(x.diem).replace('d9', 'xanh').replace('d0', 'do').replace('d5', 'vang').replace('d7', '') + '">' + esc(x.mon) + ' ' + esc(TEN_KT[x.ky] || x.ky) + ': <b>' + esc(x.diem) + '</b></span>';
       }).join(' ') + '</div>' : '') +
+      (d.ghiChu && d.ghiChu.length ? '<h3>🗒️ Ghi chú (' + d.ghiChu.length + ')</h3>' + d.ghiChu.slice(0, 30).map(function (x) {
+        return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b>\n' + esc(x.nd) + '</div>'; }).join('') : '') +
       '<h3>Vắng: ' + d.vang.length + ' buổi</h3>' + (d.vang.length ? '<div class="nho">' + d.vang.map(function (v) { return esc(v.Ngay) + ' (' + esc(v.TrangThai) + ')'; }).join(', ') + '</div>' : '') +
       (!cnBat('minhChung') ? '' : '<h3>📎 Minh chứng</h3><div class="hang"><button class="nut" onclick="mcMoi(\'' + ma + '\')">📷 Chụp tài liệu</button>' +
       '<button class="nut phu" onclick="mcMoi(\'' + ma + '\', true)">🖼 Chọn ảnh có sẵn</button></div><div id="mcDs" class="nho" style="margin-top:6px">Đang tải…</div>') +
@@ -3684,6 +3722,75 @@ function veKhoThang(d) {
   return '<div style="margin:6px 0"><b>Thư viện tháng:</b> ' + (ds.length ? ds.map(function (k) {
     return '<span class="tag xanh">HK ' + esc(k.hocKy) + ' · ' + esc(k.mon) + ' (' + (k.v2 ? k.soYC + ' yêu cầu, ' : '') + k.soCau + ' câu, tháng ' + esc(k.thang.join(', ')) + ')</span>';
   }).join(' ') : '<span class="tag do">chưa có – tải file "Thư viện nhận xét THÁNG…"</span>') + '</div>';
+}
+
+// ============================================================================ GHI CHÚ HẰNG NGÀY (Sổ theo dõi → 🗒️ Ghi chú)
+var gc = null, gcPhan = 'lop', gcMa = '', gcHen = null, gcCho = null, gcLS = [];
+var GC_NHANH = {
+  lop: ['Cả lớp đi học đầy đủ, đúng giờ.', 'Lớp giữ trật tự, nề nếp tốt.', 'Nhiều em hăng hái phát biểu xây dựng bài.', 'Một số em chưa chuẩn bị bài ở nhà.', 'Vệ sinh lớp học sạch sẽ.'],
+  hs: ['Quên vở / đồ dùng học tập.', 'Chưa làm bài ở nhà.', 'Chưa thuộc bài.', 'Mất trật tự trong giờ học.', 'Hăng hái phát biểu.', 'Có tiến bộ.', 'Biết giúp đỡ bạn.', 'Không khoẻ, cần theo dõi.'],
+  khac: []
+};
+function moGhiChu() {
+  ['stChonBai', 'stNhap', 'stPT', 'stVo', 'stThang', 'stCN'].forEach(function (id) { $(id).classList.add('an'); });
+  ['stCheBai', 'stCheChung', 'stChePT', 'stCheVo', 'stCheThang', 'stCheCN'].forEach(function (id) { $(id).classList.remove('on'); });
+  $('stGC').classList.remove('an'); $('stCheGC').classList.add('on');
+  taiGhiChu();
+}
+function taiGhiChu() {
+  if (!$('stNgay').value) $('stNgay').value = homNayIso();
+  gcLuuNgay();
+  var ngay = isoToDmy($('stNgay').value); $('gcNgayTen').textContent = 'Ngày ' + ngay;
+  chay('layGhiChu', ngay).then(function (d) { gc = d; gcLS = []; if (gcPhan === 'hs' && gcMa) gcTaiLS(); veGC(); });
+}
+function gcChon(p) { gcLuuNgay(); gcPhan = p; ['lop', 'hs', 'khac'].forEach(function (x) { $('gcChon' + x).classList.toggle('on', x === p); }); veGC(); }
+function gcNhanh(loai, ds) {
+  return ds.length ? '<div class="hang" style="margin:6px 0 2px">' + ds.map(function (c, i) {
+    return '<span class="chip" style="font-size:13px;padding:5px 10px" onclick="gcThem(\'' + loai + '\',' + i + ')">+ ' + esc(c.replace(/\.$/, '')) + '</span>'; }).join('') + '</div>' : '';
+}
+function veGC() {
+  if (!gc) return;
+  if (gcPhan !== 'hs') {
+    var ten = gcPhan === 'lop' ? 'Ghi chú chung cho cả lớp' : 'Ghi chú khác (họp, việc cần nhớ, trao đổi với phụ huynh, giáo viên…)';
+    $('gcND').innerHTML = '<div class="the gc-o"><b>' + ten + '</b>' + gcNhanh(gcPhan, GC_NHANH[gcPhan]) +
+      '<textarea id="gcO" oninput="gcGhi(\'' + gcPhan + '\', \'\', this.value)" placeholder="Gõ ghi chú…">' + esc(gc[gcPhan] || '') + '</textarea><div class="nho" id="gcTT"></div></div>' +
+      '<div class="the"><b>30 ngày gần đây</b>' + (gc.ganDay[gcPhan].length ? gc.ganDay[gcPhan].map(function (x) {
+        return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b>\n' + esc(x.nd) + '</div>'; }).join('') : '<div class="nho" style="margin-top:6px">Chưa có.</div>') + '</div>';
+    return;
+  }
+  var h = gc.dsHS.filter(function (x) { return x.ma === gcMa; })[0];
+  $('gcND').innerHTML = (h ? '<div class="the gc-o bm-hs"><div><span class="nho">' + h.stt + '.</span> <b>' + esc(h.ten) + '</b>' + dauNhom(h.ma) + '</div>' +
+      gcNhanh('hs', GC_NHANH.hs) + '<textarea id="gcO" oninput="gcGhi(\'hs\', \'' + h.ma + '\', this.value)" placeholder="Ghi chú về em hôm nay…">' + esc(gc.hs[h.ma] || '') + '</textarea>' +
+      '<div class="nho" id="gcTT"></div><div id="gcLS">' + gcVeLS() + '</div></div>'
+    : '<div class="the nho">Chạm vào tên em để ghi chú riêng. Dấu ✎ là em đã có ghi chú ngày này; số nhỏ là tổng số ghi chú của em.</div>') +
+    '<div class="the"><div class="hs-luoi">' + gc.dsHS.map(function (x) {
+      return '<div class="hs' + (x.ma === gcMa ? ' on' : '') + '" onclick="gcChonHS(\'' + x.ma + '\')"><div class="stt">' + x.stt + dauNhom(x.ma) + '</div>' + esc(x.ten) +
+        (gc.hs[x.ma] ? '<span class="gc-dau">✎</span>' : '') + (gc.dem[x.ma] ? '<span class="gc-dem">' + gc.dem[x.ma] + ' ghi chú</span>' : '') + '</div>';
+    }).join('') + '</div></div>';
+}
+function gcVeLS() {
+  var ds = gcLS.filter(function (x) { return x.ngay !== gc.ngay; });
+  return ds.length ? '<div style="margin-top:10px"><b style="font-size:14px">Ghi chú trước của em</b>' + ds.slice(0, 20).map(function (x) {
+    return '<div class="gc-cu"><b>' + esc(x.ngay) + '</b>\n' + esc(x.nd) + '</div>'; }).join('') + '</div>' : '';
+}
+function gcChonHS(ma) { gcLuuNgay(); gcMa = gcMa === ma ? '' : ma; gcLS = []; veGC(); if (gcMa) { gcTaiLS(); window.scrollTo(0, 0); } }
+function gcTaiLS() { var ma = gcMa; goi('layGhiChuHS', ma).then(function (ds) { if (gcMa !== ma) return; gcLS = ds; if ($('gcLS')) $('gcLS').innerHTML = gcVeLS(); }, function () {}); }
+function gcThem(loai, i) {
+  var o = $('gcO'), c = GC_NHANH[loai][i]; if (!o) return;
+  if (o.value.indexOf(c) >= 0) return;
+  o.value = (o.value.replace(/\s+$/, '') ? o.value.replace(/\s+$/, '') + ' ' : '') + c; o.oninput();
+}
+function gcGhi(loai, ma, v) {
+  if (loai === 'hs') gc.hs[ma] = v; else gc[loai] = v;
+  gcCho = { ngay: gc.ngay, loai: loai, ma: ma, nd: v }; clearTimeout(gcHen); if ($('gcTT')) $('gcTT').textContent = 'Đang soạn…';
+  gcHen = setTimeout(gcLuuNgay, 800);
+}
+function gcLuuNgay() {
+  clearTimeout(gcHen); gcHen = null; var x = gcCho; if (!x) return; gcCho = null;
+  goi('luuGhiChu', x.ngay, x.loai, x.ma, x.nd).then(function (luc) {
+    if ($('gcTT')) $('gcTT').textContent = 'Đã lưu lúc ' + luc.slice(-5) + '.';
+    if (x.loai === 'hs' && gc && gc.ngay === x.ngay) { var co = !!String(x.nd).trim(); var cu = document.querySelector('.hs.on .gc-dau'); if (!co && cu) cu.remove(); }
+  }, function (e) { bao('Chưa lưu được ghi chú: ' + ((e && e.message) || e) + ' – gõ thêm 1 ký tự để lưu lại.', 8000); });
 }
 
 // ============================================================================ SỔ CHỦ NHIỆM (Sổ theo dõi → 📘 Sổ chủ nhiệm)

@@ -46,6 +46,7 @@ var BANG = {
   NhomHS:       ['MaDinhDanh', 'Nhom', 'GhiChu', 'BoGoiY', 'CapNhat'],
   // Điểm bài kiểm tra (Tiếng Việt, Toán): Ky = GK1 / CK1 / GK2 / CK2. Điểm cuối kì (CK) cũng là "Điểm KTĐK" của màn Định kỳ.
   DiemKiemTra:  ['NamHoc', 'Ky', 'Mon', 'MaDinhDanh', 'Diem', 'CapNhat'],
+  GhiChuNgay:   ['Ngay', 'Loai', 'MaDinhDanh', 'NoiDung', 'CapNhat'],     // Loai: lop / hs / khac
   // Sổ chủ nhiệm: kế hoạch – kết quả từng tuần; theo dõi học sinh chưa tiến bộ (Thang = số tháng; '*' = em được thêm vào danh sách)
   SoChuNhiem:   ['NamHoc', 'Tuan', 'TuNgay', 'DenNgay', 'NoiDung', 'KetQua', 'CapNhat'],
   TheoDoiTienBo: ['NamHoc', 'MaDinhDanh', 'Thang', 'NoiDung', 'BienPhap', 'KetQua', 'CapNhat']
@@ -744,7 +745,7 @@ function layHoSo(ma) {
   var namHoc = caiDat_().NamHoc || '', diemKT = [];
   doc_('DiemKiemTra').forEach(function (r) { if (r.NamHoc === namHoc && r.MaDinhDanh === ma && r.Diem) diemKT.push({ ky: r.Ky, mon: r.Mon, diem: r.Diem }); });
   diemKT.sort(function (a, b) { return a.mon < b.mon ? -1 : a.mon > b.mon ? 1 : KY_KT.indexOf(a.ky) - KY_KT.indexOf(b.ky); });
-  return { hs: h, nhanXet: nx, vang: dd, phongTrao: phongTraoCuaHS_(namHoc)[ma] || [], diemKT: diemKT };
+  return { hs: h, nhanXet: nx, vang: dd, phongTrao: phongTraoCuaHS_(namHoc)[ma] || [], diemKT: diemKT, ghiChu: ghiChuCuaHS_(ma) };
 }
 
 // ============================================================================ NHẬN XÉT THÁNG (biểu mẫu đánh giá thường xuyên)
@@ -881,6 +882,37 @@ function ghepNhanXetKy_(ghi, gioiHan) {
   var ds = c.tb >= 2.5 ? c.tot.slice(0, 3).concat(can.slice(0, 1)) : c.can.map(function (x) { return x.cau; }).slice(0, 2).concat(c.tot.slice(0, 2));
   return noiCau_(ds, gioiHan);
 }
+// ============================================================================ GHI CHÚ HẰNG NGÀY (Sổ theo dõi → 🗒️ Ghi chú)
+// 3 mục: 'lop' ghi chú chung cả lớp · 'hs' ghi chú riêng từng em · 'khac' ghi chú khác. Mỗi ngày mỗi mục (mỗi em) 1 ô.
+function layGhiChu(ngay) {
+  ngay = ngay || homNay_();
+  var k = key_(ngay), o = { ngay: ngay, lop: '', khac: '', hs: {}, dem: {}, ganDay: { lop: [], khac: [] } };
+  doc_('GhiChuNgay').forEach(function (r) {
+    if (!r.NoiDung) return;
+    if (r.Ngay === ngay) { if (r.Loai === 'hs') o.hs[r.MaDinhDanh] = r.NoiDung; else o[r.Loai] = r.NoiDung; }
+    if (r.Loai === 'hs') o.dem[r.MaDinhDanh] = (o.dem[r.MaDinhDanh] || 0) + 1;
+    else if (r.Ngay !== ngay && key_(r.Ngay) <= k && soNgay_(r.Ngay, ngay) <= 30 && o.ganDay[r.Loai]) o.ganDay[r.Loai].push({ ngay: r.Ngay, nd: r.NoiDung });
+  });
+  ['lop', 'khac'].forEach(function (l) { o.ganDay[l].sort(function (a, b) { return key_(b.ngay) - key_(a.ngay); }); o.ganDay[l] = o.ganDay[l].slice(0, 15); });
+  o.dsHS = hocSinhDangHoc_(ngay).map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; });
+  return o;
+}
+function luuGhiChu(ngay, loai, ma, nd) {
+  return voiKhoa_(function () {
+    if (['lop', 'hs', 'khac'].indexOf(loai) < 0) throw new Error('Loại ghi chú không hợp lệ.');
+    ma = loai === 'hs' ? ma : ''; nd = String(nd || '').trim();
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+    thayTheTheo_('GhiChuNgay', function (r) { return !(r.Ngay === ngay && r.Loai === loai && (r.MaDinhDanh || '') === ma); },
+      nd ? [hang_('GhiChuNgay', { Ngay: ngay, Loai: loai, MaDinhDanh: ma, NoiDung: nd, CapNhat: luc })] : []);
+    return luc;
+  });
+}
+function ghiChuCuaHS_(ma) {
+  return doc_('GhiChuNgay').filter(function (r) { return r.Loai === 'hs' && r.MaDinhDanh === ma && r.NoiDung; })
+    .map(function (r) { return { ngay: r.Ngay, nd: r.NoiDung }; }).sort(function (a, b) { return key_(b.ngay) - key_(a.ngay); });
+}
+function layGhiChuHS(ma) { return ghiChuCuaHS_(ma); }
+
 // ============================================================================ SỔ CHỦ NHIỆM (theo mẫu sổ chủ nhiệm điện tử của trường cô)
 // Điều lệ trường tiểu học (TT 28/2020) Điều 21: GVCN có Sổ chủ nhiệm, được dùng hồ sơ điện tử. Bộ không ban hành mẫu → làm đúng 2 phần
 // trong sổ của trường: (1) Kế hoạch – kết quả theo tuần; (2) Theo dõi học sinh chưa tiến bộ. App gợi ý từ dữ liệu sẵn có, cô viết / sửa.
@@ -967,6 +999,10 @@ function goiYTuanCN(tuan, tu, den) {
       var s = 0; MON_VO.forEach(function (m) { var x = dv.vo[ma][m]; if (x) s += x.N + x.cu; }); return s ? ten[ma] + ' (' + s + ' lần)' : ''; }).filter(Boolean);
     kq.push(chua.length ? '- Nộp vở: chưa đầy đủ – ' + chua.join(', ') + '.' : '- Nộp vở: cả lớp nộp đầy đủ.');
   }
+  // ghi chú chung cả lớp trong tuần (Sổ theo dõi → 🗒️ Ghi chú)
+  doc_('GhiChuNgay').filter(function (r) { return r.Loai === 'lop' && r.NoiDung && trongKhoang_(r.Ngay, tu, den); })
+    .sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); })
+    .forEach(function (r) { kq.push('- ' + String(r.NoiDung).replace(/\s*\n\s*/g, '; ').replace(/^-\s*/, '') + ' (' + ngayNgan_(r.Ngay) + ')'); });
   // kết quả vở của tháng (xếp loại theo mức em đạt nhiều nhất cả tháng: A nhanh đẹp đúng · B đẹp đúng · C đúng · D chưa đúng, chưa đẹp)
   if (thang) {
     var nam = namCuaThang_(namHoc, thang), dvt = demVo_(function (ngay) { var p = String(ngay).split('/'); return +p[1] === thang && +p[2] === nam; }), xl = { A: 0, B: 0, C: 0, D: 0 }, co = 0;
@@ -1030,6 +1066,8 @@ function goiYTheoDoiHS(ma, thang) {
   var v = 0; MON_VO.forEach(function (m) { var x = ((t.vo || {})[ma] || {})[m]; if (x) v += x.N + x.cu; });
   var kp = 0; doc_('DiemDanh').forEach(function (r) { var p = String(r.Ngay).split('/'); if (r.MaDinhDanh === ma && +p[1] === thang && r.TrangThai === 'Vắng không phép') kp += (r.Buoi === 'Sáng' || r.Buoi === 'Chiều' ? 0.5 : 1); });
   var nd = han.map(function (c) { c = c.replace(/\.$/, ''); return c.charAt(0).toLowerCase() + c.slice(1); });   // nối bằng ";" → chữ thường
+  ghiChuCuaHS_(ma).filter(function (g) { return +String(g.ngay).split('/')[1] === thang; }).slice(0, 2)
+    .forEach(function (g) { nd.push(String(g.nd).replace(/\.$/, '').replace(/^./, function (c) { return c.toLowerCase(); }) + ' (' + ngayNgan_(g.ngay) + ')'); });
   if (v >= 2) nd.push('chưa nộp vở ' + v + ' lần');
   if (kp) nd.push('vắng không phép ' + kp + ' buổi');
   var a = diemTB(t), b = truoc ? diemTB(truoc) : 0, soSanh = '';
@@ -1564,7 +1602,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo', 'GhiChuNgay'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';

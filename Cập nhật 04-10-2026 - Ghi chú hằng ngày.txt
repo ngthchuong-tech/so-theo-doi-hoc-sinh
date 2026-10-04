@@ -1,0 +1,15 @@
+CẬP NHẬT – 🗒️ GHI CHÚ HẰNG NGÀY (Sổ theo dõi → 🗒️ Ghi chú)
+
+3 mục, ghi theo ngày ở ô ngày phía trên (đổi ngày để xem / ghi bù), app tự lưu:
+1. Chung cả lớp – có câu chạm nhanh; bên dưới là ghi chú 30 ngày gần đây.
+2. Riêng từng em – chạm tên em để ghi; câu chạm nhanh (quên vở, chưa làm bài ở nhà, chưa thuộc bài, mất trật tự,
+   hăng hái phát biểu, có tiến bộ, biết giúp đỡ bạn, không khoẻ); hiện ghi chú trước của em; ✎ = em đã có ghi chú ngày đó.
+3. Ghi chú khác – họp, việc cần nhớ, trao đổi với phụ huynh, giáo viên bộ môn…
+
+Liên kết: ghi chú của em hiện trong hồ sơ học sinh; Sổ chủ nhiệm gợi ý từ ghi chú (ghi chú cả lớp trong tuần → Kết quả tuần;
+ghi chú riêng của em trong tháng → Nội dung cần lưu ý ở phần theo dõi học sinh chưa tiến bộ).
+
+Phần chấm điểm: theo ý cô giữ nguyên điểm số tròn như hiện tại (không thêm 0,25 / 0,5 / 0,75).
+
+Đã thử trên máy giả lập: ghi cả 3 mục, câu chạm nhanh, đổi ngày, lịch sử, hồ sơ, gợi ý Sổ chủ nhiệm; màn điện thoại; không lỗi.
+Cách cập nhật: dán lại Code.gs và Index.html → Triển khai → Phiên bản mới.
