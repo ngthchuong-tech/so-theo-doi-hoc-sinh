@@ -2292,22 +2292,26 @@ function veNopVo() {
   var chua = dem['–'] || 0;
   $('voNhanh').innerHTML = '<span class="nho">' + esc(voMon) + ': ' + VO_NUT.filter(function (b) { return dem[b[0]]; }).map(function (b) { return b[1] + ' ' + dem[b[0]]; }).join(' · ') +
     (dem['vắng'] ? ' · vắng ' + dem['vắng'] : '') + (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'A\')">Em chưa chọn: ' + VO_TEN.A + '</button>' : '');
-  $('voDs').innerHTML = vo.hs.length ? vo.hs.map(function (h, i) {
-    var m = h.tt[voMon], nut = VO_NUT.filter(function (b) { return b[0] === m; })[0];
-    return '<div class="vo-hang' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><span class="vo-stt">' + (i + 1) + '</span><div style="min-width:0">' + voTen(h.ten) + dauNhom(h.ma) +
-      (h.vang ? '<span class="tag">vắng</span>' : nut ? '<div class="vo-muc ' + nut[2] + '">' + esc(nut[1]) + '</div>' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
-      '<div class="vo-nut">' + VO_NUT.map(function (b, k) {
-      return '<button class="' + (m === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + k + ')">' + b[1] + '</button>';
-    }).join('') + '</div></div>';
-  }).join('') : '<div class="nho">Chưa có danh sách học sinh.</div>';
+  // Bảng: cột trái tên học sinh, 6 cột mức (tiêu đề cột đứng yên khi cuộn), mỗi ô 1 dấu tick
+  var dau = document.querySelector('header'); if (dau) document.documentElement.style.setProperty('--cao-dau', dau.offsetHeight + 'px');
+  $('voDs').innerHTML = vo.hs.length ? '<div class="vo-bang"><div class="vo-dong vo-dau"><div class="vo-goc">Học sinh<div class="nho">chạm tiêu đề cột: chọn cho em chưa chọn</div></div>' +
+    VO_NUT.map(function (b, k) { return '<div class="vo-cot ' + b[2] + '" title="Chọn &quot;' + esc(b[1]) + '&quot; cho các em chưa chọn" onclick="voCaLop(\'' + b[0] + '\')"><span>' + esc(b[1]) + '</span><b>' + (dem[b[0]] || 0) + '</b></div>'; }).join('') + '</div>' +
+    vo.hs.map(function (h, i) {
+      var m = h.tt[voMon];
+      return '<div class="vo-dong' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><div style="min-width:0">' + voTen(h.ten, i + 1) + dauNhom(h.ma) +
+        (h.vang ? '<span class="tag">vắng</span>' : m ? '' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
+        VO_NUT.map(function (b, k) {
+          return '<button class="vo-o' + (m === b[0] ? ' on ' + b[2] : '') + '" aria-label="' + esc(h.ten + ': ' + b[1]) + '" onclick="voDat(' + i + ', ' + k + ')"><span>' + (m === b[0] ? '✓' : '') + '</span></button>';
+        }).join('') + '</div>';
+    }).join('') + '</div>' : '<div class="nho">Chưa có danh sách học sinh.</div>';
 }
-function voTen(ten) {                  // họ đệm nhỏ ở trên, tên gọi (2 chữ cuối) to, đậm
+function voTen(ten, stt) {             // dòng nhỏ: số thứ tự + họ đệm; dòng dưới: tên gọi (2 chữ cuối) to, đậm
   var p = String(ten || '').trim().split(/\s+/), goi = p.slice(-2).join(' '), ho = p.slice(0, -2).join(' ');
-  return (ho ? '<div class="vo-dem">' + esc(ho) + '</div>' : '') + '<div class="vo-ho">' + esc(goi) + '</div>';
+  return '<div class="vo-dem">' + (stt ? '<span class="vo-stt">' + stt + '</span> ' : '') + esc(ho) + '</div><div class="vo-ho">' + esc(goi) + '</div>';
 }
 function voChonMon(m) { voMon = m; veNopVo(); }
-function voDat(i, k) { var tt = VO_NUT[k][0]; if (vo.hs[i].tt[voMon] !== tt) { vo.hs[i].tt[voMon] = tt; vo.sua = true; } veNopVo(); }
-function voCaLop(m) { var n = 0; vo.hs.forEach(function (h) { if (!h.tt[voMon] && !h.vang) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
+function voDat(i, k) { var tt = VO_NUT[k][0], h = vo.hs[i]; h.tt[voMon] = h.tt[voMon] === tt ? '' : tt; vo.sua = true; veNopVo(); }
+function voCaLop(m) { var n = 0; if (!vo.hs.some(function (h) { return !h.tt[voMon] && !h.vang; })) return bao('Em nào cũng đã chọn mức. Chạm ô của từng em để sửa.'); vo.hs.forEach(function (h) { if (!h.tt[voMon] && !h.vang) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
 function voBoThayDoi() { if (!vo || !vo.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại?')) taiNopVo(); }
 function voLuu() {
   if (!vo || !vo.hs.length) return bao('Chưa có danh sách học sinh.');

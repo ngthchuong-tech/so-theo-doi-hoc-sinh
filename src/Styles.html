@@ -65,17 +65,28 @@
   .seg button.on.p { background: #fff4e0; color: var(--vang); font-weight: 700; }
   .seg button.on.kp { background: #fdecea; color: var(--do); font-weight: 700; }
   .nhom-dau { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
-  .vo-hang { display: grid; grid-template-columns: minmax(118px, 38%) 1fr; gap: 8px; align-items: center; padding: 10px 6px; border-bottom: 1px solid var(--vien); }
-  .vo-hang:nth-child(even) { background: #f8fafc; }
-  .vo-hang.chua { background: #fff8ec; }
-  .vo-ten { display: flex; gap: 8px; align-items: flex-start; border-right: 3px solid var(--chinh2); padding-right: 8px; height: 100%; }
-  .vo-stt { flex: none; min-width: 24px; height: 24px; border-radius: 12px; background: var(--chinh); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-  .vo-dem { font-size: 12.5px; color: #5b6472; line-height: 1.2; }
-  .vo-ho { font-size: 18px; font-weight: 800; color: #1a2433; line-height: 1.2; }
-  .vo-muc { font-size: 12px; font-weight: 700; margin-top: 3px; } .vo-muc.co { color: var(--xanh); } .vo-muc.p { color: var(--vang); } .vo-muc.kp { color: var(--do); }
-  .vo-nut { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
-  .vo-hang .vo-nut button { padding: 6px 3px; font-size: 12px; }
-  @media (min-width: 640px) { .vo-nut { grid-template-columns: repeat(3, 1fr); } .vo-hang { grid-template-columns: 220px 1fr; } }
+  /* Nộp vở: bảng tên – 6 cột mức, tiêu đề cột dính dưới thanh trên cùng */
+  .vo-bang { margin: -4px -6px 0; }
+  .vo-dong { display: grid; grid-template-columns: minmax(110px, 1fr) repeat(6, minmax(32px, 44px)); align-items: stretch; border-bottom: 1px solid var(--vien); }
+  .vo-dong:nth-child(odd):not(.vo-dau) { background: #f8fafc; }
+  .vo-dong.chua { background: #fff8ec !important; }
+  .vo-dau { position: sticky; top: var(--cao-dau, 64px); z-index: 3; background: #fff; box-shadow: 0 2px 4px rgba(16,24,40,.08); }
+  .vo-goc { font-weight: 800; font-size: 14px; padding: 6px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .vo-goc .nho { font-weight: 400; font-size: 10.5px; line-height: 1.2; }
+  .vo-cot { font-size: 10.5px; line-height: 1.15; font-weight: 700; text-align: center; padding: 6px 2px 4px; border-left: 1px solid var(--vien); border-top: 4px solid var(--xanh);
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center; gap: 3px; cursor: pointer; color: #1a2433; }
+  .vo-cot.p { border-top-color: var(--vang); } .vo-cot.kp { border-top-color: var(--do); }
+  .vo-cot b { font-size: 11px; background: #eef1f6; border-radius: 8px; padding: 0 6px; }
+  .vo-ten { display: flex; gap: 6px; align-items: flex-start; padding: 8px 6px; }
+  .vo-o { border: 0; border-left: 1px solid var(--vien); background: transparent; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 48px; }
+  .vo-o span { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #c7cdd6; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #fff; }
+  .vo-o.on.co span { background: var(--xanh); border-color: var(--xanh); } .vo-o.on.p span { background: var(--vang); border-color: var(--vang); } .vo-o.on.kp span { background: var(--do); border-color: var(--do); }
+  @media (min-width: 640px) { .vo-dong { grid-template-columns: 220px repeat(6, 1fr); } .vo-cot { font-size: 12.5px; } }
+  .vo-stt { display: inline-flex; vertical-align: middle; min-width: 20px; height: 20px; border-radius: 10px; background: var(--chinh); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; }
+  .vo-dem { font-size: 12.5px; color: #5b6472; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vo-ten .tag { font-size: 10.5px; padding: 1px 6px; margin-top: 2px; }
+  .vo-ho { font-size: 15.5px; font-weight: 800; color: #1a2433; line-height: 1.2; }
+
   .vo-nut button { border: 1px solid var(--vien); background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 12.5px; cursor: pointer; line-height: 1.2; }
   .vo-nut button.on.co { background: #e8f5e9; color: var(--xanh); border-color: var(--xanh); font-weight: 700; }
   .vo-nut button.on.p { background: #fff4e0; color: var(--vang); border-color: var(--vang); font-weight: 700; }

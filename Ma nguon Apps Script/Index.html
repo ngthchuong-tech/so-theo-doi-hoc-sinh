@@ -75,17 +75,28 @@
   .seg button.on.p { background: #fff4e0; color: var(--vang); font-weight: 700; }
   .seg button.on.kp { background: #fdecea; color: var(--do); font-weight: 700; }
   .nhom-dau { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
-  .vo-hang { display: grid; grid-template-columns: minmax(118px, 38%) 1fr; gap: 8px; align-items: center; padding: 10px 6px; border-bottom: 1px solid var(--vien); }
-  .vo-hang:nth-child(even) { background: #f8fafc; }
-  .vo-hang.chua { background: #fff8ec; }
-  .vo-ten { display: flex; gap: 8px; align-items: flex-start; border-right: 3px solid var(--chinh2); padding-right: 8px; height: 100%; }
-  .vo-stt { flex: none; min-width: 24px; height: 24px; border-radius: 12px; background: var(--chinh); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-  .vo-dem { font-size: 12.5px; color: #5b6472; line-height: 1.2; }
-  .vo-ho { font-size: 18px; font-weight: 800; color: #1a2433; line-height: 1.2; }
-  .vo-muc { font-size: 12px; font-weight: 700; margin-top: 3px; } .vo-muc.co { color: var(--xanh); } .vo-muc.p { color: var(--vang); } .vo-muc.kp { color: var(--do); }
-  .vo-nut { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
-  .vo-hang .vo-nut button { padding: 6px 3px; font-size: 12px; }
-  @media (min-width: 640px) { .vo-nut { grid-template-columns: repeat(3, 1fr); } .vo-hang { grid-template-columns: 220px 1fr; } }
+  /* Nộp vở: bảng tên – 6 cột mức, tiêu đề cột dính dưới thanh trên cùng */
+  .vo-bang { margin: -4px -6px 0; }
+  .vo-dong { display: grid; grid-template-columns: minmax(110px, 1fr) repeat(6, minmax(32px, 44px)); align-items: stretch; border-bottom: 1px solid var(--vien); }
+  .vo-dong:nth-child(odd):not(.vo-dau) { background: #f8fafc; }
+  .vo-dong.chua { background: #fff8ec !important; }
+  .vo-dau { position: sticky; top: var(--cao-dau, 64px); z-index: 3; background: #fff; box-shadow: 0 2px 4px rgba(16,24,40,.08); }
+  .vo-goc { font-weight: 800; font-size: 14px; padding: 6px; display: flex; flex-direction: column; justify-content: flex-end; }
+  .vo-goc .nho { font-weight: 400; font-size: 10.5px; line-height: 1.2; }
+  .vo-cot { font-size: 10.5px; line-height: 1.15; font-weight: 700; text-align: center; padding: 6px 2px 4px; border-left: 1px solid var(--vien); border-top: 4px solid var(--xanh);
+            display: flex; flex-direction: column; justify-content: space-between; align-items: center; gap: 3px; cursor: pointer; color: #1a2433; }
+  .vo-cot.p { border-top-color: var(--vang); } .vo-cot.kp { border-top-color: var(--do); }
+  .vo-cot b { font-size: 11px; background: #eef1f6; border-radius: 8px; padding: 0 6px; }
+  .vo-ten { display: flex; gap: 6px; align-items: flex-start; padding: 8px 6px; }
+  .vo-o { border: 0; border-left: 1px solid var(--vien); background: transparent; cursor: pointer; padding: 0; display: flex; align-items: center; justify-content: center; min-height: 48px; }
+  .vo-o span { width: 25px; height: 25px; border-radius: 50%; border: 2px solid #c7cdd6; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900; color: #fff; }
+  .vo-o.on.co span { background: var(--xanh); border-color: var(--xanh); } .vo-o.on.p span { background: var(--vang); border-color: var(--vang); } .vo-o.on.kp span { background: var(--do); border-color: var(--do); }
+  @media (min-width: 640px) { .vo-dong { grid-template-columns: 220px repeat(6, 1fr); } .vo-cot { font-size: 12.5px; } }
+  .vo-stt { display: inline-flex; vertical-align: middle; min-width: 20px; height: 20px; border-radius: 10px; background: var(--chinh); color: #fff; font-size: 11px; font-weight: 700; align-items: center; justify-content: center; }
+  .vo-dem { font-size: 12.5px; color: #5b6472; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vo-ten .tag { font-size: 10.5px; padding: 1px 6px; margin-top: 2px; }
+  .vo-ho { font-size: 15.5px; font-weight: 800; color: #1a2433; line-height: 1.2; }
+
   .vo-nut button { border: 1px solid var(--vien); background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 12.5px; cursor: pointer; line-height: 1.2; }
   .vo-nut button.on.co { background: #e8f5e9; color: var(--xanh); border-color: var(--xanh); font-weight: 700; }
   .vo-nut button.on.p { background: #fff4e0; color: var(--vang); border-color: var(--vang); font-weight: 700; }
@@ -754,7 +765,7 @@
             <li>Chọn môn <b>Tiếng Việt</b> hoặc <b>Toán</b>. Mỗi em có 4 mức: <b>Nhanh, đẹp, đúng</b> / <b>Đúng nhưng chưa đẹp</b> /
               <b>Đúng, biết trình bày</b> hoặc <b>Đúng, chưa biết trình bày</b> / <b>Chưa đúng – chưa đẹp</b>, và <b>Chưa nộp</b>.</li>
             <li>Mỗi em <b>sẵn mức của lần chấm trước</b> (em lần trước chưa nộp thì lấy mức gần nhất em có nộp). Cô chỉ chạm sửa em khác mức → làm tiếp môn kia → <b>Lưu nộp vở</b>.
-              Lần đầu: bấm <b>Em chưa chọn: Nhanh, đẹp, đúng</b> rồi sửa riêng từng em (tên em ở cột trái, mức ở cột phải).</li>
+              Bảng: tên em ở cột trái, 6 cột mức bên phải (tiêu đề cột luôn hiện khi cuộn) – chạm vào ô để tick, chạm lại để bỏ. Chạm <b>tiêu đề cột</b> để chọn mức đó cho tất cả em chưa chọn, rồi tick sửa riêng em khác mức.</li>
             <li>Ghi ngày khác: đổi ở ô ngày phía trên. Cuối tháng, nhận xét môn có 1 câu về vở theo <b>mức em gặp nhiều nhất</b> trong tháng
               (VD "Bài làm trong vở đúng nhưng chưa đẹp."), kèm nhắc nếu có ngày chưa nộp.</li>
           </ol>
@@ -3971,22 +3982,26 @@ function veNopVo() {
   var chua = dem['–'] || 0;
   $('voNhanh').innerHTML = '<span class="nho">' + esc(voMon) + ': ' + VO_NUT.filter(function (b) { return dem[b[0]]; }).map(function (b) { return b[1] + ' ' + dem[b[0]]; }).join(' · ') +
     (dem['vắng'] ? ' · vắng ' + dem['vắng'] : '') + (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'A\')">Em chưa chọn: ' + VO_TEN.A + '</button>' : '');
-  $('voDs').innerHTML = vo.hs.length ? vo.hs.map(function (h, i) {
-    var m = h.tt[voMon], nut = VO_NUT.filter(function (b) { return b[0] === m; })[0];
-    return '<div class="vo-hang' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><span class="vo-stt">' + (i + 1) + '</span><div style="min-width:0">' + voTen(h.ten) + dauNhom(h.ma) +
-      (h.vang ? '<span class="tag">vắng</span>' : nut ? '<div class="vo-muc ' + nut[2] + '">' + esc(nut[1]) + '</div>' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
-      '<div class="vo-nut">' + VO_NUT.map(function (b, k) {
-      return '<button class="' + (m === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + k + ')">' + b[1] + '</button>';
-    }).join('') + '</div></div>';
-  }).join('') : '<div class="nho">Chưa có danh sách học sinh.</div>';
+  // Bảng: cột trái tên học sinh, 6 cột mức (tiêu đề cột đứng yên khi cuộn), mỗi ô 1 dấu tick
+  var dau = document.querySelector('header'); if (dau) document.documentElement.style.setProperty('--cao-dau', dau.offsetHeight + 'px');
+  $('voDs').innerHTML = vo.hs.length ? '<div class="vo-bang"><div class="vo-dong vo-dau"><div class="vo-goc">Học sinh<div class="nho">chạm tiêu đề cột: chọn cho em chưa chọn</div></div>' +
+    VO_NUT.map(function (b, k) { return '<div class="vo-cot ' + b[2] + '" title="Chọn &quot;' + esc(b[1]) + '&quot; cho các em chưa chọn" onclick="voCaLop(\'' + b[0] + '\')"><span>' + esc(b[1]) + '</span><b>' + (dem[b[0]] || 0) + '</b></div>'; }).join('') + '</div>' +
+    vo.hs.map(function (h, i) {
+      var m = h.tt[voMon];
+      return '<div class="vo-dong' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><div style="min-width:0">' + voTen(h.ten, i + 1) + dauNhom(h.ma) +
+        (h.vang ? '<span class="tag">vắng</span>' : m ? '' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
+        VO_NUT.map(function (b, k) {
+          return '<button class="vo-o' + (m === b[0] ? ' on ' + b[2] : '') + '" aria-label="' + esc(h.ten + ': ' + b[1]) + '" onclick="voDat(' + i + ', ' + k + ')"><span>' + (m === b[0] ? '✓' : '') + '</span></button>';
+        }).join('') + '</div>';
+    }).join('') + '</div>' : '<div class="nho">Chưa có danh sách học sinh.</div>';
 }
-function voTen(ten) {                  // họ đệm nhỏ ở trên, tên gọi (2 chữ cuối) to, đậm
+function voTen(ten, stt) {             // dòng nhỏ: số thứ tự + họ đệm; dòng dưới: tên gọi (2 chữ cuối) to, đậm
   var p = String(ten || '').trim().split(/\s+/), goi = p.slice(-2).join(' '), ho = p.slice(0, -2).join(' ');
-  return (ho ? '<div class="vo-dem">' + esc(ho) + '</div>' : '') + '<div class="vo-ho">' + esc(goi) + '</div>';
+  return '<div class="vo-dem">' + (stt ? '<span class="vo-stt">' + stt + '</span> ' : '') + esc(ho) + '</div><div class="vo-ho">' + esc(goi) + '</div>';
 }
 function voChonMon(m) { voMon = m; veNopVo(); }
-function voDat(i, k) { var tt = VO_NUT[k][0]; if (vo.hs[i].tt[voMon] !== tt) { vo.hs[i].tt[voMon] = tt; vo.sua = true; } veNopVo(); }
-function voCaLop(m) { var n = 0; vo.hs.forEach(function (h) { if (!h.tt[voMon] && !h.vang) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
+function voDat(i, k) { var tt = VO_NUT[k][0], h = vo.hs[i]; h.tt[voMon] = h.tt[voMon] === tt ? '' : tt; vo.sua = true; veNopVo(); }
+function voCaLop(m) { var n = 0; if (!vo.hs.some(function (h) { return !h.tt[voMon] && !h.vang; })) return bao('Em nào cũng đã chọn mức. Chạm ô của từng em để sửa.'); vo.hs.forEach(function (h) { if (!h.tt[voMon] && !h.vang) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
 function voBoThayDoi() { if (!vo || !vo.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại?')) taiNopVo(); }
 function voLuu() {
   if (!vo || !vo.hs.length) return bao('Chưa có danh sách học sinh.');
