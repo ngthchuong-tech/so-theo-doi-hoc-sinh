@@ -479,6 +479,7 @@
           <div class="hang" style="margin-top:6px" id="voMonChip"></div>
           <div class="nho" style="margin-top:4px">Mỗi em sẵn mức của <b>lần chấm trước</b>. Cô chỉ chạm sửa em khác mức (hoặc <b>Chưa nộp</b>), rồi bấm Lưu. Đổi ngày ở ô ngày phía trên.</div>
           <div class="hang" style="margin-top:6px" id="voNhanh"></div>
+          <details class="xk" style="margin-top:8px"><summary>⬇ Xuất Excel nộp vở (ngày, tuần, tháng, kì, năm)</summary><div id="voXuat"></div></details>
         </div>
         <div class="the" id="voDs"></div>
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
@@ -489,6 +490,7 @@
           <div class="hang gian"><h3 style="margin:0">👀 Theo dõi hằng ngày</h3><span class="nho" id="tdTomTat"></span></div>
           <div class="nho" style="margin-top:4px">Chạm ô để tick, chạm lại để bỏ. App tự lưu. Cột <b>Cô ghi thêm</b> chính là ghi chú riêng của em trong ngày (cùng với 🗒️ Ghi chú).
             Kết quả được tổng hợp vào đánh giá tháng, kì, cuối năm và Sổ chủ nhiệm (dạng chung). Đổi ngày ở ô ngày phía trên.</div>
+          <details class="xk" style="margin-top:8px"><summary>⬇ Xuất Excel theo dõi hằng ngày (ngày, tuần, tháng, kì, năm)</summary><div id="tdXuat"></div></details>
         </div>
         <div class="the" style="padding:8px" id="tdDs"></div>
       </div>
@@ -733,6 +735,9 @@
             <li><b>Được tổng hợp</b>: em có từ <b>3 lần</b> trong tháng thì app đưa vào nhận xét tháng môn Tiếng Việt / Toán (VD "Đọc to, lưu loát.", "Cần chú ý viết đúng chính tả.")
               và làm căn cứ năng lực – phẩm chất (phát biểu → Giao tiếp, Chăm chỉ; quên sách vở → Trách nhiệm, Tự chủ…) → từ đó vào định kỳ, cuối năm.
               Sổ chủ nhiệm tuần / tháng ghi <b>dạng chung</b> (số em), không nêu tên từng em; phần Theo dõi học sinh chưa tiến bộ ghi điều em còn hạn chế.</li>
+            <li><b>⬇ Xuất Excel</b> (ngay dưới phần giới thiệu, ở cả 👀 Theo dõi hằng ngày và 📒 Nộp vở): chọn <b>Ngày đang chọn / Tuần / Tháng / Học kì I / Học kì II / Cả năm / Tuỳ chọn</b> → Xuất Excel.
+              File 1 ngày: bảng tick (✓) hoặc mức vở + ghi chú của từng em. File nhiều ngày: sheet <b>Tổng hợp</b> (số lần mỗi mục / mỗi mức của từng em, dòng Cộng)
+              và sheet <b>Chi tiết theo ngày</b>. Bản sao lưu vào Google Drive (thư mục Biểu mẫu đã xuất).</li>
           </ul>
         </details>
       </div>
@@ -4069,7 +4074,7 @@ var VO_TEN = {}; VO_NUT.forEach(function (b) { VO_TEN[b[0]] = b[1]; });
 function moNopVo() {
   $('stChonBai').classList.add('an'); $('stNhap').classList.add('an'); $('stPT').classList.add('an'); $('stVo').classList.remove('an');
   ['stCheBai', 'stCheChung', 'stChePT'].forEach(function (id) { $(id).classList.remove('on'); }); $('stCheVo').classList.add('on');
-  taiNopVo();
+  xkKhung('vo'); taiNopVo();
 }
 function taiNopVo() {
   if (!$('stNgay').value) $('stNgay').value = homNayIso();
@@ -4157,10 +4162,119 @@ function veKhoThang(d) {
   }).join(' ') : '<span class="tag do">chưa có – tải file "Thư viện nhận xét THÁNG…"</span>') + '</div>';
 }
 
+// ============================================================================ XUẤT EXCEL NỘP VỞ / THEO DÕI HẰNG NGÀY
+// Khung chọn thời gian dùng chung (loai 'vo' | 'td'); máy chủ trả số liệu, trình duyệt dựng file bằng SheetJS.
+function xkKhung(loai) {
+  var k = $(loai + 'Xuat'); if (!k || k.innerHTML) return;
+  k.innerHTML = '<div class="hang" style="margin-top:8px"><label>Xuất theo <select id="xk' + loai + 'Kieu" onchange="xkDoiKieu(\'' + loai + '\')">' +
+    '<option value="ngay">Ngày đang chọn</option><option value="tuan">Tuần</option><option value="thang" selected>Tháng</option>' +
+    '<option value="hk1">Học kì I</option><option value="hk2">Học kì II</option><option value="nam">Cả năm học</option><option value="tuy">Tuỳ chọn</option></select></label>' +
+    '<span id="xk' + loai + 'O"></span><button class="nut" onclick="xkXuat(\'' + loai + '\')">⬇ Xuất Excel</button></div><div id="xk' + loai + 'KQ"></div>';
+  xkDoiKieu(loai);
+}
+function xkDoiKieu(loai) {
+  var k = $('xk' + loai + 'Kieu').value, ngay = $('stNgay').value || homNayIso(), t = +ngay.split('-')[1];
+  $('xk' + loai + 'O').innerHTML = k === 'ngay' ? '<span class="nho">' + isoToDmy(ngay) + ' (đổi ở ô ngày phía trên)</span>'
+    : k === 'tuan' ? '<label>Ngày trong tuần <input type="date" id="xk' + loai + 'Ngay" value="' + ngay + '"></label>'
+    : k === 'thang' ? '<label><select id="xk' + loai + 'Thang">' + [8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6].map(function (x) { return '<option value="' + x + '"' + (x === t ? ' selected' : '') + '>Tháng ' + x + '</option>'; }).join('') + '</select></label>'
+    : k === 'tuy' ? '<label>Từ <input type="date" id="xk' + loai + 'Tu"></label> <label>đến <input type="date" id="xk' + loai + 'Den" value="' + ngay + '"></label>' : '';
+}
+function xkXuat(loai) {
+  var k = $('xk' + loai + 'Kieu').value, yc = { kieu: k };
+  if (k === 'ngay') yc.ngay = isoToDmy($('stNgay').value || homNayIso());
+  if (k === 'tuan') yc.ngay = isoToDmy($('xk' + loai + 'Ngay').value || homNayIso());
+  if (k === 'thang') yc.thang = +$('xk' + loai + 'Thang').value;
+  if (k === 'tuy') { if (!$('xk' + loai + 'Tu').value || !$('xk' + loai + 'Den').value) return bao('Chọn từ ngày, đến ngày.'); yc.tu = isoToDmy($('xk' + loai + 'Tu').value); yc.den = isoToDmy($('xk' + loai + 'Den').value); }
+  if (loai === 'vo' && vo && vo.sua && !confirm('Nộp vở ngày ' + vo.ngay + ' chưa lưu – file chỉ có số liệu đã lưu. Vẫn xuất?')) return;
+  if (loai === 'td' && tdHen) tdLuuNgay();
+  chay('layXuatSoTheoDoi', loai, yc).then(function (d) {
+    if (!d.ct.length) return bao('Chưa có số liệu ' + (loai === 'vo' ? 'nộp vở' : 'theo dõi hằng ngày') + ' trong ' + d.ten.charAt(0).toLowerCase() + d.ten.slice(1) + '.', 6000);
+    var x = loai === 'vo' ? xkVo(d) : xkTD(d), wb = XLSX.utils.book_new();
+    x.sheet.forEach(function (s) { XLSX.utils.book_append_sheet(wb, s[1], s[0]); });
+    var ten = ((loai === 'vo' ? 'Nop vo ' : 'Theo doi hang ngay ') + d.ten + ' - Lop ' + d.lop).replace(/[\\/:*?"<>|]/g, '-') + '.xlsx';
+    hienKetQuaXuat($('xk' + loai + 'KQ'), ten, XLSX.write(wb, { bookType: 'xlsx', type: 'base64' }), '<div class="nho">' + esc(x.moTa) + '</div>', false);
+  });
+}
+function xkDau(d, tieuDe, soCot) {         // 3 dòng đầu + gộp ô
+  return { dong: [[tieuDe + ' – ' + d.ten.toUpperCase()], [(d.truong ? 'Trường: ' + d.truong + ' · ' : '') + 'Lớp: ' + d.lop + ' · Năm học: ' + d.namHoc],
+    ['Từ ngày ' + d.tu + ' đến ngày ' + d.den], []], gop: [0, 1, 2].map(function (r) { return { s: { r: r, c: 0 }, e: { r: r, c: soCot - 1 } }; }) };
+}
+function xkSheet(dong, gop, rong) { var s = XLSX.utils.aoa_to_sheet(dong); s['!merges'] = gop; s['!cols'] = rong.map(function (w) { return { wch: w }; }); return s; }
+function xkVo(d) {
+  var ten = {}; d.muc.forEach(function (m) { ten[m[0]] = m[1]; });
+  var hsTen = {}; d.hs.forEach(function (h) { hsTen[h.ma] = h; });
+  var mucCua = function (x) { return x.muc ? ten[x.muc] || x.muc : (x.chu || ''); };
+  if (d.kieu === 'ngay') {                                  // 1 ngày: mức + ghi chú từng môn
+    var nc = 3 + d.mon.length * 2, h = xkDau(d, 'NỘP VỞ', nc), dong = h.dong;
+    dong.push(['STT', 'Mã định danh', 'Họ và tên'].concat([].concat.apply([], d.mon.map(function (m) { return [m + ' – mức', m + ' – ghi chú']; }))));
+    d.hs.forEach(function (hs) {
+      dong.push([hs.stt, hs.ma, hs.ten].concat([].concat.apply([], d.mon.map(function (m) {
+        var x = d.ct.filter(function (y) { return y.ma === hs.ma && y.mon === m; })[0] || {}; return [x.ma ? mucCua(x) : '', x.gc || '']; }))));
+    });
+    return { sheet: [['Nộp vở ' + d.tu.slice(0, 5).replace('/', '-'), xkSheet(dong, h.gop, [5, 13, 26].concat(d.mon.map(function () { return [20, 30]; }).reduce(function (a, b) { return a.concat(b); }, [])))]],
+             moTa: d.hs.length + ' học sinh · ngày ' + d.tu + '.' };
+  }
+  // nhiều ngày: Tổng hợp (số lần mỗi mức theo môn, mức gặp nhiều nhất, nhận xét vở) + Chi tiết theo ngày
+  var cot = d.muc.map(function (m) { return m[1]; }), nc2 = 3 + d.mon.length * (cot.length + 2) + 1, h2 = xkDau(d, 'TỔNG HỢP NỘP VỞ', nc2), ds = h2.dong;
+  ds[2][0] += ' · Số ngày chấm: ' + d.mon.map(function (m) { return m + ' ' + d.soNgay[m]; }).join(', ');
+  var r1 = ['STT', 'Mã định danh', 'Họ và tên'], r2 = ['', '', ''], gop = h2.gop.slice(), c0 = 3;
+  d.mon.forEach(function (m) { r1.push(m.toUpperCase()); for (var i = 1; i < cot.length + 2; i++) r1.push(''); r2 = r2.concat(cot, ['Mức nhiều nhất', 'Nhận xét vở']);
+    gop.push({ s: { r: 4, c: c0 }, e: { r: 4, c: c0 + cot.length + 1 } }); c0 += cot.length + 2; });
+  r1.push('Ghi chú vở'); r2.push('');
+  [0, 1, 2, nc2 - 1].forEach(function (c) { gop.push({ s: { r: 4, c: c }, e: { r: 5, c: c } }); });
+  ds.push(r1, r2);
+  var tong = {};
+  d.hs.forEach(function (hs) {
+    var dong = [hs.stt, hs.ma, hs.ten + (hs.chuyenDi ? ' (đã chuyển đi)' : '')];
+    d.mon.forEach(function (m) {
+      var v = ((d.dem[hs.ma] || {})[m]) || null, nhieu = '', n = 0;
+      d.muc.forEach(function (x) { var so = v ? v[x[0]] || 0 : 0; dong.push(so || ''); tong[m + x[0]] = (tong[m + x[0]] || 0) + so; if (x[0] !== 'N' && so > n) { n = so; nhieu = x[1]; } });
+      dong.push(nhieu, v ? cauVoDem(v, 0) : '');
+    });
+    dong.push(d.ct.filter(function (y) { return y.ma === hs.ma && y.gc; }).map(function (y) { return y.ngay.slice(0, 5) + ' ' + y.mon + ': ' + y.gc; }).join('; '));
+    ds.push(dong);
+  });
+  var cong = ['', '', 'CỘNG (lượt)']; d.mon.forEach(function (m) { d.muc.forEach(function (x) { cong.push(tong[m + x[0]] || 0); }); cong.push('', ''); }); ds.push(cong);
+  var ct = [['Ngày', 'STT', 'Họ và tên', 'Môn', 'Mức', 'Ghi chú']];
+  d.ct.forEach(function (x) { var hs = hsTen[x.ma]; if (hs) ct.push([x.ngay, hs.stt, hs.ten, x.mon, mucCua(x), x.gc || '']); });
+  var rong = [5, 13, 26]; d.mon.forEach(function () { rong = rong.concat(cot.map(function () { return 9; }), [14, 34]); }); rong.push(40);
+  return { sheet: [['Tổng hợp', xkSheet(ds, gop, rong)], ['Chi tiết theo ngày', xkSheet(ct, [], [12, 5, 26, 12, 24, 36])]],
+           moTa: d.hs.length + ' học sinh · sheet "Tổng hợp" (số lần mỗi mức) và "Chi tiết theo ngày".' };
+}
+function xkTD(d) {
+  var hsTen = {}; d.hs.forEach(function (h) { hsTen[h.ma] = h; });
+  var nhomCua = function (s, n) { return d.muc.filter(function (x) { return x.nhom === n && String(s).indexOf(x.k) >= 0; }).map(function (x) { return x.ten; }).join(', '); };
+  var r1 = ['STT', 'Mã định danh', 'Họ và tên'], r2 = ['', '', ''], nc = 3 + d.muc.length + (d.kieu === 'ngay' ? 0 : 3) + 1, h = xkDau(d, d.kieu === 'ngay' ? 'THEO DÕI HẰNG NGÀY' : 'TỔNG HỢP THEO DÕI HẰNG NGÀY', nc);
+  var gop = h.gop.slice(), c0 = 3, cuoi = '';
+  d.muc.forEach(function (x, i) { r1.push(x.nhom !== cuoi ? d.nhom[x.nhom] : ''); r2.push(x.ten);
+    if (x.nhom !== cuoi) { var so = d.muc.filter(function (y) { return y.nhom === x.nhom; }).length; gop.push({ s: { r: 4, c: c0 + i }, e: { r: 4, c: c0 + i + so - 1 } }); cuoi = x.nhom; } });
+  if (d.kieu !== 'ngay') { r1.push('TỔNG SỐ LẦN', '', ''); r2.push('Tích cực', 'Hạn chế', 'Nề nếp'); gop.push({ s: { r: 4, c: 3 + d.muc.length }, e: { r: 4, c: 5 + d.muc.length } }); }
+  r1.push('CÔ GHI THÊM'); r2.push('');
+  [0, 1, 2, nc - 1].forEach(function (c) { gop.push({ s: { r: 4, c: c }, e: { r: 5, c: c } }); });
+  if (d.kieu !== 'ngay') h.dong[2][0] += ' · Số ngày có theo dõi: ' + d.soNgay;
+  var ds = h.dong.concat([r1, r2]), tong = {};
+  d.hs.forEach(function (hs) {
+    var dem = d.dem[hs.ma] || {}, dong = [hs.stt, hs.ma, hs.ten + (hs.chuyenDi ? ' (đã chuyển đi)' : '')], tn = { tc: 0, hc: 0, nn: 0 };
+    d.muc.forEach(function (x) { var n = dem[x.k] || 0; tong[x.k] = (tong[x.k] || 0) + n; tn[x.nhom] += n; dong.push(d.kieu === 'ngay' ? (n ? '✓' : '') : (n || '')); });
+    if (d.kieu !== 'ngay') dong.push(tn.tc || '', tn.hc || '', tn.nn || '');
+    dong.push(d.ct.filter(function (y) { return y.ma === hs.ma && y.ghi; }).map(function (y) { return (d.kieu === 'ngay' ? '' : y.ngay.slice(0, 5) + ': ') + y.ghi; }).join('; '));
+    ds.push(dong);
+  });
+  var cong = ['', '', d.kieu === 'ngay' ? 'CỘNG (số em)' : 'CỘNG (lượt)']; d.muc.forEach(function (x) { cong.push(tong[x.k] || 0); }); ds.push(cong);
+  var rong = [5, 13, 26].concat(d.muc.map(function () { return 11; }), d.kieu === 'ngay' ? [] : [9, 9, 9], [44]);
+  var sh = [[d.kieu === 'ngay' ? 'Theo dõi ' + d.tu.slice(0, 5).replace('/', '-') : 'Tổng hợp', xkSheet(ds, gop, rong)]];
+  if (d.kieu !== 'ngay') {
+    var ct = [['Ngày', 'STT', 'Họ và tên', 'Tích cực', 'Hạn chế', 'Nề nếp', 'Cô ghi thêm']];
+    d.ct.forEach(function (x) { var hs = hsTen[x.ma]; if (hs) ct.push([x.ngay, hs.stt, hs.ten, nhomCua(x.tick, 'tc'), nhomCua(x.tick, 'hc'), nhomCua(x.tick, 'nn'), x.ghi]); });
+    sh.push(['Chi tiết theo ngày', xkSheet(ct, [], [12, 5, 26, 34, 30, 26, 40])]);
+  }
+  return { sheet: sh, moTa: d.hs.length + ' học sinh' + (d.kieu === 'ngay' ? ' · ngày ' + d.tu + '.' : ' · sheet "Tổng hợp" (số lần mỗi mục) và "Chi tiết theo ngày".') };
+}
+
 // ============================================================================ THEO DÕI HẰNG NGÀY (Sổ theo dõi → 👀)
 // Bảng: cột tên đứng yên bên trái, 2 hàng tiêu đề (nhóm + 9 mục) đứng yên khi cuộn; tick tự lưu; "Cô ghi thêm" = ghi chú riêng của em.
 var td = null, tdHen = null, tdGhiHen = {};
-function moTheoDoi() { $('stTD').classList.remove('an'); $('stCheTD').classList.add('on'); taiTheoDoi(); }
+function moTheoDoi() { $('stTD').classList.remove('an'); $('stCheTD').classList.add('on'); xkKhung('td'); taiTheoDoi(); }
 function taiTheoDoi() {
   if (!$('stNgay').value) $('stNgay').value = homNayIso();
   if (tdHen) tdLuuNgay();

@@ -1,0 +1,15 @@
+CẬP NHẬT 05/10/2026 – XUẤT EXCEL NỘP VỞ VÀ THEO DÕI HẰNG NGÀY
+
+Ở cả 📒 Nộp vở và 👀 Theo dõi hằng ngày có mục "⬇ Xuất Excel …" (chạm để mở):
+- Chọn: Ngày đang chọn · Tuần · Tháng · Học kì I · Học kì II · Cả năm học · Tuỳ chọn (từ ngày – đến ngày) → bấm "⬇ Xuất Excel".
+- Có nút tải file về máy, đồng thời app lưu bản sao vào Google Drive (thư mục Biểu mẫu đã xuất).
+
+NỘI DUNG FILE
+- Xuất 1 ngày:
+    Nộp vở: STT, mã định danh, họ tên, mức + ghi chú từng môn (Tiếng Việt, Toán).
+    Theo dõi: STT, mã, họ tên, 9 cột tick (✓) theo nhóm TÍCH CỰC / HẠN CHẾ / NỀ NẾP, Cô ghi thêm; dòng Cộng = số em mỗi cột.
+- Xuất tuần / tháng / kì / năm (2 sheet):
+    "Tổng hợp": số lần mỗi mức vở (từng môn) + mức nhiều nhất + câu nhận xét vở; hoặc số lần mỗi mục theo dõi + tổng Tích cực / Hạn chế / Nề nếp;
+                cột ghi chú gộp theo ngày; dòng Cộng (lượt) cuối bảng.
+    "Chi tiết theo ngày": từng ngày, từng em.
+- Chỉ có số liệu ĐÃ LƯU (nộp vở chưa bấm Lưu thì app nhắc trước khi xuất).

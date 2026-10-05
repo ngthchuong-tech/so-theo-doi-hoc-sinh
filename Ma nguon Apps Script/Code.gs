@@ -1961,6 +1961,7 @@ function phamViDiemDanh_(yc) {
   var cd = caiDat_(), namHoc = cd.NamHoc || '', hk = doc_('HocKy').filter(function (h) { return h.NamHoc === namHoc; });
   var hkI = hk.filter(function (h) { return h.HocKy === 'I'; })[0], hkII = hk.filter(function (h) { return h.HocKy === 'II'; })[0];
   var f = function (d) { return Utilities.formatDate(d, TZ, 'dd/MM/yyyy'); };
+  if (yc.kieu === 'ngay') { var n1 = yc.ngay || homNay_(); return { tu: n1, den: n1, ten: 'Ngày ' + n1 }; }
   if (yc.kieu === 'tuan') {
     var d = toDate_(yc.ngay || homNay_()), thu = (d.getDay() + 6) % 7;      // thứ Hai = 0
     var dau = new Date(d.getFullYear(), d.getMonth(), d.getDate() - thu);
@@ -2009,6 +2010,46 @@ function layTongHopDiemDanh(yc) {
       return { stt: i + 1, ma: h.MaDinhDanh, ten: h.HoTen, chuyenDi: h.TrangThai === 'Đã chuyển đi', P: o.P, KP: o.KP,
                chuyenCan: soNgay ? Math.round((1 - (o.P + o.KP) / soNgay) * 1000) / 10 : null, ngay: o.ngay };
     }) };
+}
+
+// ============================================================================ XUẤT EXCEL NỘP VỞ / THEO DÕI HẰNG NGÀY
+// loai: 'vo' | 'td'; yc như Tổng hợp điểm danh (kieu: ngay / tuan / thang / hk1 / hk2 / nam / tuy). Trình duyệt dựng file Excel.
+function layXuatSoTheoDoi(loai, yc) {
+  var pv = phamViDiemDanh_(yc), a = key_(pv.tu), b = key_(pv.den), cd = caiDat_();
+  var trong = function (n) { var k = key_(n); return k >= a && k <= b; };
+  var hs = doc_('HocSinh').filter(function (h) { return h.TrangThai !== 'Đã chuyển đi' || (h.NgayChuyenDi && key_(h.NgayChuyenDi) >= a); })
+    .sort(function (x, y) { return +x.ThuTu - +y.ThuTu; });
+  var out = { loai: loai, kieu: yc.kieu, ten: pv.ten, tu: pv.tu, den: pv.den, lop: cd.Lop || '', truong: cd.Truong || '', namHoc: cd.NamHoc || '',
+    hs: hs.map(function (h, i) { return { stt: i + 1, ma: h.MaDinhDanh, ten: h.HoTen, chuyenDi: h.TrangThai === 'Đã chuyển đi' }; }), ct: [] };
+  if (loai === 'vo') {
+    var dv = demVo_(trong), ngayMon = {};
+    out.mon = MON_VO; out.muc = MUC_VO; out.dem = dv.vo;
+    doc_('NopVo').forEach(function (r) {
+      if (!trong(r.Ngay)) return;
+      if (r.MaDinhDanh === '*') { if (r.Mon === '*') return; (ngayMon[r.Mon] = ngayMon[r.Mon] || {})[r.Ngay] = 1;
+        var g = giaiMaVo_(r.GhiChu); Object.keys(g).forEach(function (ma) { out.ct.push({ ngay: r.Ngay, ma: ma, mon: r.Mon, muc: g[ma], gc: '' }); }); }
+      else out.ct.push({ ngay: r.Ngay, ma: r.MaDinhDanh, mon: r.Mon, muc: r.TrangThai === 'Chưa nộp' ? 'N' : '', chu: r.TrangThai, gc: '' });   // cách ghi cũ
+    });
+    doc_('GhiChuVo').forEach(function (r) {
+      if (!trong(r.Ngay)) return; var o = {}; try { o = JSON.parse(r.DuLieu || '{}'); } catch (e) {}
+      Object.keys(o).forEach(function (ma) {
+        var x = out.ct.filter(function (y) { return y.ngay === r.Ngay && y.ma === ma && y.mon === r.Mon; })[0];
+        if (x) x.gc = o[ma]; else out.ct.push({ ngay: r.Ngay, ma: ma, mon: r.Mon, muc: '', gc: o[ma] });
+      });
+    });
+    out.soNgay = {}; MON_VO.forEach(function (m) { out.soNgay[m] = Object.keys(ngayMon[m] || {}).length; });
+  } else {
+    var dt = demTheoDoi_(trong), ghi = {};
+    out.muc = TD_MUC.map(function (x) { return { k: x.k, ten: x.ten, nhom: x.nhom }; }); out.nhom = TD_NHOM; out.dem = dt.dem; out.soNgay = dt.soNgay;
+    doc_('GhiChuNgay').forEach(function (r) { if (r.Loai === 'hs' && r.NoiDung && trong(r.Ngay)) ghi[r.Ngay + '|' + r.MaDinhDanh] = r.NoiDung; });
+    doc_('TheoDoiNgay').forEach(function (r) {
+      if (!trong(r.Ngay)) return; var o = {}; try { o = JSON.parse(r.DuLieu || '{}'); } catch (e) {}
+      Object.keys(o).forEach(function (ma) { out.ct.push({ ngay: r.Ngay, ma: ma, tick: o[ma], ghi: ghi[r.Ngay + '|' + ma] || '' }); delete ghi[r.Ngay + '|' + ma]; });
+    });
+    Object.keys(ghi).forEach(function (k) { var p = k.split('|'); out.ct.push({ ngay: p[0], ma: p[1], tick: '', ghi: ghi[k] }); });   // ngày chỉ có "cô ghi thêm"
+  }
+  out.ct.sort(function (x, y) { return key_(x.ngay) - key_(y.ngay); });
+  return out;
 }
 
 // ============================================================================ PHONG TRÀO – CUỘC THI
