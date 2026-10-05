@@ -49,6 +49,10 @@ var BANG = {
   GhiChuNgay:   ['Ngay', 'Loai', 'MaDinhDanh', 'NoiDung', 'CapNhat'],     // Loai: lop / hs / khac
   // Mẫu ghi chú của cô (chip chạm nhanh): An = '1' là ẩn mẫu có sẵn của app
   MauGhiChu:    ['Loai', 'NoiDung', 'An', 'CapNhat'],
+  // Theo dõi hằng ngày: 1 dòng / ngày, DuLieu = JSON {mã HS: 'các mã tick'} (mã tick: TD_MUC trong Chung.js)
+  TheoDoiNgay:  ['Ngay', 'DuLieu', 'CapNhat'],
+  // Ghi chú nộp vở: 1 dòng / ngày / môn, DuLieu = JSON {mã HS: ghi chú}
+  GhiChuVo:     ['Ngay', 'Mon', 'DuLieu', 'CapNhat'],
   // Nhắc việc: Han dd/MM/yyyy, Gio HH:mm, MucDo thuong/quantrong/gap, Lap ''/ngay/tuan, BaoLich '1' = tạo sự kiện Lịch Google (báo trên điện thoại)
   NhacViec:     ['Ma', 'Han', 'Gio', 'NoiDung', 'MaDinhDanh', 'MucDo', 'Lap', 'BaoLich', 'LichID', 'TrangThai', 'NguonNgay', 'NguonLoai', 'CapNhat'],
   // Bài kiểm tra nhập từ file của cô: đề (mỗi câu: điểm tối đa, mức, kĩ năng) và điểm từng câu của từng em (JSON {câu: điểm})
@@ -1032,6 +1036,36 @@ function luuGhiChu(ngay, loai, ma, nd) {
     return luc;
   });
 }
+// ============================================================================ THEO DÕI HẰNG NGÀY (Sổ theo dõi → 👀)
+// Bảng tick 9 cột (Chung.js TD_MUC) + "Cô ghi thêm" = ghi chú riêng của em trong ngày (bảng GhiChuNgay, dùng chung với 🗒️ Ghi chú)
+function layTheoDoiNgay(ngay) {
+  ngay = ngay || homNay_();
+  var tick = {}, daLuu = false, ghi = {}, vang = {};
+  doc_('TheoDoiNgay').forEach(function (r) { if (r.Ngay === ngay) { daLuu = true; try { tick = JSON.parse(r.DuLieu || '{}'); } catch (e) {} } });
+  doc_('GhiChuNgay').forEach(function (r) { if (r.Ngay === ngay && r.Loai === 'hs' && r.NoiDung) ghi[r.MaDinhDanh] = r.NoiDung; });
+  doc_('DiemDanh').forEach(function (r) { if (r.Ngay === ngay && r.TrangThai !== 'Có mặt' && r.Buoi !== 'Sáng' && r.Buoi !== 'Chiều') vang[r.MaDinhDanh] = 1; });
+  return { ngay: ngay, daLuu: daLuu, tick: tick, ghi: ghi,
+    hs: hocSinhDangHoc_(ngay).map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1, vang: !!vang[h.MaDinhDanh] }; }) };
+}
+// tick: {mã HS: 'abc'} – lưu cả ngày (ghi đè)
+function luuTheoDoiNgay(ngay, tick) {
+  return voiKhoa_(function () {
+    var o = {}; Object.keys(tick || {}).forEach(function (ma) { var s = String(tick[ma] || '').replace(/[^a-i]/g, ''); if (s) o[ma] = s; });
+    var luc = Utilities.formatDate(new Date(), TZ, 'dd/MM/yyyy HH:mm');
+    thayTheTheo_('TheoDoiNgay', function (r) { return r.Ngay !== ngay; }, Object.keys(o).length ? [hang_('TheoDoiNgay', { Ngay: ngay, DuLieu: JSON.stringify(o), CapNhat: luc })] : []);
+    return luc;
+  });
+}
+// Đếm số lần tick trong những ngày thoả loc(ngay): {dem: {mã HS: {a: n, ...}}, soNgay}
+function demTheoDoi_(loc) {
+  var dem = {}, soNgay = 0;
+  doc_('TheoDoiNgay').forEach(function (r) {
+    if (!loc(r.Ngay)) return; soNgay++;
+    var o = {}; try { o = JSON.parse(r.DuLieu || '{}'); } catch (e) {}
+    Object.keys(o).forEach(function (ma) { var d = dem[ma] = dem[ma] || {}; String(o[ma]).split('').forEach(function (k) { d[k] = (d[k] || 0) + 1; }); });
+  });
+  return { dem: dem, soNgay: soNgay };
+}
 function ghiChuCuaHS_(ma) {
   return doc_('GhiChuNgay').filter(function (r) { return r.Loai === 'hs' && r.MaDinhDanh === ma && r.NoiDung; })
     .map(function (r) { return { ngay: r.Ngay, nd: r.NoiDung }; }).sort(function (a, b) { return key_(b.ngay) - key_(a.ngay); });
@@ -1130,7 +1164,11 @@ function goiYThangCN(thang) {
     Object.keys(t0.gcHS || {}).forEach(function (ma) { if (!ten[ma]) return; var d = {};
       t0.gcHS[ma].forEach(function (nd) { phanLoaiGhiChu(nd).forEach(function (x) { if (x.tot < 0) d[x.nhan] = (d[x.nhan] || 0) + 1; }); });
       Object.keys(d).forEach(function (n) { if (d[n] >= 2) (nhacThang[n] = nhacThang[n] || []).push(ten[ma]); }); });
-    Object.keys(nhacThang).forEach(function (n) { ton.push('còn ' + n + ' nhiều lần: ' + nhacThang[n].join(', ')); });
+    Object.keys(t0.td || {}).forEach(function (ma) { if (!ten[ma]) return;           // theo dõi hằng ngày: từ 3 lần / tháng
+      TD_MUC.forEach(function (x) { if ((t0.td[ma][x.k] || 0) >= TD_NGUONG) (nhacThang[(x.tot > 0 ? '+' : '') + x.ten.toLowerCase()] = nhacThang[(x.tot > 0 ? '+' : '') + x.ten.toLowerCase()] || []).push(ten[ma]); }); });
+    var tot0 = Object.keys(nhacThang).filter(function (n) { return n[0] === '+'; });
+    if (tot0.length) uu.push('nhiều em ' + tot0.map(function (n) { return n.slice(1) + ' (' + nhacThang[n].length + ' em)'; }).join(', '));
+    Object.keys(nhacThang).filter(function (n) { return n[0] !== '+'; }).forEach(function (n) { ton.push('còn ' + nhacThang[n].length + ' em ' + n + ' nhiều lần'); });
   } catch (e) {}
   kyKetThucTrongThang_(namHoc, thang).forEach(function (ky) {      // bài kiểm tra của kì kết thúc trong tháng
     var dk = diemKiemTra_(namHoc)[ky]; if (!dk) return;
@@ -1210,15 +1248,19 @@ function goiYTuanCN(tuan, tu, den) {
   var gcTuan = doc_('GhiChuNgay').filter(function (r) { return r.NoiDung && trongKhoang_(r.Ngay, tu, den); }).sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); });
   gcTuan.filter(function (r) { return r.Loai === 'khac'; }).forEach(function (r) { nd.push('- ' + String(r.NoiDung).replace(/\s*\n\s*/g, '; ').replace(/^-\s*/, '') + ' (' + ngayNgan_(r.Ngay) + ')'); });
   // ghi chú riêng từng em trong tuần → HS tích cực / cần nhắc nhở
-  var tichCuc = [], nhac = {};
+  // (cô yêu cầu: Sổ CN ghi dạng đánh giá chung, không nêu chi tiết từng em)
+  var tichCuc = {}, nhac = {};
   gcTuan.filter(function (r) { return r.Loai === 'hs' && ten[r.MaDinhDanh]; }).forEach(function (r) {
-    phanLoaiGhiChu(r.NoiDung).forEach(function (x) {
-      if (x.tot > 0) { if (tichCuc.indexOf(ten[r.MaDinhDanh]) < 0) tichCuc.push(ten[r.MaDinhDanh]); }
-      else { var a = nhac[ten[r.MaDinhDanh]] = nhac[ten[r.MaDinhDanh]] || []; if (a.indexOf(x.nhan) < 0) a.push(x.nhan); }
-    });
+    phanLoaiGhiChu(r.NoiDung).forEach(function (x) { var o = x.tot > 0 ? tichCuc : nhac; (o[x.nhan] = o[x.nhan] || {})[r.MaDinhDanh] = 1; });
   });
-  if (tichCuc.length) kq.push('- HS tích cực: ' + tichCuc.join(', ') + '.');
-  if (Object.keys(nhac).length) kq.push('- Nhắc nhở: ' + Object.keys(nhac).map(function (t) { return t + ' (' + nhac[t].join(', ') + ')'; }).join('; ') + ' – GV đã nhắc nhở, trao đổi với phụ huynh.');
+  var tdT = demTheoDoi_(function (ngay) { return trongKhoang_(ngay, tu, den); });
+  if (tdT.soNgay) {
+    var soEm = {}; Object.keys(tdT.dem).forEach(function (ma) { if (!ten[ma]) return; Object.keys(tdT.dem[ma]).forEach(function (k) { soEm[k] = (soEm[k] || 0) + 1; }); });
+    TD_MUC.forEach(function (x) { if (soEm[x.k]) { var o = x.tot > 0 ? tichCuc : nhac, n = x.ten.toLowerCase(); o[n] = o[n] || {}; o[n]._so = (o[n]._so || 0) + soEm[x.k]; } });
+  }
+  var dem = function (o) { return Object.keys(o).map(function (n) { var s = Object.keys(o[n]).filter(function (k) { return k !== '_so'; }).length + (o[n]._so || 0); return n + ' (' + s + ' em)'; }); };
+  if (Object.keys(tichCuc).length) kq.push('- Ưu điểm: nhiều em ' + dem(tichCuc).join(', ') + '.');
+  if (Object.keys(nhac).length) kq.push('- Hạn chế: còn ' + dem(nhac).join(', ') + ' – GV đã nhắc nhở, rèn thêm, trao đổi với phụ huynh.');
   // ghi chú chung cả lớp trong tuần (Sổ theo dõi → 🗒️ Ghi chú)
   doc_('GhiChuNgay').filter(function (r) { return r.Loai === 'lop' && r.NoiDung && trongKhoang_(r.Ngay, tu, den); })
     .sort(function (a, b) { return key_(a.Ngay) - key_(b.Ngay); })
@@ -1287,6 +1329,8 @@ function goiYTheoDoiHS(ma, thang) {
   var kp = 0; doc_('DiemDanh').forEach(function (r) { var p = String(r.Ngay).split('/'); if (r.MaDinhDanh === ma && +p[1] === thang && r.TrangThai === 'Vắng không phép') kp += (r.Buoi === 'Sáng' || r.Buoi === 'Chiều' ? 0.5 : 1); });
   var nd = han.map(function (c) { c = c.replace(/\.$/, ''); return c.charAt(0).toLowerCase() + c.slice(1); });   // nối bằng ";" → chữ thường
   var namHocTD = caiDat_().NamHoc || '', dKT = diemKiemTra_(namHocTD), cKT = diemCau_(namHocTD), deK = deKT_(namHocTD);
+  var tdHS = (t.td || {})[ma] || {};
+  TD_MUC.forEach(function (x) { if (x.tot < 0 && (tdHS[x.k] || 0) >= TD_NGUONG) nd.push(x.ten.toLowerCase() + ' (' + tdHS[x.k] + ' lần trong tháng)'); });
   kyKetThucTrongThang_(namHocTD, thang).forEach(function (ky) {      // bài kiểm tra kì kết thúc trong tháng: điểm + câu còn yếu
     MON_VO.forEach(function (m) {
       var d = (dKT[ky] || {})[ma + '|' + m]; if (!d) return;
@@ -1877,7 +1921,7 @@ function xoaAnhNamHoc(namHoc, goLai) {
 // ============================================================================ KẾT THÚC NĂM HỌC → NĂM HỌC MỚI
 // Sao lưu nguyên file dữ liệu thành "Lưu trữ <năm học> - Lớp …" (thư mục App Sổ theo dõi / Lưu trữ), rồi làm trống
 // các bảng theo năm. Giữ: cài đặt, môn học, kho thư viện, nhận xét chung; ảnh minh chứng (xoá riêng ở Dung lượng ảnh).
-var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo', 'GhiChuNgay', 'DeKiemTra', 'DiemCau'];
+var BANG_THEO_NAM = ['HocSinh', 'DiemDanh', 'SoTheoDoi', 'NhanXetThang', 'DanhGiaKy', 'PhienBanNX', 'HocKy', 'TuanHoc', 'LichBaoGiang', 'PhongTrao', 'ThamGia', 'DanhGiaThang', 'NopVo', 'NhomHS', 'DiemKiemTra', 'SoChuNhiem', 'TheoDoiTienBo', 'GhiChuNgay', 'DeKiemTra', 'DiemCau', 'TheoDoiNgay', 'GhiChuVo'];
 function namSau_(n) { var y = /(\d{4})-(\d{4})/.exec(n || ''); return y ? (+y[1] + 1) + '-' + (+y[2] + 1) : ''; }
 function layNamHoc() {
   var cd = caiDat_(), namHoc = cd.NamHoc || '';
@@ -2071,7 +2115,7 @@ function layBaoCaoPhongTrao() {
 // ============================================================================ GIAO DIỆN GỌN: CHỨC NĂNG BẬT/TẮT + HIỆN THEO THỜI ĐIỂM
 // Cô bật dần các chức năng nâng cao ở Cài đặt → Chức năng. Đánh giá định kỳ / Nhận xét GVCN / Năm học mới chỉ hiện quanh
 // thời điểm cần làm (trừ khi cô chọn "Luôn hiện"). Trả về cùng Trang chủ để không thêm lần gọi máy chủ.
-var CHUC_NANG_MAC_DINH = { theoBai: false, tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' };
+var CHUC_NANG_MAC_DINH = { hdtnDD: false, theoBai: false, tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' };
 var TEN_KY = { GK1: 'giữa học kì I', CK1: 'cuối học kì I', GK2: 'giữa học kì II', CK2: 'cuối năm' };
 function chucNang_() {
   var o = {}; try { o = JSON.parse(caiDat_().ChucNang || '{}'); } catch (e) {}
@@ -2317,6 +2361,9 @@ function duLieuThang_(thang) {
   });
   var gcHS = {};                                 // ghi chú riêng từng em trong tháng (căn cứ năng lực, phẩm chất)
   doc_('GhiChuNgay').forEach(function (r) { if (r.Loai === 'hs' && r.NoiDung && trongThang(r.Ngay)) (gcHS[r.MaDinhDanh] = gcHS[r.MaDinhDanh] || []).push(r.NoiDung); });
+  doc_('GhiChuVo').forEach(function (r) { if (!trongThang(r.Ngay)) return; var o = {}; try { o = JSON.parse(r.DuLieu || '{}'); } catch (e) {}
+    Object.keys(o).forEach(function (ma) { (gcHS[ma] = gcHS[ma] || []).push(o[ma]); }); });
+  var dtd = demTheoDoi_(trongThang);            // theo dõi hằng ngày: số lần tick của từng em trong tháng
   var pt = {}, ptHS = phongTraoCuaHS_(namHoc);  // số phong trào, cuộc thi em tham gia trong tháng
   Object.keys(ptHS).forEach(function (ma) { var n = ptHS[ma].filter(function (x) { return trongThang(x.ngay); }).length; if (n) pt[ma] = n; });
   var dv = demVo_(function (ngay) { var p = String(ngay).split('/'); return +p[1] === thang && +p[2] === nam; }), vo = dv.vo;
@@ -2330,7 +2377,7 @@ function duLieuThang_(thang) {
     });
   });
   return { thang: thang, nam: nam, namHoc: namHoc, hocKy: hk, gioiHan: GIOI_HAN_THANG, lib: lib, du: du, vo: vo, soNgayVo: dv.soNgay, soNgayVoCu: dv.soNgayCu, mucVo: MUC_VO,
-           yc: yc.mon, ghi: yc.ghi, vangKP: vangKP, coDiemDanh: coDiemDanh, pt: pt, gcHS: gcHS,
+           yc: yc.mon, ghi: yc.ghi, vangKP: vangKP, coDiemDanh: coDiemDanh, pt: pt, gcHS: gcHS, td: dtd.dem, soNgayTD: dtd.soNgay,
            hs: hs.map(function (h, i) { return { ma: h.MaDinhDanh, ten: h.HoTen, stt: i + 1 }; }),
            mon: mon.map(function (m) { return { ten: m.TenMon, sheet: m.TenSheetBieuMau || m.TenMon, tieuChi: !!lib[m.TenMon] || !!yc.mon[m.TenMon], yc: !!yc.mon[m.TenMon] }; }),
            sheets: [{ ten: TEN_SHEET_TONG_HOP, mon: '' }].concat(mon.map(function (m) { return { ten: m.TenSheetBieuMau || m.TenMon, mon: m.TenMon }; })) };
@@ -2399,7 +2446,9 @@ function layNopVo(ngay) {
   });
   var vang = {};                                     // em vắng cả ngày: không điền sẵn mức
   doc_('DiemDanh').forEach(function (r) { if (r.Ngay === ngay && r.TrangThai !== 'Có mặt' && r.Buoi !== 'Sáng' && r.Buoi !== 'Chiều') vang[r.MaDinhDanh] = 1; });
-  return { ngay: ngay, muc: MUC_VO, mon: MON_VO, daLuu: daLuu, ngayTruoc: ngayTruoc,
+  var gcVo = {};
+  doc_('GhiChuVo').forEach(function (r) { if (r.Ngay === ngay) { try { gcVo[r.Mon] = JSON.parse(r.DuLieu || '{}'); } catch (e) {} } });
+  return { ngay: ngay, muc: MUC_VO, mon: MON_VO, daLuu: daLuu, ngayTruoc: ngayTruoc, gc: gcVo,
     hs: hocSinhDangHoc_(ngay).map(function (h) {
       var tt = {}, ma = h.MaDinhDanh;
       MON_VO.forEach(function (m) {
@@ -2421,6 +2470,12 @@ function luuNopVo(ngay, ds) {
       if (ma.length) moi.push(hang_('NopVo', { Ngay: ngay, MaDinhDanh: '*', Mon: m, TrangThai: 'Đã lưu', GhiChu: ma.join(' '), CapNhat: luc }));
     });
     thayTheTheo_('NopVo', function (r) { return r.Ngay !== ngay; }, moi);
+    var gcMoi = [];                                  // ghi chú nộp vở của từng em (ds[].gc = {môn: chữ})
+    MON_VO.forEach(function (m) {
+      var o = {}; ds.forEach(function (x) { var g = String((x.gc || {})[m] || '').trim().slice(0, 200); if (g) o[x.ma] = g; });
+      if (Object.keys(o).length) gcMoi.push(hang_('GhiChuVo', { Ngay: ngay, Mon: m, DuLieu: JSON.stringify(o), CapNhat: luc }));
+    });
+    thayTheTheo_('GhiChuVo', function (r) { return r.Ngay !== ngay; }, gcMoi);
     return 'Đã lưu nộp vở ' + ngay + ': ' + MON_VO.map(function (m) { return m + ' ' + dem[m].co + ' em' + (dem[m].chua ? ' (' + dem[m].chua + ' chưa nộp)' : ''); }).join('; ') + '.';
   });
 }
@@ -2448,9 +2503,9 @@ function layDanhGiaThang(thang) {
 // Chọn 1 trong các mẫu câu – mỗi em 1 mẫu cố định (giống hệt trên máy)
 function chon4_(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(String(ma).slice(-4), 10) || 0; return ds[(n + k) % ds.length]; }
 function noiCauRong_(ds, n) { return noiCau_(ds.filter(function (x) { return x; }), n); }
-function cauVoThang_(t, ma, mon) {
-  if (!t.soNgayVo || MON_VO.indexOf(mon) < 0) return '';
-  return cauVoDem_((t.vo[ma] || {})[mon], t.soNgayVoCu);
+function cauVoThang_(t, ma, mon) {           // câu nộp vở + câu theo dõi hằng ngày (đọc, chính tả, tính toán) của môn
+  var vo = t.soNgayVo && MON_VO.indexOf(mon) >= 0 ? cauVoDem_((t.vo[ma] || {})[mon], t.soNgayVoCu) : '';
+  return [cauTDMon((t.td || {})[ma], mon), vo].filter(function (x) { return x; }).join(' ');
 }
 // Nhận xét 1 ô của 1 tháng đúng như màn đánh giá tháng hiện: phần cô sửa, hoặc bản app ghép
 function nxThang_(t, ma, phan) {
@@ -2541,6 +2596,29 @@ var GC_LOAI = [
   { re: /đánh nhau|đánh bạn|trêu|xô đẩy|nói tục|chửi/i, nhan: 'chưa hòa nhã với bạn', tot: -1, muc: ['Nhân ái'] },
   { re: /nói dối|gian lận|quay cóp|nhìn bài/i, nhan: 'chưa trung thực', tot: -1, muc: ['Trung thực'] }
 ];
+// THEO DÕI HẰNG NGÀY (Sổ theo dõi → 👀): 9 cột tick. nhom: tc tích cực / hc hạn chế / nn nề nếp. tot: +1 / -1.
+// muc: mục năng lực – phẩm chất được tính; mon: môn được nêu trong nhận xét tháng.
+var TD_MUC = [
+  { k: 'a', ten: 'Tích cực phát biểu', nhom: 'tc', tot: 1, muc: ['Giao tiếp và hợp tác', 'Chăm chỉ'] },
+  { k: 'b', ten: 'Tích cực chuẩn bị bài', nhom: 'tc', tot: 1, muc: ['Chăm chỉ', 'Tự chủ và tự học', 'Trách nhiệm'] },
+  { k: 'c', ten: 'Đọc to, lưu loát', nhom: 'tc', tot: 1, muc: ['Ngôn ngữ'], mon: 'Tiếng Việt', cau: 'Đọc to, lưu loát.' },
+  { k: 'd', ten: 'Tính toán nhanh', nhom: 'tc', tot: 1, muc: ['Tính toán'], mon: 'Toán', cau: 'Tính toán nhanh.' },
+  { k: 'e', ten: 'Sai chính tả', nhom: 'hc', tot: -1, muc: ['Ngôn ngữ'], mon: 'Tiếng Việt', cau: 'Cần chú ý viết đúng chính tả.' },
+  { k: 'f', ten: 'Đọc nhỏ / đọc chậm', nhom: 'hc', tot: -1, muc: ['Ngôn ngữ'], mon: 'Tiếng Việt', cau: 'Cần luyện đọc to, rõ ràng, nhanh hơn.' },
+  { k: 'g', ten: 'Tính toán chậm', nhom: 'hc', tot: -1, muc: ['Tính toán'], mon: 'Toán', cau: 'Cần rèn tính toán nhanh, chính xác hơn.' },
+  { k: 'h', ten: 'Quên sách vở', nhom: 'nn', tot: -1, muc: ['Trách nhiệm', 'Tự chủ và tự học'], cauNL: 'Cần chuẩn bị đủ sách vở trước khi đến lớp.' },
+  { k: 'i', ten: 'Quên đồ dùng học tập', nhom: 'nn', tot: -1, muc: ['Trách nhiệm'], cauNL: 'Cần chuẩn bị đủ đồ dùng học tập.' }
+];
+var TD_NHOM = { tc: 'TÍCH CỰC', hc: 'HẠN CHẾ', nn: 'NỀ NẾP' };
+var TD_NGUONG = 3;            // trong 1 tháng: từ 3 lần trở lên mới coi là biểu hiện thường xuyên
+var TD_THEO = {}; TD_MUC.forEach(function (x) { TD_THEO[x.k] = x; });
+// Câu nhận xét môn (Tiếng Việt / Toán) từ số lần tick trong tháng: d = {a: số lần, ...}
+function cauTDMon(d, mon) {
+  if (!d) return '';
+  return TD_MUC.filter(function (x) { return x.mon === mon && (d[x.k] || 0) >= TD_NGUONG; })
+    .sort(function (a, b) { return a.tot - b.tot || d[b.k] - d[a.k]; }).slice(0, 2)
+    .sort(function (a, b) { return b.tot - a.tot; }).map(function (x) { return x.cau; }).join(' ');
+}
 function phanLoaiGhiChu(nd) { nd = String(nd || ''); return GC_LOAI.filter(function (x) { return x.re.test(nd) && !(x.tru && x.tru.test(nd)); }); }
 
 function diemMucNL(m) { return m === 'HTXS' || m === 'HTT' ? 1 : m === 'HT' ? 0 : m === 'CHT' || m === 'CCG' ? -1 : null; }
@@ -2602,6 +2680,17 @@ function nlpcTuThang(t, ma) {
     cc.n = Object.keys(o.nhan).filter(function (n) { return CAU_GC_YEU[n]; }).sort(function (a, b) { return o.nhan[b] - o.nhan[a]; })[0] || '';   // điều cần nhắc nhiều nhất
     canCu[k].push(cc);
   });
+  // theo dõi hằng ngày: cộng số lần tick theo mục; tốt ≥ 3 lần (và gấp đôi hạn chế) → +1, hạn chế ≥ 3 lần (nhiều hơn tốt) → -1
+  var tdD = (t.td || {})[ma], tdM = {};
+  if (tdD) TD_MUC.forEach(function (x) { var n = tdD[x.k] || 0; if (!n) return; x.muc.forEach(function (k) {
+    var o = tdM[k] = tdM[k] || { tot: 0, yeu: 0, nhan: [] }; if (x.tot > 0) o.tot += n; else o.yeu += n; o.nhan.push({ x: x, n: n }); }); });
+  Object.keys(tdM).forEach(function (k) {
+    var o = tdM[k], d = o.tot >= TD_NGUONG && o.tot >= 2 * o.yeu ? 1 : o.yeu >= TD_NGUONG && o.yeu > o.tot ? -1 : 0;
+    if (!canCu[k] || !d) return;
+    var cc = c(d, 'Theo dõi hằng ngày: ' + o.nhan.map(function (y) { return y.x.ten.toLowerCase() + ' ' + y.n + ' lần'; }).join(', '), 'td');
+    var yeu = o.nhan.filter(function (y) { return y.x.tot < 0; }).sort(function (a, b) { return b.n - a.n; })[0];
+    cc.n = yeu ? yeu.x.k : ''; canCu[k].push(cc);
+  });
   var coDuLieu = false, kq = { muc: {}, canCu: {} }, soNguon = {};
   Object.keys(canCu).forEach(function (k) { soNguon[k] = canCu[k].length; canCu[k] = canCu[k].filter(function (x) { return x; }); if (canCu[k].length) coDuLieu = true; });
   NLPC_CHUNG.concat(NLPC_DAC_THU, NLPC_PC).forEach(function (k) {
@@ -2610,7 +2699,7 @@ function nlpcTuThang(t, ma) {
     ds.forEach(function (x) { if (x.d > 0) tot++; else if (x.d < 0) yeu++; });
     kq.canCu[k] = ds;
     // Tốt cần "biểu hiện rõ và thường xuyên": mọi căn cứ đều tốt và có ít nhất 2 căn cứ (mục chỉ có 1 nguồn như Trung thực thì 1 là đủ)
-    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot && !ds.every(function (x) { return x.k === 'gc'; }) ? 'Cần cố gắng' : 'Đạt');   // chỉ có ghi chú thì không hạ xuống Cần cố gắng
+    kq.muc[k] = !ds.length ? '' : (tot === ds.length && (ds.length >= 2 || soNguon[k] === 1) ? 'Tốt' : yeu > tot && !ds.every(function (x) { return x.k === 'gc' || x.k === 'td'; }) ? 'Cần cố gắng' : 'Đạt');   // chỉ có ghi chú / tick hằng ngày thì không hạ xuống Cần cố gắng
   });
   return kq;
 }
@@ -2638,9 +2727,10 @@ function cauNLPC(kq, phan, ma, n) {
   var ds = phan === 'NLC' ? NLPC_CHUNG : phan === 'PC' ? NLPC_PC : ['Ngôn ngữ', 'Tính toán'];
   var lay = function (muc) {
     return ds.filter(function (k) { return kq.muc[k] === muc; }).map(function (k) {
-      if (muc === 'Cần cố gắng' && phan === 'PC') {   // phẩm chất yếu vì vở / chuyên cần → câu nói đúng điều đó
-        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && (CAU_YEU_NL[x.k] || (x.k === 'gc' && CAU_GC_YEU[x.n])); })[0];
-        if (y) return y.k === 'gc' ? CAU_GC_YEU[y.n] : CAU_YEU_NL[y.k];
+      if (muc === 'Cần cố gắng') {   // yếu vì vở / chuyên cần / ghi chú / theo dõi hằng ngày → câu nói đúng điều đó
+        var cauTD = function (x) { var m = TD_THEO[x.n]; return m && (m.cauNL || m.cau); };
+        var y = (kq.canCu[k] || []).filter(function (x) { return x.d < 0 && (x.k === 'td' ? cauTD(x) : phan === 'PC' && (CAU_YEU_NL[x.k] || (x.k === 'gc' && CAU_GC_YEU[x.n]))); })[0];
+        if (y) return y.k === 'td' ? cauTD(y) : y.k === 'gc' ? CAU_GC_YEU[y.n] : CAU_YEU_NL[y.k];
       }
       return chonCauNL((CAU_NLPC[k] || {})[muc], ma, ds.indexOf(k));
     });

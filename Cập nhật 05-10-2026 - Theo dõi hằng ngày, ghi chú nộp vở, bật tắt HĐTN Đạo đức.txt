@@ -1,0 +1,28 @@
+CẬP NHẬT 05/10/2026 – THEO FILE "BỔ SUNG" CỦA CÔ
+
+1. NỘP VỞ: THÊM CỘT GHI CHÚ
+- Cột cuối "Ghi chú" (📝) trong bảng nộp vở. Chạm 📝 → ô ghi hiện ngay dưới hàng của em → "Xong".
+- Ghi chú hiện nhỏ dưới tên em; mỗi môn (Tiếng Việt / Toán) có ghi chú riêng; lưu cùng khi bấm "Lưu nộp vở".
+- Ghi chú vở cũng được tính như ghi chú riêng của em (căn cứ năng lực – phẩm chất).
+
+2. MỤC MỚI: 👀 THEO DÕI HẰNG NGÀY (Sổ theo dõi; có nút ở Trang chủ)
+- Bảng giống mẫu của cô: Tên học sinh | TÍCH CỰC (Tích cực phát biểu, Tích cực chuẩn bị bài, Đọc to lưu loát, Tính toán nhanh)
+  | HẠN CHẾ (Sai chính tả, Đọc nhỏ/Đọc chậm, Tính toán chậm) | NỀ NẾP (Quên sách vở, Quên đồ dùng học tập) | CÔ GHI THÊM.
+- Cột tên và 2 hàng tiêu đề luôn đứng yên khi cuộn; trên điện thoại vuốt ngang để xem hết cột.
+- Chạm ô để tick, chạm lại để bỏ; app tự lưu. "Cô ghi thêm" = ghi chú riêng của em trong ngày (hiện cả ở mục Ghi chú, không phải ghi 2 lần).
+
+3. CÀI ĐẶT → CHỨC NĂNG: "Đánh giá tháng: Hoạt động trải nghiệm, Đạo đức"
+- Tắt sẵn: màn Đánh giá → Thường xuyên chỉ còn Tiếng Việt, Toán, Năng lực – phẩm chất. Khi cần đánh giá thì bật.
+- Đánh giá định kỳ (giữa kì, cuối kì) vẫn luôn có 2 môn này.
+
+LƯU Ý ĐÃ LÀM THEO
+- Mục Ghi chú: bỏ các câu mẫu trùng với Theo dõi hằng ngày (hăng hái phát biểu, chuẩn bị bài, quên vở / đồ dùng).
+- Tổng hợp từ Theo dõi hằng ngày (em có từ 3 lần trong tháng):
+    • Đánh giá tháng: câu nhận xét Tiếng Việt / Toán (VD "Đọc to, lưu loát.", "Cần chú ý viết đúng chính tả.", "Cần rèn tính toán nhanh, chính xác hơn.")
+      và căn cứ năng lực – phẩm chất (phát biểu → Giao tiếp, Chăm chỉ; chuẩn bị bài → Chăm chỉ, Tự chủ, Trách nhiệm;
+      đọc, chính tả → Ngôn ngữ; tính toán → Tính toán; quên sách vở, đồ dùng → Trách nhiệm, Tự chủ).
+      Chỉ riêng tick hằng ngày / ghi chú thì không hạ em xuống "Cần cố gắng".
+    • Định kỳ và cuối năm: lấy từ các tháng như trước.
+    • Sổ chủ nhiệm tuần, tháng: dạng chung, chỉ ghi số em ("Ưu điểm: nhiều em tích cực phát biểu (12 em)…", "Hạn chế: còn sai chính tả (5 em)…"),
+      không nêu tên từng em. Phần ghi chú riêng ở Sổ chủ nhiệm tuần cũng đổi sang dạng chung.
+    • Phần "Theo dõi học sinh chưa tiến bộ" (từng em) ghi thêm hạn chế em có từ 3 lần trong tháng.

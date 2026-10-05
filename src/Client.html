@@ -84,6 +84,7 @@ function moTab(t) { if (t === hienTai.tab && !hienTai.buoc && !hienTai.hoSo) { a
 function apDung(tt) {
   if (cnHen) cnLuuNgay();                             // sổ chủ nhiệm đang soạn dở → lưu ngay khi chuyển màn
   if (gcHen) gcLuuNgay();                             // ghi chú đang soạn dở
+  if (tdHen) tdLuuNgay();                             // theo dõi hằng ngày đang chờ lưu
   var cu = hienTai; hienTai = tt; var t = tt.tab;
   document.body.setAttribute('data-tab', t);          // màu chủ đạo theo khu vực (Styles: body[data-tab])
   var veSauND = nd && nd.nguon && nd.nguon.dong;
@@ -104,8 +105,9 @@ function apDung(tt) {
     if (tt.ngay) $('stNgay').value = tt.ngay;
     $('stPT').classList.add('an'); $('stChePT').classList.remove('on'); $('stVo').classList.add('an'); $('stCheVo').classList.remove('on');
     $('stThang').classList.add('an'); $('stCheThang').classList.remove('on'); $('stCN').classList.add('an'); $('stCheCN').classList.remove('on');
-    $('stGC').classList.add('an'); $('stCheGC').classList.remove('on');
+    $('stGC').classList.add('an'); $('stCheGC').classList.remove('on'); $('stTD').classList.add('an'); $('stCheTD').classList.remove('on');
     if (tt.buoc === 'pt') moPhongTrao(tt.maPT);
+    else if (tt.buoc === 'td') moTheoDoi();
     else if (tt.buoc === 'gc') moGhiChu();
     else if (tt.buoc === 'cn') moSoCN();
     else if (tt.buoc === 'thang') moChonThang();
@@ -219,6 +221,7 @@ function doiCheDo(c) {
   if (c === 'pt') { if (hienTai.buoc !== 'pt' || hienTai.maPT) diToi({ tab: 'sotheodoi', buoc: 'pt' }); return; }
   if (c === 'cn') { if (hienTai.buoc !== 'cn') diToi({ tab: 'sotheodoi', buoc: 'cn' }); return; }
   if (c === 'gc') { if (hienTai.buoc !== 'gc') diToi({ tab: 'sotheodoi', buoc: 'gc' }); return; }
+  if (c === 'td') { if (hienTai.buoc !== 'td') diToi({ tab: 'sotheodoi', buoc: 'td' }); return; }
   if (c === 'chung') { if (hienTai.buoc !== 'chung') diToi({ tab: 'sotheodoi', buoc: 'chung', ngay: $('stNgay').value }); }
   else if (hienTai.buoc) moChonBai();
 }
@@ -250,6 +253,7 @@ function taiTietTrongNgay() {
 }
 function doiNgaySTD() {
   if (!$('stGC').classList.contains('an')) return taiGhiChu();      // đang ở Ghi chú: đổi ngày = xem / ghi ngày đó
+  if (!$('stTD').classList.contains('an')) return taiTheoDoi();     // đang ở Theo dõi hằng ngày
   if (!$('stVo').classList.contains('an')) {          // đang ở Nộp vở
     if (vo && vo.sua && !confirm('Cô chưa lưu nộp vở ngày ' + vo.ngay + '. Đổi ngày và bỏ thay đổi?')) { $('stNgay').value = dmyToIso(vo.ngay); return; }
     return taiNopVo();
@@ -2006,10 +2010,11 @@ function ptXuat() {
 
 // ============================================================================ GIAO DIỆN GỌN: chức năng bật/tắt + hiện theo thời điểm
 // GD lấy cùng Trang chủ (máy chủ tính), nhớ trên máy để lần mở sau áp dụng ngay.
-var GD = { chucNang: { theoBai: false, tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' }, kyHien: [], kyNhac: [], hienGVCN: false, hienNamHoc: true };
+var GD = { chucNang: { hdtnDD: false, theoBai: false, tongHopDD: true, phongTrao: true, minhChung: false, chupBai: false, ai: false, thoiDiem: 'tuDong' }, kyHien: [], kyNhac: [], hienGVCN: false, hienNamHoc: true };
 try { var _gd = JSON.parse(localStorage.getItem('giaoDien') || 'null'); if (_gd && _gd.chucNang) GD = _gd; } catch (e) {}
 function cnBat(k) { return !!(GD.chucNang && GD.chucNang[k]); }
 var DS_CN = [
+  ['hdtnDD', '🎭 Đánh giá tháng: Hoạt động trải nghiệm, Đạo đức', 'Hiện 2 môn này ở Đánh giá → Thường xuyên (hằng tháng). Tắt sẵn – khi cần đánh giá thì bật. Đánh giá định kỳ vẫn luôn có 2 môn này.'],
   ['theoBai', '📝 Ghi nhận xét theo từng bài học (cách cũ)', 'Ghi mức, câu nhận xét cho từng em sau mỗi tiết. Cô đã chuyển sang đánh giá theo tháng nên tắt sẵn.'],
   ['tongHopDD', '📊 Tổng hợp điểm danh', 'Xem, xuất Excel số ngày vắng theo tuần, tháng, học kì, năm (trong màn Điểm danh).'],
   ['phongTrao', '🏆 Phong trào – Cuộc thi', 'Ghi các em tham gia, đạt giải; đưa vào hồ sơ và nhận xét GVCN (trong Sổ theo dõi).'],
@@ -2101,9 +2106,9 @@ function cauVoDem(v, soNgayCu) {
   if (!tot) return nhac || (soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '');
   return CAU_VO[tot] + (nhac ? ' ' + nhac : '');
 }
-function cauVo(ma, mon) {
-  if (!tg.soNgayVo || MON_CO_VO.indexOf(mon) < 0) return '';
-  return cauVoDem((tg.vo[ma] || {})[mon], tg.soNgayVoCu);
+function cauVo(ma, mon) {              // câu nộp vở + câu theo dõi hằng ngày của môn – giống cauVoThang_ trên máy chủ
+  var v = tg.soNgayVo && MON_CO_VO.indexOf(mon) >= 0 ? cauVoDem((tg.vo[ma] || {})[mon], tg.soNgayVoCu) : '';
+  return [cauTDMon((tg.td || {})[ma], mon), v].filter(function (x) { return x; }).join(' ');
 }
 // Ghép nhận xét môn từ các yêu cầu cần đạt – giống hệt ghepYC_ trên máy chủ (điều làm tốt → điều cần cố gắng → vở)
 function ghepYC(g, yc, vo, n) {
@@ -2141,6 +2146,7 @@ function ghepTongHop(ma) {         // ô "Môn học" của sheet Sổ tổng h�
 function taiThang() {
   chay('layDanhGiaThang', +$('bmThang').value).then(function (d) {
     if (d.goiY) GOI_Y_MON = d.goiY;
+    if (!cnBat('hdtnDD')) d.mon = d.mon.filter(function (m) { return m.ten !== MON_HDTN && m.ten !== MON_DD; });   // Cài đặt → Chức năng
     tg = d; if (tgPhan !== 'NLPC' && !tgMon(tgPhan)) tgPhan = d.mon.length ? d.mon[0].ten : 'NLPC';
     $('bmKetQua').innerHTML = ''; $('bmFile').value = ''; $('tgNoiDung').classList.remove('an'); veThang();
   });
@@ -2287,6 +2293,7 @@ function moNopVo() {
 }
 function taiNopVo() {
   if (!$('stNgay').value) $('stNgay').value = homNayIso();
+  voSuaGC = -1;
   chay('layNopVo', isoToDmy($('stNgay').value)).then(function (d) { vo = d; vo.sua = false; veNopVo(); });
 }
 function veNopVo() {
@@ -2301,31 +2308,44 @@ function veNopVo() {
   // Bảng: cột trái tên học sinh, 6 cột mức (tiêu đề cột đứng yên khi cuộn), mỗi ô 1 dấu tick
   var dau = document.querySelector('header'); if (dau) document.documentElement.style.setProperty('--cao-dau', dau.offsetHeight + 'px');
   $('voDs').innerHTML = vo.hs.length ? '<div class="vo-bang"><div class="vo-dong vo-dau"><div class="vo-goc">Học sinh<div class="nho">chạm tiêu đề cột: chọn cho em chưa chọn</div></div>' +
-    VO_NUT.map(function (b, k) { return '<div class="vo-cot ' + b[2] + '" title="Chọn &quot;' + esc(b[1]) + '&quot; cho các em chưa chọn" onclick="voCaLop(\'' + b[0] + '\')"><span>' + esc(b[1]) + '</span><b>' + (dem[b[0]] || 0) + '</b></div>'; }).join('') + '</div>' +
+    VO_NUT.map(function (b, k) { return '<div class="vo-cot ' + b[2] + '" title="Chọn &quot;' + esc(b[1]) + '&quot; cho các em chưa chọn" onclick="voCaLop(\'' + b[0] + '\')"><span>' + esc(b[1]) + '</span><b>' + (dem[b[0]] || 0) + '</b></div>'; }).join('') +
+    '<div class="vo-cot gc" style="cursor:default"><span>Ghi chú</span><b>' + vo.hs.filter(function (h) { return voGC(h.ma); }).length + '</b></div></div>' +
     vo.hs.map(function (h, i) {
       var m = h.tt[voMon];
       return '<div class="vo-dong' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><div style="min-width:0">' + voTen(h.ten, i + 1) + dauNhom(h.ma) +
-        (h.vang ? '<span class="tag">vắng</span>' : m ? '' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
+        (h.vang ? '<span class="tag">vắng</span>' : m ? '' : '<span class="tag vang">chưa chọn</span>') + (voGC(h.ma) ? '<div class="vo-gc">📝 ' + esc(voGC(h.ma)) + '</div>' : '') + '</div></div>' +
         VO_NUT.map(function (b, k) {
           return '<button class="vo-o' + (m === b[0] ? ' on ' + b[2] : '') + '" aria-label="' + esc(h.ten + ': ' + b[1]) + '" onclick="voDat(' + i + ', ' + k + ')"><span>' + (m === b[0] ? '✓' : '') + '</span></button>';
-        }).join('') + '</div>';
+        }).join('') + '<button class="vo-o vo-o-gc' + (voGC(h.ma) ? ' co' : '') + '" aria-label="Ghi chú ' + esc(h.ten) + '" onclick="voMoGC(' + i + ')"><span>' + (voGC(h.ma) ? '✎' : '📝') + '</span></button>' +
+        (voSuaGC === i ? '<div class="vo-gc-o"><input type="text" id="voGCO" maxlength="200" value="' + esc(voGC(h.ma)) + '" placeholder="Ghi chú vở ' + esc(voMon) + ' của em (VD: chưa sửa bài, quên vở ô li)" onkeydown="if(event.key===\'Enter\')voXongGC()">' +
+          '<button class="nut nut-nho" onclick="voXongGC()">Xong</button></div>' : '') + '</div>';
     }).join('') + '</div>' : '<div class="nho">Chưa có danh sách học sinh.</div>';
 }
 function voTen(ten, stt) {             // dòng nhỏ: số thứ tự + họ đệm; dòng dưới: tên gọi (2 chữ cuối) to, đậm
   var p = String(ten || '').trim().split(/\s+/), goi = p.slice(-2).join(' '), ho = p.slice(0, -2).join(' ');
   return '<div class="vo-dem">' + (stt ? '<span class="vo-stt">' + stt + '</span> ' : '') + esc(ho) + '</div><div class="vo-ho">' + esc(goi) + '</div>';
 }
-function voChonMon(m) { voMon = m; veNopVo(); }
+var voSuaGC = -1;
+function voGC(ma) { return ((vo.gc || {})[voMon] || {})[ma] || ''; }
+function voMoGC(i) { if (voSuaGC >= 0 && $('voGCO')) voXongGC(true); voSuaGC = voSuaGC === i ? -1 : i; veNopVo(); var o = $('voGCO'); if (o) o.focus(); }
+function voXongGC(giu) {
+  var o = $('voGCO'); if (!o || voSuaGC < 0) return;
+  var h = vo.hs[voSuaGC], g = (vo.gc = vo.gc || {})[voMon] = (vo.gc || {})[voMon] || {}, v = o.value.trim();
+  if ((g[h.ma] || '') !== v) { if (v) g[h.ma] = v; else delete g[h.ma]; vo.sua = true; }
+  if (!giu) { voSuaGC = -1; veNopVo(); }
+}
+function voChonMon(m) { if (voSuaGC >= 0) voXongGC(); voMon = m; veNopVo(); }
 function voDat(i, k) { var tt = VO_NUT[k][0], h = vo.hs[i]; h.tt[voMon] = h.tt[voMon] === tt ? '' : tt; vo.sua = true; veNopVo(); }
 function voCaLop(m) { var n = 0; if (!vo.hs.some(function (h) { return !h.tt[voMon] && !h.vang; })) return bao('Em nào cũng đã chọn mức. Chạm ô của từng em để sửa.'); vo.hs.forEach(function (h) { if (!h.tt[voMon] && !h.vang) { h.tt[voMon] = m; n++; } }); if (n) vo.sua = true; veNopVo(); bao('Đã chọn "' + VO_TEN[m] + '" cho ' + n + ' em.'); }
 function voBoThayDoi() { if (!vo || !vo.sua) return bao('Chưa có thay đổi.'); if (confirm('Bỏ các thay đổi chưa lưu và tải lại?')) taiNopVo(); }
 function voLuu() {
   if (!vo || !vo.hs.length) return bao('Chưa có danh sách học sinh.');
+  if (voSuaGC >= 0) voXongGC();
   var ngay = vo.ngay, cu = vo;                   // lưu ngầm như điểm danh
   var thieu = vo.mon.map(function (m) { var k = vo.hs.filter(function (h) { return !h.tt[m] && !h.vang; }).length; return k ? m + ' ' + k + ' em' : ''; }).filter(Boolean);
   if (thieu.length && !confirm('Còn em chưa chọn mức (' + thieu.join(', ') + ') – các em này không được ghi. Vẫn lưu?')) return;
   vo.mon.forEach(function (m) { vo.daLuu[m] = true; }); vo.sua = false; veNopVo(); bao('Đang lưu nộp vở…', 20000);
-  goi('luuNopVo', ngay, vo.hs.map(function (h) { return { ma: h.ma, tt: h.tt }; })).then(function (m) { bao(m, 5000); },
+  goi('luuNopVo', ngay, vo.hs.map(function (h) { var gc = {}; vo.mon.forEach(function (m) { var g = ((vo.gc || {})[m] || {})[h.ma]; if (g) gc[m] = g; }); return { ma: h.ma, tt: h.tt, gc: gc }; })).then(function (m) { bao(m, 5000); },
     function (e) { if (vo === cu) { vo.sua = true; veNopVo(); } bao('Chưa lưu được nộp vở ' + ngay + ': ' + ((e && e.message) || e) + ' – bấm Lưu lần nữa.', 9000); });
 }
 
@@ -2357,11 +2377,62 @@ function veKhoThang(d) {
   }).join(' ') : '<span class="tag do">chưa có – tải file "Thư viện nhận xét THÁNG…"</span>') + '</div>';
 }
 
+// ============================================================================ THEO DÕI HẰNG NGÀY (Sổ theo dõi → 👀)
+// Bảng: cột tên đứng yên bên trái, 2 hàng tiêu đề (nhóm + 9 mục) đứng yên khi cuộn; tick tự lưu; "Cô ghi thêm" = ghi chú riêng của em.
+var td = null, tdHen = null, tdGhiHen = {};
+function moTheoDoi() { $('stTD').classList.remove('an'); $('stCheTD').classList.add('on'); taiTheoDoi(); }
+function taiTheoDoi() {
+  if (!$('stNgay').value) $('stNgay').value = homNayIso();
+  if (tdHen) tdLuuNgay();
+  chay('layTheoDoiNgay', isoToDmy($('stNgay').value)).then(function (d) { td = d; veTheoDoi(); });
+}
+function veTheoDoi() {
+  if (!td) return;
+  var dem = {}; Object.keys(td.tick).forEach(function (ma) { String(td.tick[ma]).split('').forEach(function (k) { dem[k] = (dem[k] || 0) + 1; }); });
+  $('tdTomTat').innerHTML = esc(td.ngay) + ' · <span id="tdTT">' + (td.daLuu ? 'đã lưu' : 'chưa có tick') + '</span>';
+  if (!td.hs.length) { $('tdDs').innerHTML = '<div class="nho">Chưa có danh sách học sinh.</div>'; return; }
+  var nhom = [], cuoi = '';
+  TD_MUC.forEach(function (x) { if (x.nhom !== cuoi) { nhom.push({ n: x.nhom, so: 0 }); cuoi = x.nhom; } nhom[nhom.length - 1].so++; });
+  $('tdDs').innerHTML = '<div class="td-cuon"><table class="td-bang"><thead><tr><th rowspan="2" class="td-ten td-goc">Học sinh</th>' +
+    nhom.map(function (g) { return '<th colspan="' + g.so + '" class="td-nhom ' + g.n + '">' + TD_NHOM[g.n] + '</th>'; }).join('') +
+    '<th rowspan="2" class="td-gt-dau">CÔ GHI THÊM</th></tr><tr>' +
+    TD_MUC.map(function (x) { return '<th class="td-cot ' + x.nhom + '"><span>' + esc(x.ten) + '</span><b>' + (dem[x.k] || 0) + '</b></th>'; }).join('') + '</tr></thead><tbody>' +
+    td.hs.map(function (h, i) {
+      var t = td.tick[h.ma] || '';
+      return '<tr><th class="td-ten">' + voTen(h.ten, h.stt) + (h.vang ? '<span class="tag">vắng</span>' : '') + '</th>' +
+        TD_MUC.map(function (x) { var co = t.indexOf(x.k) >= 0;
+          return '<td class="td-o ' + x.nhom + (co ? ' on' : '') + '" onclick="tdDat(' + i + ',\'' + x.k + '\', this)"><span>' + (co ? '✓' : '') + '</span></td>'; }).join('') +
+        '<td class="td-gt"><input type="text" maxlength="300" value="' + esc(td.ghi[h.ma] || '') + '" placeholder="…" data-ma="' + h.ma + '" oninput="tdGhi(this)"></td></tr>';
+    }).join('') + '</tbody></table></div>';
+}
+function tdDat(i, k, el) {           // tick / bỏ tick 1 ô (vẽ lại đúng ô đó để bảng không nhảy)
+  var h = td.hs[i], t = td.tick[h.ma] || '', co = t.indexOf(k) >= 0;
+  t = co ? t.replace(k, '') : t + k; if (t) td.tick[h.ma] = t; else delete td.tick[h.ma];
+  el.classList.toggle('on', !co); el.firstChild.textContent = co ? '' : '✓';
+  var cot = el.closest('table').querySelectorAll('thead .td-cot b')[TD_MUC.map(function (x) { return x.k; }).indexOf(k)];
+  if (cot) cot.textContent = Math.max(0, (+cot.textContent || 0) + (co ? -1 : 1));
+  $('tdTT').textContent = 'đang lưu…'; clearTimeout(tdHen); tdHen = setTimeout(tdLuuNgay, 900);
+}
+function tdLuuNgay() {
+  clearTimeout(tdHen); tdHen = null; if (!td) return;
+  var ngay = td.ngay, tick = JSON.parse(JSON.stringify(td.tick));
+  goi('luuTheoDoiNgay', ngay, tick).then(function (luc) { if (td && td.ngay === ngay) { td.daLuu = true; if ($('tdTT')) $('tdTT').textContent = 'đã lưu lúc ' + luc.slice(-5); } },
+    function (e) { bao('Chưa lưu được theo dõi ngày ' + ngay + ': ' + ((e && e.message) || e) + ' – chạm lại 1 ô để lưu lại.', 9000); });
+}
+function tdGhi(el) {                  // "Cô ghi thêm" → ghi chú riêng của em trong ngày (tự lưu)
+  var ma = el.dataset.ma, ngay = td.ngay, v = el.value; td.ghi[ma] = v;
+  clearTimeout(tdGhiHen[ma]);
+  tdGhiHen[ma] = setTimeout(function () { delete tdGhiHen[ma];
+    goi('luuGhiChu', ngay, 'hs', ma, v).then(function () { if ($('tdTT')) $('tdTT').textContent = 'đã lưu ghi chú'; },
+      function (e) { bao('Chưa lưu được ghi chú: ' + ((e && e.message) || e), 8000); }); }, 900);
+}
+
 // ============================================================================ GHI CHÚ HẰNG NGÀY (Sổ theo dõi → 🗒️ Ghi chú)
 var gc = null, gcPhan = 'lop', gcMa = '', gcHen = null, gcCho = null, gcLS = [];
 var GC_NHANH = {
-  lop: ['Cả lớp đi học đầy đủ, đúng giờ.', 'Lớp giữ trật tự, nề nếp tốt.', 'Nhiều em hăng hái phát biểu xây dựng bài.', 'Một số em chưa chuẩn bị bài ở nhà.', 'Vệ sinh lớp học sạch sẽ.'],
-  hs: ['Quên vở / đồ dùng học tập.', 'Chưa làm bài ở nhà.', 'Chưa thuộc bài.', 'Mất trật tự trong giờ học.', 'Hăng hái phát biểu.', 'Có tiến bộ.', 'Biết giúp đỡ bạn.', 'Không khoẻ, cần theo dõi.'],
+  // (phát biểu, chuẩn bị bài, quên sách vở / đồ dùng… đã có cột tick ở 👀 Theo dõi hằng ngày nên không lặp lại ở đây)
+  lop: ['Cả lớp đi học đầy đủ, đúng giờ.', 'Lớp giữ trật tự, nề nếp tốt.', 'Vệ sinh lớp học sạch sẽ.'],
+  hs: ['Chưa làm bài ở nhà.', 'Chưa thuộc bài.', 'Mất trật tự trong giờ học.', 'Có tiến bộ.', 'Biết giúp đỡ bạn.', 'Không khoẻ, cần theo dõi.'],
   khac: []
 };
 function moGhiChu() {

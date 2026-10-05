@@ -37,7 +37,7 @@
           <button class="nut o-nhanh c1" onclick="moTab('diemdanh')"><span class="o-ic">✅</span>Điểm danh</button>
           <button class="nut o-nhanh c2" onclick="diToi({ tab: 'sotheodoi', buoc: 'vo' })"><span class="o-ic">📒</span>Nộp vở</button>
           <button class="nut o-nhanh c3" onclick="diToi({ tab: 'sotheodoi', buoc: 'thang' })"><span class="o-ic">📋</span>Đánh giá tháng</button>
-          <button class="nut o-nhanh c4" onclick="moTab('hocsinh')"><span class="o-ic">👧</span>Học sinh</button>
+          <button class="nut o-nhanh c4" onclick="diToi({ tab: 'sotheodoi', buoc: 'td' })"><span class="o-ic">👀</span>Theo dõi hằng ngày</button>
         </div>
       </div>
       <div class="the">
@@ -93,6 +93,7 @@
         <div class="hang" style="margin-top:8px">
           <span class="chip" id="stCheThang" onclick="doiCheDo('thang')">📋 Đánh giá tháng</span>
           <span class="chip" id="stCheVo" onclick="doiCheDo('vo')">📒 Nộp vở</span>
+          <span class="chip" id="stCheTD" onclick="doiCheDo('td')">👀 Theo dõi hằng ngày</span>
           <span class="chip on" id="stCheBai" onclick="doiCheDo('bai')">Theo bài học</span>
           <span class="chip" id="stCheChung" onclick="doiCheDo('chung')">Phẩm chất – năng lực</span>
           <span class="chip" id="stChePT" onclick="doiCheDo('pt')">🏆 Phong trào – Cuộc thi</span>
@@ -159,6 +160,15 @@
         </div>
         <div class="the" id="voDs"></div>
         <div class="the-chan"><div class="trong hang" style="flex-wrap:nowrap"><button class="nut phu" onclick="voBoThayDoi()">Bỏ thay đổi</button><button class="nut lon" onclick="voLuu()">Lưu nộp vở</button></div></div>
+      </div>
+
+      <div id="stTD" class="an">
+        <div class="the">
+          <div class="hang gian"><h3 style="margin:0">👀 Theo dõi hằng ngày</h3><span class="nho" id="tdTomTat"></span></div>
+          <div class="nho" style="margin-top:4px">Chạm ô để tick, chạm lại để bỏ. App tự lưu. Cột <b>Cô ghi thêm</b> chính là ghi chú riêng của em trong ngày (cùng với 🗒️ Ghi chú).
+            Kết quả được tổng hợp vào đánh giá tháng, kì, cuối năm và Sổ chủ nhiệm (dạng chung). Đổi ngày ở ô ngày phía trên.</div>
+        </div>
+        <div class="the" style="padding:8px" id="tdDs"></div>
       </div>
 
       <div id="stGC" class="an">
