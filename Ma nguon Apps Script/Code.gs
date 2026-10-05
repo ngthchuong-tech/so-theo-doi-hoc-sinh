@@ -2351,8 +2351,8 @@ function luuDanhGiaThang(thang, ds) {
 // Nộp vở (theo ý cô, 03/10/2026): 4 mức chất lượng (mức 3 có 2 câu) + "Chưa nộp". Mã: A–E, N.
 // Lưu gọn: mỗi ngày mỗi môn 1 dòng (MaDinhDanh '*', GhiChu = "mã:A mã:B …"). Dữ liệu cách cũ (mỗi em 1 dòng
 // Chưa nộp / Chưa làm xong / Nộp muộn + dòng '*' môn '*') vẫn đọc được.
-var MUC_VO = [['A', 'Nhanh, đẹp, đúng'], ['B', 'Đẹp, đúng'], ['C', 'Đúng, biết trình bày'], ['D', 'Đúng, chưa biết trình bày'], ['E', 'Chưa đúng – chưa đẹp'], ['N', 'Chưa nộp']];
-var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đẹp, đúng.', C: 'Bài làm trong vở đúng, biết trình bày.',
+var MUC_VO = [['A', 'Nhanh, đẹp, đúng'], ['B', 'Đúng nhưng chưa đẹp'], ['C', 'Đúng, biết trình bày'], ['D', 'Đúng, chưa biết trình bày'], ['E', 'Chưa đúng – chưa đẹp'], ['N', 'Chưa nộp']];
+var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đúng nhưng chưa đẹp.', C: 'Bài làm trong vở đúng, biết trình bày.',
                D: 'Bài làm trong vở đúng nhưng chưa biết trình bày.', E: 'Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn.' };
 function giaiMaVo_(s) { var o = {}; String(s || '').split(/\s+/).forEach(function (x) { var p = x.split(':'); if (p.length === 2 && p[1]) o[p[0]] = p[1]; }); return o; }
 // Đếm các lần trong những ngày thoả loc(ngay): {vo: {ma: {môn: {A.., N, cu: số lần chưa xong/muộn cách cũ}}}, soNgay, soNgayCu}
@@ -2566,8 +2566,8 @@ function nlpcTuThang(t, ma) {
   var voCL = null, voNop = null;
   if (v) {
     var tot = '', n = 0; ['A', 'B', 'C', 'D', 'E'].forEach(function (k) { if (v[k] > n) { n = v[k]; tot = k; } });
-    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đẹp, đúng', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
-    if (tot) voCL = c(tot === 'A' || tot === 'B' ? 1 : tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
+    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đúng nhưng chưa đẹp', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
+    if (tot) voCL = c(tot === 'A' ? 1 : tot === 'B' || tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
     var thieu = v.N + v.cu; voNop = c(!thieu ? 1 : thieu <= 2 ? 0 : -1, thieu ? 'Chưa nộp vở ' + thieu + ' lần' : 'Nộp vở đầy đủ', 'nop');
   } else if (t.soNgayVoCu) voNop = c(1, 'Nộp vở đầy đủ', 'nop');
   var kp = (t.vangKP || {})[ma] || 0;

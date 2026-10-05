@@ -65,8 +65,17 @@
   .seg button.on.p { background: #fff4e0; color: var(--vang); font-weight: 700; }
   .seg button.on.kp { background: #fdecea; color: var(--do); font-weight: 700; }
   .nhom-dau { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
-  .vo-hang { padding: 8px 0; border-bottom: 1px solid var(--vien); }
-  .vo-nut { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-top: 4px; }
+  .vo-hang { display: grid; grid-template-columns: minmax(118px, 38%) 1fr; gap: 8px; align-items: center; padding: 10px 6px; border-bottom: 1px solid var(--vien); }
+  .vo-hang:nth-child(even) { background: #f8fafc; }
+  .vo-hang.chua { background: #fff8ec; }
+  .vo-ten { display: flex; gap: 8px; align-items: flex-start; border-right: 3px solid var(--chinh2); padding-right: 8px; height: 100%; }
+  .vo-stt { flex: none; min-width: 24px; height: 24px; border-radius: 12px; background: var(--chinh); color: #fff; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .vo-dem { font-size: 12.5px; color: #5b6472; line-height: 1.2; }
+  .vo-ho { font-size: 18px; font-weight: 800; color: #1a2433; line-height: 1.2; }
+  .vo-muc { font-size: 12px; font-weight: 700; margin-top: 3px; } .vo-muc.co { color: var(--xanh); } .vo-muc.p { color: var(--vang); } .vo-muc.kp { color: var(--do); }
+  .vo-nut { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
+  .vo-hang .vo-nut button { padding: 6px 3px; font-size: 12px; }
+  @media (min-width: 640px) { .vo-nut { grid-template-columns: repeat(3, 1fr); } .vo-hang { grid-template-columns: 220px 1fr; } }
   .vo-nut button { border: 1px solid var(--vien); background: #fff; border-radius: 8px; padding: 7px 4px; font-size: 12.5px; cursor: pointer; line-height: 1.2; }
   .vo-nut button.on.co { background: #e8f5e9; color: var(--xanh); border-color: var(--xanh); font-weight: 700; }
   .vo-nut button.on.p { background: #fff4e0; color: var(--vang); border-color: var(--vang); font-weight: 700; }

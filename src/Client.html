@@ -2084,7 +2084,7 @@ function chon4(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(S
 function tgO(ma, phan) { var d = tg.du[ma] = tg.du[ma] || {}; return d[phan] = d[phan] || { mucKT: '', mucKN: '', muc: '', nx: '' }; }
 function tgMon(ten) { return tg.mon.filter(function (m) { return m.ten === ten; })[0]; }
 // Câu vở của tháng: mức gặp nhiều nhất (bằng nhau lấy mức tốt hơn) + nhắc nộp vở – giống hệt cauVoDem_ trên máy chủ
-var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đẹp, đúng.', C: 'Bài làm trong vở đúng, biết trình bày.',
+var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đúng nhưng chưa đẹp.', C: 'Bài làm trong vở đúng, biết trình bày.',
                D: 'Bài làm trong vở đúng nhưng chưa biết trình bày.', E: 'Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn.' };
 function cauVoDem(v, soNgayCu) {
   if (!v) return soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '';
@@ -2271,7 +2271,7 @@ function xuatThang(input) {
 
 // ============================================================================ NỘP VỞ HẰNG NGÀY (Sổ theo dõi → 📒 Nộp vở)
 var vo = null, voMon = 'Tiếng Việt';
-var VO_NUT = [['A', 'Nhanh, đẹp, đúng', 'co'], ['B', 'Đẹp, đúng', 'co'], ['C', 'Đúng, biết trình bày', 'p'],
+var VO_NUT = [['A', 'Nhanh, đẹp, đúng', 'co'], ['B', 'Đúng nhưng chưa đẹp', 'p'], ['C', 'Đúng, biết trình bày', 'p'],
               ['D', 'Đúng, chưa biết trình bày', 'p'], ['E', 'Chưa đúng – chưa đẹp', 'kp'], ['N', 'Chưa nộp', 'kp']];
 var VO_TEN = {}; VO_NUT.forEach(function (b) { VO_TEN[b[0]] = b[1]; });
 function moNopVo() {
@@ -2291,12 +2291,19 @@ function veNopVo() {
     '<span class="tag">chưa lưu' + (vo.ngayTruoc[voMon] ? ' – mức theo lần ' + esc(vo.ngayTruoc[voMon]) : '') + '</span>');
   var chua = dem['–'] || 0;
   $('voNhanh').innerHTML = '<span class="nho">' + esc(voMon) + ': ' + VO_NUT.filter(function (b) { return dem[b[0]]; }).map(function (b) { return b[1] + ' ' + dem[b[0]]; }).join(' · ') +
-    (dem['vắng'] ? ' · vắng ' + dem['vắng'] : '') + (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'B\')">Em chưa chọn: Đẹp, đúng</button>' : '');
+    (dem['vắng'] ? ' · vắng ' + dem['vắng'] : '') + (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'A\')">Em chưa chọn: ' + VO_TEN.A + '</button>' : '');
   $('voDs').innerHTML = vo.hs.length ? vo.hs.map(function (h, i) {
-    return '<div class="vo-hang"><div><span class="nho">' + (i + 1) + '.</span> ' + esc(h.ten) + dauNhom(h.ma) + (h.vang ? ' <span class="tag">vắng</span>' : '') + (h.tt[voMon] || h.vang ? '' : ' <span class="tag vang">chưa chọn</span>') + '</div><div class="vo-nut">' + VO_NUT.map(function (b, k) {
-      return '<button class="' + (h.tt[voMon] === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + k + ')">' + b[1] + '</button>';
+    var m = h.tt[voMon], nut = VO_NUT.filter(function (b) { return b[0] === m; })[0];
+    return '<div class="vo-hang' + (m || h.vang ? '' : ' chua') + '"><div class="vo-ten"><span class="vo-stt">' + (i + 1) + '</span><div style="min-width:0">' + voTen(h.ten) + dauNhom(h.ma) +
+      (h.vang ? '<span class="tag">vắng</span>' : nut ? '<div class="vo-muc ' + nut[2] + '">' + esc(nut[1]) + '</div>' : '<span class="tag vang">chưa chọn</span>') + '</div></div>' +
+      '<div class="vo-nut">' + VO_NUT.map(function (b, k) {
+      return '<button class="' + (m === b[0] ? 'on ' + b[2] : '') + '" onclick="voDat(' + i + ', ' + k + ')">' + b[1] + '</button>';
     }).join('') + '</div></div>';
   }).join('') : '<div class="nho">Chưa có danh sách học sinh.</div>';
+}
+function voTen(ten) {                  // họ đệm nhỏ ở trên, tên gọi (2 chữ cuối) to, đậm
+  var p = String(ten || '').trim().split(/\s+/), goi = p.slice(-2).join(' '), ho = p.slice(0, -2).join(' ');
+  return (ho ? '<div class="vo-dem">' + esc(ho) + '</div>' : '') + '<div class="vo-ho">' + esc(goi) + '</div>';
 }
 function voChonMon(m) { voMon = m; veNopVo(); }
 function voDat(i, k) { var tt = VO_NUT[k][0]; if (vo.hs[i].tt[voMon] !== tt) { vo.hs[i].tt[voMon] = tt; vo.sua = true; } veNopVo(); }

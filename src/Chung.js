@@ -50,8 +50,8 @@ function nlpcTuThang(t, ma) {
   var voCL = null, voNop = null;
   if (v) {
     var tot = '', n = 0; ['A', 'B', 'C', 'D', 'E'].forEach(function (k) { if (v[k] > n) { n = v[k]; tot = k; } });
-    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đẹp, đúng', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
-    if (tot) voCL = c(tot === 'A' || tot === 'B' ? 1 : tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
+    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đúng nhưng chưa đẹp', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
+    if (tot) voCL = c(tot === 'A' ? 1 : tot === 'B' || tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
     var thieu = v.N + v.cu; voNop = c(!thieu ? 1 : thieu <= 2 ? 0 : -1, thieu ? 'Chưa nộp vở ' + thieu + ' lần' : 'Nộp vở đầy đủ', 'nop');
   } else if (t.soNgayVoCu) voNop = c(1, 'Nộp vở đầy đủ', 'nop');
   var kp = (t.vangKP || {})[ma] || 0;
