@@ -301,6 +301,7 @@ function moBaiThat(mon, bai, tiet, tenSBG) {
       if (st.mon === mon && st.bai === baiLuc && !stLuuCho) { st.hs = hs; if (!$('stNhap').classList.contains('an')) veHocSinhST(); }
     }, function () {});
     $('stMonTen').textContent = mon + (tiet ? ' · Tiết ' + tiet : '') + (st.thang ? ' · ghi ngày ' : ' · ') + ngay;
+    datMonLon(st.thang ? mon : '');
     if (st.thang && !st.bo.hoatDong.length) { bao('Chưa có thư viện yêu cầu cho ' + mon + ' ' + st.bai + ' – tải file "Thư viện nhận xét THÁNG…" ở Cài đặt.', 9000); return moChonBai(); }
     $('stBaiTen').textContent = st.bai || '(chưa ghép bài)';
     $('stTam').innerHTML = st.bo.tam ? '<span class="tag vang">Môn/bài này chưa có thư viện – đang dùng thư viện tạm</span>' : '';
@@ -317,7 +318,7 @@ function moNhanXetChungThat() {
     return chay('layHocSinhChoBai', isoToDmy($('stNgay').value), 'Chung', '').then(function (hs) {
       st.hs = hs;
       $('stMonTen').textContent = 'Phẩm chất – năng lực · ' + isoToDmy($('stNgay').value);
-      $('stBaiTen').textContent = 'Nhận xét chung'; $('stTam').innerHTML = '';
+      $('stBaiTen').textContent = 'Nhận xét chung'; $('stTam').innerHTML = ''; datMonLon('');
       $('stChonBai').classList.add('an'); $('stNhap').classList.remove('an'); veNhap();
     });
   });
@@ -403,6 +404,11 @@ function luuNhanXetUI() {
 function cauHienTai() {          // câu thư viện của mức đang chọn + mẫu của cô (★)
   var hd = st.bo && st.bo.hoatDong[st.hd]; if (!hd || !st.muc) return [];
   return (hd.muc[st.muc] || []).concat((hd.mau && hd.mau[st.muc]) || []);
+}
+function datMonLon(mon) {               // tiêu đề lớn tên môn ở màn đánh giá tháng: MÔN TOÁN / MÔN TIẾNG VIỆT
+  var e = $('stMonLon'); e.classList.toggle('an', !mon);
+  e.className = 'mon-lon' + (mon ? (/toán/i.test(mon) ? ' toan' : /tiếng việt/i.test(mon) ? ' tv' : '') : ' an');
+  e.textContent = mon ? (/toán/i.test(mon) ? '🔢 ' : /tiếng việt/i.test(mon) ? '📖 ' : '') + 'MÔN ' + mon.toUpperCase() : '';
 }
 function cheDoThang() {
   $('stH1').textContent = st.thang ? '1. Yêu cầu cần đạt' : '1. Hoạt động';

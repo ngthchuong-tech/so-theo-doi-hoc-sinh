@@ -67,6 +67,11 @@
   .nhom-dau { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
   /* Nộp vở: bảng tên – 6 cột mức, tiêu đề cột dính dưới thanh trên cùng */
   .vo-bang { margin: -4px -6px 0; }
+  /* Tiêu đề môn ở màn đánh giá tháng */
+  .mon-lon { font-size: 22px; font-weight: 900; letter-spacing: .5px; text-align: center; padding: 10px 12px; margin: -2px 0 12px; border-radius: 12px;
+             color: #fff; background: linear-gradient(120deg, var(--chinh), var(--chinh2)); }
+  .mon-lon.toan { background: linear-gradient(120deg, #1d4ed8, #3b82f6); }
+  .mon-lon.tv { background: linear-gradient(120deg, #be123c, #f43f5e); }
   .vo-dong { display: grid; grid-template-columns: minmax(110px, 1fr) repeat(6, minmax(32px, 44px)); align-items: stretch; border-bottom: 1px solid var(--vien); }
   .vo-dong:nth-child(odd):not(.vo-dau) { background: #f8fafc; }
   .vo-dong.chua { background: #fff8ec !important; }

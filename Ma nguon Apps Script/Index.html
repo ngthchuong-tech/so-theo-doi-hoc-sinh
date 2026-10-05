@@ -77,6 +77,11 @@
   .nhom-dau { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 4px; vertical-align: middle; }
   /* Nộp vở: bảng tên – 6 cột mức, tiêu đề cột dính dưới thanh trên cùng */
   .vo-bang { margin: -4px -6px 0; }
+  /* Tiêu đề môn ở màn đánh giá tháng */
+  .mon-lon { font-size: 22px; font-weight: 900; letter-spacing: .5px; text-align: center; padding: 10px 12px; margin: -2px 0 12px; border-radius: 12px;
+             color: #fff; background: linear-gradient(120deg, var(--chinh), var(--chinh2)); }
+  .mon-lon.toan { background: linear-gradient(120deg, #1d4ed8, #3b82f6); }
+  .mon-lon.tv { background: linear-gradient(120deg, #be123c, #f43f5e); }
   .vo-dong { display: grid; grid-template-columns: minmax(110px, 1fr) repeat(6, minmax(32px, 44px)); align-items: stretch; border-bottom: 1px solid var(--vien); }
   .vo-dong:nth-child(odd):not(.vo-dau) { background: #f8fafc; }
   .vo-dong.chua { background: #fff8ec !important; }
@@ -418,6 +423,7 @@
 
       <div id="stNhap" class="an">
         <div class="the">
+          <div class="mon-lon an" id="stMonLon"></div>
           <div class="hang gian">
             <div><div class="nho" id="stMonTen"></div><div style="font-weight:700" id="stBaiTen"></div></div>
             <button class="nut phu" id="stDoiBai" onclick="moChonBai()">← Đổi bài</button>
@@ -1991,6 +1997,7 @@ function moBaiThat(mon, bai, tiet, tenSBG) {
       if (st.mon === mon && st.bai === baiLuc && !stLuuCho) { st.hs = hs; if (!$('stNhap').classList.contains('an')) veHocSinhST(); }
     }, function () {});
     $('stMonTen').textContent = mon + (tiet ? ' · Tiết ' + tiet : '') + (st.thang ? ' · ghi ngày ' : ' · ') + ngay;
+    datMonLon(st.thang ? mon : '');
     if (st.thang && !st.bo.hoatDong.length) { bao('Chưa có thư viện yêu cầu cho ' + mon + ' ' + st.bai + ' – tải file "Thư viện nhận xét THÁNG…" ở Cài đặt.', 9000); return moChonBai(); }
     $('stBaiTen').textContent = st.bai || '(chưa ghép bài)';
     $('stTam').innerHTML = st.bo.tam ? '<span class="tag vang">Môn/bài này chưa có thư viện – đang dùng thư viện tạm</span>' : '';
@@ -2007,7 +2014,7 @@ function moNhanXetChungThat() {
     return chay('layHocSinhChoBai', isoToDmy($('stNgay').value), 'Chung', '').then(function (hs) {
       st.hs = hs;
       $('stMonTen').textContent = 'Phẩm chất – năng lực · ' + isoToDmy($('stNgay').value);
-      $('stBaiTen').textContent = 'Nhận xét chung'; $('stTam').innerHTML = '';
+      $('stBaiTen').textContent = 'Nhận xét chung'; $('stTam').innerHTML = ''; datMonLon('');
       $('stChonBai').classList.add('an'); $('stNhap').classList.remove('an'); veNhap();
     });
   });
@@ -2093,6 +2100,11 @@ function luuNhanXetUI() {
 function cauHienTai() {          // câu thư viện của mức đang chọn + mẫu của cô (★)
   var hd = st.bo && st.bo.hoatDong[st.hd]; if (!hd || !st.muc) return [];
   return (hd.muc[st.muc] || []).concat((hd.mau && hd.mau[st.muc]) || []);
+}
+function datMonLon(mon) {               // tiêu đề lớn tên môn ở màn đánh giá tháng: MÔN TOÁN / MÔN TIẾNG VIỆT
+  var e = $('stMonLon'); e.classList.toggle('an', !mon);
+  e.className = 'mon-lon' + (mon ? (/toán/i.test(mon) ? ' toan' : /tiếng việt/i.test(mon) ? ' tv' : '') : ' an');
+  e.textContent = mon ? (/toán/i.test(mon) ? '🔢 ' : /tiếng việt/i.test(mon) ? '📖 ' : '') + 'MÔN ' + mon.toUpperCase() : '';
 }
 function cheDoThang() {
   $('stH1').textContent = st.thang ? '1. Yêu cầu cần đạt' : '1. Hoạt động';
