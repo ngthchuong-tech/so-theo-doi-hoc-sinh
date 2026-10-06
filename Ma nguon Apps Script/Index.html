@@ -476,8 +476,9 @@
       <div id="stVo" class="an">
         <div class="the">
           <div class="hang gian"><b>Nộp vở hằng ngày</b><span id="voTomTat" class="nho"></span></div>
+          <div id="voNgayKhac"></div>
           <div class="hang" style="margin-top:6px" id="voMonChip"></div>
-          <div class="nho" style="margin-top:4px">Mỗi em sẵn mức của <b>lần chấm trước</b>. Cô chỉ chạm sửa em khác mức (hoặc <b>Chưa nộp</b>), rồi bấm Lưu. Đổi ngày ở ô ngày phía trên.</div>
+          <div class="nho" style="margin-top:4px">Mỗi ngày mới bảng để trống. Chạm tiêu đề cột để chọn nhanh cho các em chưa chọn, chạm ô để sửa từng em, rồi bấm Lưu. Đổi ngày ở ô ngày phía trên.</div>
           <div class="hang" style="margin-top:6px" id="voNhanh"></div>
           <details class="xk" style="margin-top:8px"><summary>⬇ Xuất Excel nộp vở (ngày, tuần, tháng, kì, năm)</summary><div id="voXuat"></div></details>
         </div>
@@ -492,6 +493,7 @@
             Kết quả được tổng hợp vào đánh giá tháng, kì, cuối năm và Sổ chủ nhiệm (dạng chung). Đổi ngày ở ô ngày phía trên.</div>
           <details class="xk" style="margin-top:8px"><summary>⬇ Xuất Excel theo dõi hằng ngày (ngày, tuần, tháng, kì, năm)</summary><div id="tdXuat"></div></details>
         </div>
+        <div id="tdNgayKhac"></div>
         <div class="the" style="padding:8px" id="tdDs"></div>
       </div>
 
@@ -803,7 +805,7 @@
             <li><b>💡 Gợi ý</b> ở ô Nội dung: thực hiện chương trình tuần, chủ đề hoạt động trải nghiệm, phong trào – cuộc thi trong tuần, rèn thêm cho các em nhóm Cần rèn thêm,
               bồi dưỡng, cuối tháng thì chấm vở sạch chữ đẹp. <b>↺ Lấy từ tuần trước</b>: chép các dòng lặp lại (tiếp tục ổn định nề nếp…).</li>
             <li><b>💡 Gợi ý</b> ở ô Kết quả: thực hiện chương trình, chuyên cần, nộp vở, số em tham gia / đạt giải phong trào, cuối tháng có
-              <b>kết quả vở sạch chữ đẹp A, B, C, D</b> (A nhanh, đẹp, đúng · B đúng nhưng chưa đẹp · C đúng · D chưa đúng – chưa đẹp; theo mức em đạt nhiều nhất trong tháng ở Nộp vở).</li>
+              <b>kết quả vở sạch chữ đẹp A, B, C, D</b> (A nhanh, đẹp, đúng · B đúng, đẹp nhưng chưa nhanh · C đúng · D chưa đúng – chưa đẹp; theo mức em đạt nhiều nhất trong tháng ở Nộp vở).</li>
             <li>Gợi ý chỉ <b>thêm dòng chưa có</b>, không xoá gì của cô; cô sửa, xoá tuỳ ý. <b>📋 Chép</b>: chép kèm dòng "TUẦN n: …" để dán lên sổ của trường.</li>
           </ul>
           <div><b>2. Theo dõi học sinh chưa tiến bộ</b>:</div>
@@ -822,12 +824,13 @@
         <details><summary>4. Sổ theo dõi – nộp vở, phong trào (và ghi theo bài học nếu bật)</summary>
           <div><b>📒 Nộp vở hằng ngày</b> (mở Sổ theo dõi là vào ngay):</div>
           <ol>
-            <li>Chọn môn <b>Tiếng Việt</b> hoặc <b>Toán</b>. Mỗi em có 4 mức: <b>Nhanh, đẹp, đúng</b> / <b>Đúng nhưng chưa đẹp</b> /
+            <li>Chọn môn <b>Tiếng Việt</b> hoặc <b>Toán</b>. Mỗi em có 4 mức: <b>Nhanh, đẹp, đúng</b> / <b>Đúng, đẹp nhưng chưa nhanh</b> /
               <b>Đúng, biết trình bày</b> hoặc <b>Đúng, chưa biết trình bày</b> / <b>Chưa đúng – chưa đẹp</b>, và <b>Chưa nộp</b>.</li>
-            <li>Mỗi em <b>sẵn mức của lần chấm trước</b> (em lần trước chưa nộp thì lấy mức gần nhất em có nộp). Cô chỉ chạm sửa em khác mức → làm tiếp môn kia → <b>Lưu nộp vở</b>.
+            <li>Mỗi ngày mới bảng <b>để trống</b> (không mang tick của ngày trước). Cô chạm tiêu đề cột để chọn nhanh cho cả lớp rồi sửa em khác mức → làm tiếp môn kia → <b>Lưu nộp vở</b>.
+              Nếu ô ngày không phải hôm nay, app hiện cảnh báo vàng kèm nút <b>Về hôm nay</b>; để app mở qua đêm thì sáng hôm sau app tự chuyển sang ngày mới.
               Bảng: tên em ở cột trái, 6 cột mức bên phải (tiêu đề cột luôn hiện khi cuộn) – chạm vào ô để tick, chạm lại để bỏ. Chạm <b>tiêu đề cột</b> để chọn mức đó cho tất cả em chưa chọn, rồi tick sửa riêng em khác mức. Cột cuối <b>Ghi chú</b> (📝): chạm để ghi riêng cho em (VD chưa sửa bài) – lưu cùng khi bấm Lưu nộp vở.</li>
             <li>Ghi ngày khác: đổi ở ô ngày phía trên. Cuối tháng, nhận xét môn có 1 câu về vở theo <b>mức em gặp nhiều nhất</b> trong tháng
-              (VD "Bài làm trong vở đúng nhưng chưa đẹp."), kèm nhắc nếu có ngày chưa nộp.</li>
+              (VD "Bài làm trong vở đúng, đẹp nhưng chưa nhanh."), kèm nhắc nếu có ngày chưa nộp.</li>
           </ol>
           <div style="margin-top:8px"><b>Ghi nhận xét theo bài học</b> (cách cũ – chỉ hiện khi bật ở Cài đặt → Chức năng):</div>
           <ol>
@@ -1653,8 +1656,8 @@ function nlpcTuThang(t, ma) {
   var voCL = null, voNop = null;
   if (v) {
     var tot = '', n = 0; ['A', 'B', 'C', 'D', 'E'].forEach(function (k) { if (v[k] > n) { n = v[k]; tot = k; } });
-    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đúng nhưng chưa đẹp', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
-    if (tot) voCL = c(tot === 'A' ? 1 : tot === 'B' || tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
+    var tenVo = { A: 'nhanh, đẹp, đúng', B: 'đúng, đẹp nhưng chưa nhanh', C: 'đúng, biết trình bày', D: 'đúng, chưa biết trình bày', E: 'chưa đúng – chưa đẹp' };
+    if (tot) voCL = c(tot === 'A' || tot === 'B' ? 1 : tot === 'C' ? 0 : -1, 'Vở thường ' + tenVo[tot], 'vo');
     var thieu = v.N + v.cu; voNop = c(!thieu ? 1 : thieu <= 2 ? 0 : -1, thieu ? 'Chưa nộp vở ' + thieu + ' lần' : 'Nộp vở đầy đủ', 'nop');
   } else if (t.soNgayVoCu) voNop = c(1, 'Nộp vở đầy đủ', 'nop');
   var kp = (t.vangKP || {})[ma] || 0;
@@ -1870,6 +1873,7 @@ function apDung(tt) {
   if (cnHen) cnLuuNgay();                             // sổ chủ nhiệm đang soạn dở → lưu ngay khi chuyển màn
   if (gcHen) gcLuuNgay();                             // ghi chú đang soạn dở
   if (tdHen) tdLuuNgay();                             // theo dõi hằng ngày đang chờ lưu
+  kiemNgayMoi();                                      // sang ngày mới khi app để mở qua đêm
   var cu = hienTai; hienTai = tt; var t = tt.tab;
   document.body.setAttribute('data-tab', t);          // màu chủ đạo theo khu vực (Styles: body[data-tab])
   var veSauND = nd && nd.nguon && nd.nguon.dong;
@@ -3880,7 +3884,7 @@ function chon4(ds, ma, k) { if (!ds || !ds.length) return ''; var n = parseInt(S
 function tgO(ma, phan) { var d = tg.du[ma] = tg.du[ma] || {}; return d[phan] = d[phan] || { mucKT: '', mucKN: '', muc: '', nx: '' }; }
 function tgMon(ten) { return tg.mon.filter(function (m) { return m.ten === ten; })[0]; }
 // Câu vở của tháng: mức gặp nhiều nhất (bằng nhau lấy mức tốt hơn) + nhắc nộp vở – giống hệt cauVoDem_ trên máy chủ
-var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đúng nhưng chưa đẹp.', C: 'Bài làm trong vở đúng, biết trình bày.',
+var CAU_VO = { A: 'Bài làm trong vở nhanh, đẹp, đúng.', B: 'Bài làm trong vở đúng, đẹp nhưng chưa nhanh.', C: 'Bài làm trong vở đúng, biết trình bày.',
                D: 'Bài làm trong vở đúng nhưng chưa biết trình bày.', E: 'Bài làm trong vở chưa đúng, chưa đẹp, cần cố gắng hơn.' };
 function cauVoDem(v, soNgayCu) {
   if (!v) return soNgayCu ? 'Nộp vở đầy đủ, đúng hạn.' : '';
@@ -4068,7 +4072,7 @@ function xuatThang(input) {
 
 // ============================================================================ NỘP VỞ HẰNG NGÀY (Sổ theo dõi → 📒 Nộp vở)
 var vo = null, voMon = 'Tiếng Việt';
-var VO_NUT = [['A', 'Nhanh, đẹp, đúng', 'co'], ['B', 'Đúng nhưng chưa đẹp', 'p'], ['C', 'Đúng, biết trình bày', 'p'],
+var VO_NUT = [['A', 'Nhanh, đẹp, đúng', 'co'], ['B', 'Đúng, đẹp nhưng chưa nhanh', 'co'], ['C', 'Đúng, biết trình bày', 'p'],
               ['D', 'Đúng, chưa biết trình bày', 'p'], ['E', 'Chưa đúng – chưa đẹp', 'kp'], ['N', 'Chưa nộp', 'kp']];
 var VO_TEN = {}; VO_NUT.forEach(function (b) { VO_TEN[b[0]] = b[1]; });
 function moNopVo() {
@@ -4086,7 +4090,8 @@ function veNopVo() {
   $('voMonChip').innerHTML = vo.mon.map(function (m) { return '<span class="chip' + (m === voMon ? ' on' : '') + '" data-m="' + esc(m) + '" onclick="voChonMon(this.dataset.m)">' + esc(m) + '</span>'; }).join('');
   var dem = {}; vo.hs.forEach(function (h) { var k = h.tt[voMon] || (h.vang ? 'vắng' : '–'); dem[k] = (dem[k] || 0) + 1; });
   $('voTomTat').innerHTML = vo.ngay + ' · ' + (vo.sua ? '<span class="tag vang">chưa lưu</span>' : vo.daLuu[voMon] ? '<span class="tag xanh">đã lưu</span>' :
-    '<span class="tag">chưa lưu' + (vo.ngayTruoc[voMon] ? ' – mức theo lần ' + esc(vo.ngayTruoc[voMon]) : '') + '</span>');
+    '<span class="tag">chưa lưu</span>');
+  $('voNgayKhac').innerHTML = canhNgayKhac(vo.ngay);
   var chua = dem['–'] || 0;
   $('voNhanh').innerHTML = '<span class="nho">' + esc(voMon) + ': ' + VO_NUT.filter(function (b) { return dem[b[0]]; }).map(function (b) { return b[1] + ' ' + dem[b[0]]; }).join(' · ') +
     (dem['vắng'] ? ' · vắng ' + dem['vắng'] : '') + (chua ? ' · <b>chưa chọn ' + chua + '</b>' : '') + '</span>' + (chua ? ' <button class="nut phu nut-nho" onclick="voCaLop(\'A\')">Em chưa chọn: ' + VO_TEN.A + '</button>' : '');
@@ -4283,6 +4288,7 @@ function taiTheoDoi() {
 function veTheoDoi() {
   if (!td) return;
   var dem = {}; Object.keys(td.tick).forEach(function (ma) { String(td.tick[ma]).split('').forEach(function (k) { dem[k] = (dem[k] || 0) + 1; }); });
+  $('tdNgayKhac').innerHTML = canhNgayKhac(td.ngay);
   $('tdTomTat').innerHTML = esc(td.ngay) + ' · <span id="tdTT">' + (td.daLuu ? 'đã lưu' : 'chưa có tick') + '</span>';
   if (!td.hs.length) { $('tdDs').innerHTML = '<div class="nho">Chưa có danh sách học sinh.</div>'; return; }
   var nhom = [], cuoi = '';
@@ -4704,6 +4710,32 @@ function cnXuatWord() {
   hienKetQuaXuat($('cnKetQua'), ('So chu nhiem ' + (cn.lop ? 'lop ' + cn.lop + ' ' : '') + cn.namHoc).replace(/[\\/:*?"<>|]/g, '-') + '.doc', b64,
     '<div class="nho">' + khoi.filter(function (k) { return k.dong.length; }).length + ' tháng, ' + soTuan + ' tuần đã ghi · ' + cn.theoDoi.length + ' học sinh theo dõi. Mở bằng Word.</div>', false);
 }
+
+// ============================================================================ NGÀY MỚI
+// Để app mở qua đêm: ô ngày vẫn là hôm qua → tick hôm nay sẽ ghi đè kết quả hôm qua. Khi sang ngày mới, ô ngày đang để "hôm nay"
+// (cô không tự chọn ngày khác) được chuyển sang ngày mới và màn đang mở được tải lại.
+var ngayMoApp = homNayIso();
+function kiemNgayMoi() {
+  var nay = homNayIso(); if (nay === ngayMoApp) return false;
+  var cu = ngayMoApp; ngayMoApp = nay;
+  ['stNgay', 'ddNgay'].forEach(function (id) { if ($(id).value === cu || !$(id).value) $(id).value = nay; });
+  return true;
+}
+function canhNgayKhac(dmy) {            // cảnh báo khi đang chấm / tick cho ngày không phải hôm nay
+  if (!dmy || dmy === isoToDmy(homNayIso())) return '';
+  return '<div class="nhac vang" style="cursor:default;margin-top:8px">Đang ghi cho <b>ngày ' + esc(dmy) + '</b> – không phải hôm nay (' + isoToDmy(homNayIso()) + '). ' +
+    '<button class="nut nut-nho" onclick="veHomNay()">Về hôm nay</button></div>';
+}
+function veHomNay() { $('stNgay').value = homNayIso(); doiNgaySTD(); }
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden || !kiemNgayMoi()) return;
+  if (hienTai.tab === 'trangchu') return taiTrangChu();
+  if (hienTai.tab === 'diemdanh' && !(dd && dd.sua)) return taiDiemDanh();
+  if (hienTai.tab !== 'sotheodoi') return;
+  if (!$('stVo').classList.contains('an') && !(vo && vo.sua)) taiNopVo();
+  else if (!$('stTD').classList.contains('an')) taiTheoDoi();
+  else if (!$('stGC').classList.contains('an')) taiGhiChu();
+});
 
 // ============================================================================ KHỞI ĐỘNG
 $('stNgay').value = homNayIso(); $('ddNgay').value = homNayIso();

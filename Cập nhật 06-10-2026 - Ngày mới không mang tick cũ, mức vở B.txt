@@ -1,0 +1,17 @@
+CẬP NHẬT 06/10/2026
+
+1. SANG NGÀY MỚI KHÔNG MẤT KẾT QUẢ NGÀY HÔM TRƯỚC (Nộp vở, Theo dõi hằng ngày)
+- Nguyên nhân: ô ngày chỉ đặt về "hôm nay" lúc mở app. Khi app để mở trên điện thoại qua đêm, hôm sau ô ngày vẫn là
+  ngày hôm qua → cô chấm / tick lại là ghi đè lên kết quả hôm qua.
+- Đã sửa:
+    • Sang ngày mới, ô ngày tự chuyển sang hôm nay (khi cô mở lại app hoặc chuyển màn) và tải lại bảng của ngày mới.
+      Nếu cô tự chọn một ngày khác thì app giữ nguyên ngày cô chọn.
+    • Nộp vở: ngày mới bảng ĐỂ TRỐNG, không còn điền sẵn mức của lần chấm trước. Chạm tiêu đề cột để chọn nhanh cho cả lớp.
+    • Theo dõi hằng ngày: mỗi ngày bảng riêng, ngày mới luôn trống.
+    • Khi đang ghi cho ngày không phải hôm nay: hiện cảnh báo vàng "Đang ghi cho ngày … – không phải hôm nay" kèm nút "Về hôm nay".
+- Kết quả các ngày trước vẫn giữ nguyên; xem lại bằng cách chọn ngày ở ô ngày.
+
+2. MỨC CHẤM VỞ
+- "Đúng nhưng chưa đẹp" → "Đúng, đẹp nhưng chưa nhanh" (màu xanh – mức tốt thứ 2).
+- Câu nhận xét tháng: "Bài làm trong vở đúng, đẹp nhưng chưa nhanh."
+- Năng lực – phẩm chất: vở mức này tính là biểu hiện tốt (như "Nhanh, đẹp, đúng").
